@@ -33,3 +33,15 @@ export function centerOn(focus: Point, view: Size): Point {
     y: Math.round(clampAxis(focus.y - view.h / 2, view.h, WORLD.h)),
   };
 }
+
+/** 흑백 → 컬러 부채꼴의 중심(트랙 중심) */
+export const SWEEP_CENTER: Point = { x: WORLD.w / 2, y: WORLD.h / 2 };
+
+/**
+ * 트랙 중심에서 본 점 p의 각도(도, 0 이상 360 미만). 출발선 방향(아래)이 0이고 화면상 반시계로 커진다.
+ * 화면 y가 아래로 +라서 atan2(dx, dy): 아래 (0,1) → 0°, 오른쪽 (1,0) → 90°, 위 → 180°, 왼쪽 → 270°.
+ */
+export function sweepAngle(p: Point): number {
+  const deg = (Math.atan2(p.x - SWEEP_CENTER.x, p.y - SWEEP_CENTER.y) * 180) / Math.PI;
+  return (deg + 360) % 360;
+}

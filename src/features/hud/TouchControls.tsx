@@ -6,7 +6,7 @@
  * 포인터 이벤트: pointerdown에 누르고, up·cancel·leave에 뗀다. 손가락이 버튼 밖으로 미끄러져도 계속 달리면 안 되므로 leave도 뗌.
  * setPointerCapture를 쓰지 않은 이유: 캡처하면 leave가 안 와서 "밖으로 밀어 멈추기"가 안 된다.
  * 키보드 사용자는 이 버튼 대신 방향키를 쓴다(Enter로 누르면 아무 일 없음 — 누르고 있는 동작이라 click이 맞지 않음).
- * 하단 메뉴 바·위치 다듬기는 step2.
+ * 위치: 하단 메뉴 바(112px) 바로 위 bottom 124px, 좌우 12px(시안).
  */
 import { TOUCH_LABELS } from '@/content/hud';
 import type { KeyAxis } from '@/features/track/trackPath';
@@ -39,7 +39,7 @@ export function TouchControls({
           onPointerCancel={() => release(b.dx)}
           onPointerLeave={() => release(b.dx)}
           onContextMenu={(e) => e.preventDefault()}
-          className={`nine-white text-ink fixed bottom-6 z-20 grid size-16 touch-none place-items-center text-xl select-none ${b.side}`}
+          className={`nine-white text-ink fixed bottom-[124px] z-20 grid size-16 touch-none place-items-center text-xl select-none ${b.side}`}
         >
           <span aria-hidden>{b.glyph}</span>
         </button>

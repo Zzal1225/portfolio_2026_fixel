@@ -144,3 +144,50 @@ body {
 .nine-tee {
   border-image-source: url('/sprites/ui/nine-tee-24.svg');
 }
+
+/*
+ * 창 열림·닫힘 애니메이션(CSS만). Radix가 data-state="open"/"closed"를 붙이고,
+ * 닫힐 때는 애니메이션이 끝날 때까지 기다렸다가 DOM에서 뺀다(Presence).
+ * 왜 Framer Motion을 안 쓰나: 첫 화면 JS 150KB 목표에서 30KB 넘게 드는데, 여기 필요한 건 "나타나기·사라지기" 두 가지뿐.
+ * 픽셀 느낌을 살리려고 steps(3)로 끊어 움직인다(부드러운 보간은 도트 그림과 어울리지 않음).
+ */
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+@keyframes dialog-out {
+  to {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes overlay-out {
+  to {
+    opacity: 0;
+  }
+}
+.dialog-content[data-state='open'] {
+  animation: dialog-in 150ms steps(3, end);
+}
+.dialog-content[data-state='closed'] {
+  animation: dialog-out 120ms steps(3, end);
+}
+.dialog-overlay[data-state='open'] {
+  animation: overlay-in 150ms steps(3, end);
+}
+.dialog-overlay[data-state='closed'] {
+  animation: overlay-out 120ms steps(3, end);
+}
+@media (prefers-reduced-motion: reduce) {
+  .dialog-content,
+  .dialog-overlay {
+    animation: none !important;
+  }
+}

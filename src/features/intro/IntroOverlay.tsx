@@ -10,7 +10,8 @@
  * 글자는 전부 DOM(캔버스 아님). 신호 띠·전광판 문구는 aria-live로 스크린리더에도 전한다.
  */
 import { BOARD_LINES, BOARD_STEPS, INTRO_LABELS, SIGNAL_BANDS } from '@/content/intro';
-import { useGame } from '@/features/track/store';
+import { selectScale, useGame } from '@/features/track/store';
+import { SWEEP_CENTER } from './camera';
 
 const BOARD_W = 96;
 const BOARD_H = 32;
@@ -106,6 +107,7 @@ export function IntroOverlay({ onSkip }: { onSkip: () => void }) {
 
   return (
     <>
+      <GraySweep />
       {phase === 'preload' && (
         // 0.3초 넘게 걸릴 때만 보이도록 CSS 지연(타이머로 꾸민 대기가 아님: 실제 로딩이 끝나면 바로 사라짐)
         <p className="font-pixel intro-loading fixed inset-x-0 bottom-6 z-30 text-center text-xs text-white">
@@ -133,5 +135,42 @@ export function IntroOverlay({ onSkip }: { onSkip: () => void }) {
         {INTRO_LABELS.skip}
       </button>
     </>
+  );
+}
+
+/**
+ * 흑백 → 컬러(부채꼴, 시안 방식). 화면 전체를 덮는 투명 판에 backdrop-filter: grayscale(1)을 걸고,
+ * 러너가 아직 안 지나간 각도만 남기는 conic-gradient 마스크를 씌운다.
+ *
+ * 왜 이렇게: 시안은 같은 월드를 캔버스 두 장(흑백·컬러)에 그려 겹쳤다. DOM에서 월드를 두 벌 그리면 요소가 두 배가 된다.
+ * 덮개 한 장 + 마스크면 월드는 한 벌이고, 바뀌는 건 마스크 각도(CSS 값) 하나다.
+ * 마스크 각도: CSS conic은 위에서 시계 방향. "from 180deg"(아래)에서 시계 방향 0~(360−θ)가 아직 흑백인 쪽이다
+ * (러너는 아래에서 화면상 반시계로 돈다).
+ * 큰 전광판·신호 띠는 이 판보다 위(z)라 인트로 중에도 컬러.
+ */
+export function GraySweep() {
+  const phase = useGame((s) => s.intro.phase);
+  const sweep = useGame((s) => s.intro.sweep);
+  const reduced = useGame((s) => s.intro.reduced);
+  const cam = useGame((s) => s.camera);
+  const scale = useGame(selectScale);
+  if (reduced || !(phase === 'preload' || phase === 'signal' || phase === 'lap')) return null;
+  if (sweep >= 360) return null;
+
+  const cx = (SWEEP_CENTER.x - cam.x) * scale;
+  const cy = (SWEEP_CENTER.y - cam.y) * scale;
+  const gray = 360 - sweep;
+  const mask = `conic-gradient(from 180deg at ${cx}px ${cy}px, #000 0deg ${gray}deg, transparent ${gray}deg 360deg)`;
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none fixed inset-0 z-[25]"
+      style={{
+        backdropFilter: 'grayscale(1)',
+        WebkitBackdropFilter: 'grayscale(1)',
+        maskImage: mask,
+        WebkitMaskImage: mask,
+      }}
+    />
   );
 }

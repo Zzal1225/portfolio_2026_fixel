@@ -16,7 +16,7 @@ import { toWorld, wrapT } from '@/features/track/trackPath';
 import { INTRO_FINISH_T } from '@/features/track/layout';
 import { FOCUS_OFFSET_Y, TICK_MS } from '@/features/track/runner-config';
 import { introScale } from '@/features/track/scale';
-import { centerOn, centerWorld, viewInWorld } from './camera';
+import { centerOn, centerWorld, sweepAngle, viewInWorld } from './camera';
 import { preloadAssets } from './preload';
 import { browserStorage, readSeen, writeSeen } from './storage';
 import { SHORT_GREET_MS, fullIntroAt, greetStartMs, introMode, zoomSteps } from './timeline';
@@ -64,7 +64,7 @@ export function useIntro(): IntroControls {
       inputEnabled: false,
       scaleOverride: mode === 'full' ? introScale(s0.scale) : null,
     });
-    s0.setIntro({ phase: 'preload', signal: 0, band: null, boardLine: -1, reduced });
+    s0.setIntro({ phase: 'preload', signal: 0, band: null, boardLine: -1, reduced, sweep: 0 });
     if (mode === 'full') {
       const half = introScale(s0.scale);
       store.setState({ camera: centerWorld(viewInWorld(s0.viewportPx, half)) });
@@ -99,9 +99,17 @@ export function useIntro(): IntroControls {
         const f = fullIntroAt(performance.now() - start, steps);
         if (f.phase === 'signal' || f.phase === 'lap') {
           // 한 바퀴 + 80px: lapT 0→1을 t 0→1+INTRO_FINISH_T로 늘린다(아치에 얼굴이 가리지 않는 자리에서 멈춤)
-          const t = wrapT(f.lapT * (1 + INTRO_FINISH_T));
+          const lapPos = f.lapT * (1 + INTRO_FINISH_T);
+          const t = wrapT(lapPos);
           store.setState({ t, phase: f.phase === 'lap' ? 'running' : 'idle', dir: 'ccw' });
-          s.setIntro({ phase: f.phase, signal: f.signal, band: f.band, boardLine: f.boardLine });
+          s.setIntro({
+            phase: f.phase,
+            signal: f.signal,
+            band: f.band,
+            boardLine: f.boardLine,
+            // 한 바퀴를 넘긴 뒤(+80px 구간)는 각도가 다시 0 근처로 돌아가므로 360(전부 컬러)으로 고정
+            sweep: lapPos >= 1 ? 360 : sweepAngle(toWorld(t)),
+          });
         } else if (f.phase === 'zoom') {
           const scale = f.zoomScale ?? s.scale;
           store.setState({

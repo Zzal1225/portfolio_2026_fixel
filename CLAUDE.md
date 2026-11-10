@@ -32,7 +32,7 @@
 | 트랙 경로 | `features/track/trackPath.ts`: `t` → 월드 픽셀 좌표·바라보는 방향, 두 `t` 사이 최단 방향·거리 |
 | 이동·카메라 | `features/track/useRunner.ts`: 입력 → 상태 머신(idle → running → arrived), 카메라 목표 계산(여유 구간·월드 경계) |
 | 미니맵·MAP 창 | 인라인 SVG (`features/hud/Minimap.tsx`): 타원 path + 구조물 점 `<button>` 6개 + 현재 화면 rect. PC는 오른쪽 아래 160×90, 모바일은 "MAP" 버튼 → 같은 SVG를 Dialog 안에 크게(`features/hud/MapDialog.tsx`) |
-| 창 | Radix Dialog + Framer Motion |
+| 창 | Radix Dialog + CSS 애니메이션(data-state). Framer Motion은 쓰지 않음(첫 화면 JS 예산, 11-10) |
 | 스타일 | Tailwind + 디자인 토큰(nanaki 토큰 JSON 규칙, 라이트 값만) |
 | 폰트 | Press Start 2P(OFL) 영어 라벨·HUD·창 제목, Galmuri(OFL) 한국어 픽셀 글자(전광판 문구·이정표·창 섹션 제목), Pretendard 본문. 전부 `next/font/local` self-host |
 | 테스트 | Vitest, Testing Library, Playwright(+axe, 화면 비교 PC 1280·모바일 390) |

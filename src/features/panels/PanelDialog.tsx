@@ -11,7 +11,7 @@
  * 이전·다음(◀ ▶, 창 안 ←→): 트랙 순서(layout.ts LANDMARKS)로 넘긴다. 창이 화면을 덮고 있으니 러너는
  * 그 구조물 앞으로 바로 옮긴다(시안 stepOpen과 같음). 순서 강제가 아니라 편의 기능.
  *
- * 애니메이션(Framer Motion)은 step2. 지금은 즉시 열고 닫는다.
+ * 열림·닫힘 애니메이션은 CSS(globals.css .dialog-content, Radix data-state). Framer Motion은 쓰지 않음(JS 크기).
  *
  * 제목 글자색: 시안은 파란 띠(tee) 위 흰 글자인데 대비가 약 3:1이라 WCAG AA(4.5:1)에 못 미친다(axe 확인).
  * 같은 팔레트의 ink(대비 약 5:1)로 바꿨다. docs/design-vs-plan.md #20.
@@ -66,7 +66,7 @@ export function PanelDialog() {
   return (
     <Dialog.Root open={open !== null} onOpenChange={(o) => !o && closePanel()}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-40 bg-(--dim)" />
+        <Dialog.Overlay className="dialog-overlay fixed inset-0 z-40 bg-(--dim)" />
         <Dialog.Content
           aria-describedby={undefined}
           onOpenAutoFocus={(e) => {
@@ -75,7 +75,7 @@ export function PanelDialog() {
             closeRef.current?.focus();
           }}
           onKeyDown={onKeyDown}
-          className="nine-white fixed inset-x-2 bottom-2 z-50 flex max-h-[78%] flex-col outline-none min-[700px]:inset-x-auto min-[700px]:top-14 min-[700px]:bottom-auto min-[700px]:left-1/2 min-[700px]:max-h-[calc(100%-112px)] min-[700px]:w-[min(720px,calc(100%-32px))] min-[700px]:-translate-x-1/2"
+          className="dialog-content nine-white fixed inset-x-2 bottom-2 z-50 flex max-h-[78%] flex-col outline-none min-[700px]:inset-x-auto min-[700px]:top-14 min-[700px]:bottom-auto min-[700px]:left-1/2 min-[700px]:max-h-[calc(100%-112px)] min-[700px]:w-[min(720px,calc(100%-32px))] min-[700px]:-translate-x-1/2"
         >
           {panel && (
             <>

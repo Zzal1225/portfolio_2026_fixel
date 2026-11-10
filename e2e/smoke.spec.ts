@@ -34,7 +34,8 @@ test('첫 방문: 인트로 → SKIP → 메뉴 → 창 → ESC', async ({ page 
   await expect(dialog).toBeHidden();
 });
 
-test('키보드만으로 6개 창을 모두 열고 닫는다', async ({ page }) => {
+test('키보드만으로 6개 창을 모두 열고 닫는다', async ({ page, isMobile }) => {
+  test.skip(isMobile, '키보드 시나리오는 PC');
   await skipIntro(page);
   for (const name of MENU) {
     const button = page.getByRole('navigation', { name: 'Menu' }).getByRole('button', {
@@ -76,6 +77,10 @@ test('axe: 트랙 화면과 창에 위반이 없다', async ({ page }) => {
     .getByRole('button', { name: 'Open PROJECT 1' })
     .click();
   await expect(page.getByRole('dialog')).toBeVisible({ timeout: OPEN_TIMEOUT });
+  // 열림 애니메이션(투명도) 도중에 대비를 재면 실제보다 낮게 나온다 → 끝날 때까지 기다림
+  await page
+    .getByRole('dialog')
+    .evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
   const dialog = await new AxeBuilder({ page }).include('[role="dialog"]').analyze();
   expect(dialog.violations).toEqual([]);
 });
@@ -101,7 +106,8 @@ test.describe('reduced-motion', () => {
   });
 });
 
-test('키보드로 달려가 반응 구역에서 Enter로 창을 연다', async ({ page }) => {
+test('키보드로 달려가 반응 구역에서 Enter로 창을 연다', async ({ page, isMobile }) => {
+  test.skip(isMobile, '키보드 시나리오는 PC');
   await skipIntro(page);
   // 인트로가 끝난 자리(출발선 +80px)에서 ← 를 누르고 있으면 시계 방향으로 RESUME(접수 테이블)에 닿는다
   await page.keyboard.down('ArrowLeft');
@@ -120,4 +126,32 @@ test('메뉴를 누르면 캐릭터가 달려간 뒤 창이 열린다(바로 열
   // 달리는 동안에는 창이 없다
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.getByRole('dialog')).toBeVisible({ timeout: OPEN_TIMEOUT });
+});
+
+test('모바일: MAP 창에서 구조물을 누르면 달려가 창이 열린다', async ({ page, isMobile }) => {
+  test.skip(!isMobile, '모바일 전용(MAP 버튼은 폭 700 미만에서만)');
+  await skipIntro(page);
+  await page.getByRole('button', { name: 'Open track map' }).click();
+  const map = page.getByRole('dialog', { name: 'MAP' });
+  await expect(map).toBeVisible();
+  await map.getByRole('button', { name: 'Open EDUCATION' }).click();
+  await expect(page.getByRole('dialog').getByRole('heading', { level: 2 })).toHaveText(
+    'EDUCATION',
+    {
+      timeout: OPEN_TIMEOUT,
+    },
+  );
+});
+
+test('모바일: ▶ 를 누르고 있으면 달린다', async ({ page, isMobile }) => {
+  test.skip(!isMobile, '모바일 전용');
+  await skipIntro(page);
+  const runner = page.locator('.spr-runner');
+  const before = await runner.evaluate((el) => (el as HTMLElement).style.transform);
+  const right = page.getByRole('button', { name: 'Run right' });
+  await right.dispatchEvent('pointerdown');
+  await page.waitForTimeout(600);
+  await right.dispatchEvent('pointerup');
+  const after = await runner.evaluate((el) => (el as HTMLElement).style.transform);
+  expect(after).not.toBe(before);
 });

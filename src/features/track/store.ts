@@ -56,6 +56,11 @@ export interface IntroState {
   boardLine: number;
   /** reduced-motion이면 손 흔들기·애니메이션 없음 */
   reduced: boolean;
+  /**
+   * 흑백 → 컬러 부채꼴 각도(도, 0~360). 트랙 중심에서 출발선(아래)부터 러너가 지나온 반시계 각도.
+   * 0이면 전부 흑백, 360이면 전부 컬러. 한 바퀴 동안만 의미가 있다.
+   */
+  sweep: number;
 }
 
 export interface GameState extends RunnerSnapshot {
@@ -96,7 +101,7 @@ export const useGame = create<GameState>()((set) => ({
   viewportPx: { w: 1280, h: 720 },
   scaleOverride: null,
   inputEnabled: false,
-  intro: { phase: 'preload', signal: 0, band: null, boardLine: -1, reduced: false },
+  intro: { phase: 'preload', signal: 0, band: null, boardLine: -1, reduced: false, sweep: 0 },
   setIntro: (next) => set((s) => ({ intro: { ...s.intro, ...next } })),
   setSnapshot: (next) => set(next),
   setViewport: (viewportPx, scale) => set({ viewportPx, scale }),

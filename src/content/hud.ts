@@ -20,3 +20,12 @@ export const HUD_LABELS = {
 
 /** 모바일 ◀ ▶(누르고 있는 동안 달림). 화면 기준 왼쪽·오른쪽 */
 export const TOUCH_LABELS = { left: 'Run left', right: 'Run right' } as const;
+
+/** 모바일 MAP 버튼·큰 지도 창 */
+export const MAP_LABELS = {
+  button: 'MAP',
+  open: 'Open track map',
+  title: 'MAP',
+  close: 'Close',
+  hint: '구조물을 누르면 그곳으로 달려갑니다',
+} as const;

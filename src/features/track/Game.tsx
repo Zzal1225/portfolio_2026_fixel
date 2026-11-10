@@ -14,7 +14,7 @@ import { PRELOAD_IMAGES } from '@/features/intro/preload';
 import { useIntro } from '@/features/intro/useIntro';
 import { PanelDialog } from '@/features/panels/PanelDialog';
 import { Menu, NameBib, ReplayButton } from '@/features/hud/Hud';
-import { Minimap } from '@/features/hud/Minimap';
+import { MapButton, Minimap } from '@/features/hud/Minimap';
 import { TouchControls } from '@/features/hud/TouchControls';
 import { useRunner } from './useRunner';
 import { useScale } from './useScale';
@@ -36,6 +36,7 @@ export function Game() {
       <Menu onSelect={goTo} />
       <World worldRef={worldRef} onSelect={goTo} />
       <Minimap onSelect={goTo} />
+      <MapButton onSelect={goTo} />
       <TouchControls press={controls.press} release={controls.release} />
       <ReplayButton onReplay={intro.replay} />
       <PanelDialog />

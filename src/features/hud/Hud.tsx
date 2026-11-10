@@ -5,7 +5,7 @@
  * 메뉴 = 키보드 사용자의 기본 길(CLAUDE.md 접근성): Tab으로 6개를 돌고 Enter면 캐릭터가 달려가 창이 열린다.
  * 그래서 메뉴는 DOM 순서상 월드보다 앞에 둔다(Game.tsx).
  *
- * 메뉴 위치: PC(폭 700 이상) 오른쪽 위 가로 한 줄. 모바일 하단 바는 step2.
+ * 메뉴 위치: PC(폭 700 이상) 오른쪽 위 가로 한 줄, 모바일은 하단 바 3×2(같은 DOM, CSS만 다름).
  */
 import { BIB, HUD_LABELS, MENU_ORDER } from '@/content/hud';
 import { INTRO_LABELS } from '@/content/intro';
@@ -30,7 +30,7 @@ export function ReplayButton({ onReplay }: { onReplay: () => void }) {
       type="button"
       onClick={onReplay}
       aria-label={INTRO_LABELS.replayAria}
-      className="nine-white font-pixel text-ink fixed bottom-4 left-4 z-20 h-11 px-2 text-[10px]"
+      className="nine-white font-pixel text-ink fixed bottom-4 left-4 z-20 h-11 px-2 text-[10px] max-[699px]:bottom-[200px] max-[699px]:left-3"
     >
       {INTRO_LABELS.replay}
     </button>
@@ -52,8 +52,12 @@ export function Menu({ onSelect }: { onSelect: (id: LandmarkId) => void }) {
   const open = useGame((s) => s.open);
   if (!useHudVisible()) return null;
   return (
-    <nav aria-label={HUD_LABELS.menu} className="fixed top-4 right-4 z-20 max-[699px]:hidden">
-      <ul className="flex gap-1">
+    <nav
+      aria-label={HUD_LABELS.menu}
+      className="fixed top-4 right-4 z-20 max-[699px]:inset-x-0 max-[699px]:top-auto max-[699px]:bottom-0 max-[699px]:h-28 max-[699px]:bg-ink max-[699px]:p-2"
+    >
+      {/* PC: 오른쪽 위 가로 한 줄 / 모바일(폭 700 미만): 하단 112px 바에 3×2 격자(시안). DOM은 하나라 Tab 순서가 같다 */}
+      <ul className="flex gap-1 max-[699px]:grid max-[699px]:h-full max-[699px]:grid-cols-3 max-[699px]:grid-rows-2">
         {MENU_ORDER.map((id) => (
           <li key={id}>
             <button
@@ -61,7 +65,7 @@ export function Menu({ onSelect }: { onSelect: (id: LandmarkId) => void }) {
               aria-label={openLabel(id)}
               aria-current={open === id ? 'true' : undefined}
               onClick={() => onSelect(id)}
-              className="nine-white font-pixel text-ink aria-[current=true]:bg-menu-selected h-11 px-1.5 text-[10px] aria-[current=true]:outline-2 aria-[current=true]:-outline-offset-4 aria-[current=true]:outline-(--color-accent)"
+              className="nine-white font-pixel text-ink aria-[current=true]:bg-menu-selected h-11 px-1.5 text-[10px] max-[699px]:w-full max-[699px]:text-[9px] aria-[current=true]:outline-2 aria-[current=true]:-outline-offset-4 aria-[current=true]:outline-(--color-accent)"
             >
               {MENU_LABEL[id]}
             </button>

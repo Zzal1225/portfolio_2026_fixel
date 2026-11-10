@@ -1,5 +1,6 @@
 /**
- * E2E 설정. step1은 크로미움 하나(PC 1280×720), WebKit·모바일·화면 비교는 step2(기획서 기능 범위).
+ * E2E 설정: 크로미움 PC(1280×720), WebKit PC(사파리 엔진, 기획서 완료 조건), 크로미움 모바일(390×844, 터치).
+ * 화면 비교(스크린샷 기준선)는 OS마다 글꼴 렌더링이 달라 CI(리눅스)에서 기준선을 만든 뒤 붙인다.
  * 서버는 프로덕션 빌드(next start)로 띄운다: dev 서버는 느리고 실제 배포와 동작이 다르다.
  */
 import { defineConfig, devices } from '@playwright/test';
@@ -20,6 +21,14 @@ export default defineConfig({
     {
       name: 'chromium-pc',
       use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 720 } },
+    },
+    {
+      name: 'webkit-pc',
+      use: { ...devices['Desktop Safari'], viewport: { width: 1280, height: 720 } },
+    },
+    {
+      name: 'chromium-mobile',
+      use: { ...devices['Pixel 7'], viewport: { width: 390, height: 844 } },
     },
   ],
   webServer: {

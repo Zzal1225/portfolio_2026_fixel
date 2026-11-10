@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { centerOn, centerWorld, viewInWorld } from './camera';
+import { centerOn, centerWorld, sweepAngle, viewInWorld } from './camera';
 
 describe('intro camera', () => {
   it('PC 1280×720 절반 배율(2×)이면 월드가 화면에 꼭 맞는다', () => {
@@ -16,5 +16,17 @@ describe('intro camera', () => {
   });
   it('러너를 가운데: 월드 가장자리에서는 멈춘다', () => {
     expect(centerOn({ x: 600, y: 340 }, { w: 320, h: 180 })).toEqual({ x: 320, y: 180 });
+  });
+});
+
+describe('sweepAngle(흑백 → 컬러 부채꼴)', () => {
+  it.each([
+    [320, 280, 0],
+    [420, 180, 90],
+    [320, 80, 180],
+    [220, 180, 270],
+    [420, 280, 45],
+  ])('(%i, %i) → %i°', (x, y, deg) => {
+    expect(sweepAngle({ x, y })).toBeCloseTo(deg, 6);
   });
 });
