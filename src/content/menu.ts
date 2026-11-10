@@ -23,5 +23,6 @@ export const openLabel = (id: LandmarkId): string => `Open ${MENU_LABEL[id]}`;
 /** `!` 말풍선의 시각적 숨김 텍스트(색·아이콘만으로 뜻을 전하지 않기) */
 export const zoneHint = (id: LandmarkId): string => `Press Enter to open ${MENU_LABEL[id]}`;
 
-/** 반응 구역에서 러너 옆에 뜨는 키 안내 태그(PC, 시안) */
+/** 반응 구역 말풍선 안 글자: PC는 키 이름, 모바일은 "!"(SPACE 키가 없음). 11-10 6차 결정 */
 export const SPACE_TAG = 'SPACE';
+export const ALERT_MARK = '!';

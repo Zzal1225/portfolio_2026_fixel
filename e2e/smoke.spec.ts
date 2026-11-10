@@ -3,7 +3,7 @@
  *  1. 첫 방문: 인트로 → SKIP → 트랙 → 메뉴 클릭 → (달려간 뒤) 창 열림 → ESC로 닫힘
  *  2. 키보드만으로 6개 창을 모두 열고 닫기
  *  3. axe 위반 0(트랙 화면·창 화면)
- *  4. 재방문은 신호등 없이 바로 인사, reduced-motion은 인트로 생략
+ *  4. 재방문도 인트로를 처음부터(SKIP 가능), reduced-motion은 인트로 생략
  *  5. 자유 이동(11-10 시안 채택): 방향키로 달려가 반응 구역에서 Enter, 지도 창, 모바일 ◀ ▶
  *
  * 메뉴 클릭 후 창은 "캐릭터가 달려간 뒤" 열린다. 그래서 창이 보일 때까지 넉넉히 기다린다.
@@ -82,13 +82,13 @@ test('axe: 트랙 화면과 창에 위반이 없다', async ({ page }) => {
   expect(dialog.violations).toEqual([]);
 });
 
-test('재방문은 인트로·인사 없이 바로 플레이(시안), introSeen 저장', async ({ page }) => {
+test('재방문에도 인트로가 처음부터 나오고 SKIP으로 건너뛴다(11-10 6차)', async ({ page }) => {
   await skipIntro(page);
-  expect(await page.evaluate(() => localStorage.getItem('introSeen'))).toBe('1');
   await page.reload();
+  await expect(page.getByRole('button', { name: 'Skip intro' })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Menu' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Skip intro' }).click();
   await expect(page.getByRole('navigation', { name: 'Menu' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Skip intro' })).toHaveCount(0);
-  await expect(page.getByText('WELCOME TO MY PORTFOLIO!')).toHaveCount(0);
 });
 
 test('프로젝트 창 제목은 "이름(부제목)"', async ({ page }) => {

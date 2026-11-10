@@ -5,7 +5,7 @@
 > README 맨 위 15초 GIF(신호등 → 한 바퀴 → 메뉴 클릭 → 창)는 배포 후 추가한다.
 
 도트 그림 육상 트랙 위를 캐릭터가 달리는 1인 포트폴리오입니다. 트랙 위 구조물 6개 앞에 서거나 메뉴·미니맵을 누르면
-ABOUT · CAREER · PROJECT 1 · PROJECT 2 · EDUCATION · RESUME 창이 열립니다. 첫 방문에는 출발 신호등과 함께 약 7초짜리 인트로가 재생됩니다(건너뛰기 가능).
+ABOUT ME · CAREER · PROJECT1 · PROJECT2 · SKILL · RESUME 창이 열립니다. 들어오면 출발 신호등과 함께 약 14초짜리 인트로가 재생됩니다(SKIP·아무 키로 건너뛰기).
 
 ## 무엇을 증명하나
 

@@ -11,9 +11,12 @@ export const PRELOAD_IMAGES = [
   '/sprites/world/track-ring-512x232.png',
   '/sprites/tiles/tile-grass-32x32.png',
   '/sprites/tiles/tile-stand-32x32.png',
-  // 구조물·신호등·심판·이정표는 물건 시트 한 장, ! 말풍선·키캡은 UI 시트(scripts/build-sheets.mjs)
+  // 구조물·신호등·심판·이정표는 물건 시트 한 장, 키캡은 UI 시트(scripts/build-sheets.mjs)
   '/sprites/sheets/objects-227x195.png',
-  '/sprites/sheets/ui-67x16.png',
+  '/sprites/sheets/ui-33x16.png',
+  // 반응 구역 말풍선 조각(border-image라 시트에 못 넣음). 처음 구역에 들어설 때 빈 판이 보이지 않게 미리 디코딩
+  '/sprites/ui/alert-body-14x11.png',
+  '/sprites/ui/alert-tail-5x3.png',
   // 인트로 큰 전광판은 빈 전광판 그림을 늘려 쓴다(시트에 넣지 않음)
   '/sprites/structures/scoreboard-blank-96x32.png',
 ] as const;

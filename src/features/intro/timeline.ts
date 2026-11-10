@@ -34,12 +34,14 @@ export const LAP_TOTAL = TRACK.length + 80;
 /** 네온 켜짐 깜빡임(0.04초 칸 7개) */
 const FLICKER = [1, 0, 1, 0, 0, 1, 1] as const;
 
-export type IntroMode = 'full' | 'short' | 'reduced';
+export type IntroMode = 'full' | 'reduced';
 
-/** 어떤 인트로를 보여 줄까. 저장소 읽기 실패는 호출 쪽에서 seen=true로 넘긴다(본 것으로 취급) */
-export function introMode(seen: boolean, reducedMotion: boolean): IntroMode {
-  if (reducedMotion) return 'reduced';
-  return seen ? 'short' : 'full';
+/**
+ * 어떤 인트로를 보여 줄까. 방문 횟수와 무관하게 매번 전체 인트로(11-10 6차 사용자 결정: SKIP이 있으니 재방문도 본다).
+ * 버린 것: localStorage.introSeen으로 재방문은 끝 상태부터 — 결정 후 저장 코드째 걷어냄.
+ */
+export function introMode(reducedMotion: boolean): IntroMode {
+  return reducedMotion ? 'reduced' : 'full';
 }
 
 export const ease = (k: number) => (k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2);

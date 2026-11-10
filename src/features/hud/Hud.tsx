@@ -1,13 +1,14 @@
 'use client';
 /**
- * HUD(화면에 고정된 DOM, 월드 배율과 무관): 로고 + 메뉴 6개 + 하단 조작 안내 판(PC) + REPLAY.
+ * HUD(화면에 고정된 DOM, 월드 배율과 무관): 로고 + 메뉴 6개 + REPLAY.
+ * 하단 조작 안내 판(시안)은 11-10 6차 결정으로 뺐다: 인트로 끝에 키캡 ↑←→↓ 안내가 같은 역할을 하고, 반응 구역 말풍선이 SPACE를 알려 준다.
  * 미니맵·MAP 버튼은 Minimap.tsx, ◀ ▶는 TouchControls.tsx.
  *
  * 메뉴 = 키보드 사용자의 기본 길(CLAUDE.md 접근성): Tab으로 6개를 돌고 Enter면 캐릭터가 달려가 창이 열린다.
  * 그래서 메뉴는 DOM 순서상 월드보다 앞에 둔다(Game.tsx).
  * 메뉴 위치: PC(폭 700 이상) 오른쪽 위 가로 한 줄, 모바일은 하단 바 3×2(같은 DOM, CSS만 다름).
  */
-import { GUIDE, HUD_LABELS, LOGO, MENU_ORDER } from '@/content/hud';
+import { HUD_LABELS, LOGO, MENU_ORDER } from '@/content/hud';
 import { INTRO_LABELS } from '@/content/intro';
 import { MENU_LABEL, openLabel } from '@/content/menu';
 import type { LandmarkId } from '@/features/track/layout';
@@ -70,16 +71,6 @@ export function Logo() {
       >
         {LOGO.sub}
       </span>
-    </p>
-  );
-}
-
-/** PC 하단 가운데 조작 안내 판(시안). 모바일은 ◀ ▶·하단 메뉴가 같은 역할이라 없음 */
-export function GuidePanel() {
-  if (!useHudVisible()) return null;
-  return (
-    <p className="hud-in-bottom nine-white font-pixel-ko text-ink pointer-events-none fixed bottom-4 left-1/2 z-20 flex h-11 -translate-x-1/2 items-center px-1.5 text-[13px] font-bold whitespace-nowrap max-[699px]:hidden">
-      {GUIDE}
     </p>
   );
 }

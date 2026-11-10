@@ -18,9 +18,6 @@ export const HUD_LABELS = {
   menu: 'Menu',
 } as const;
 
-/** PC 하단 가운데 조작 안내 판(시안) */
-export const GUIDE = '↑ ↓ ← → 이동 · SPACE 또는 클릭으로 선택';
-
 /** 모바일 ◀ ▶: 트랙 순서로 이전·다음 지점까지 달려가 창을 연다(시안) */
 export const TOUCH_LABELS = { prev: 'Go to previous stop', next: 'Go to next stop' } as const;
 

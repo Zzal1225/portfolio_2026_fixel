@@ -10,19 +10,14 @@ import {
   introMode,
   lapDistance,
 } from './timeline';
-import { readSeen, writeSeen } from './storage';
 
 const SCALES = { whole: 2, zoom: 6, normal: 4 }; // PC 1280×720
 const FOCUS = { x: 400, y: 268 };
 
 describe('introMode', () => {
-  it.each([
-    [false, false, 'full'],
-    [true, false, 'short'],
-    [false, true, 'reduced'],
-    [true, true, 'reduced'],
-  ] as const)('seen=%s reduced=%s → %s', (seen, reduced, mode) => {
-    expect(introMode(seen, reduced)).toBe(mode);
+  it('방문 횟수와 무관하게 전체 인트로, reduced-motion만 생략', () => {
+    expect(introMode(false)).toBe('full');
+    expect(introMode(true)).toBe('reduced');
   });
 });
 
@@ -104,36 +99,5 @@ describe('배율·카메라 구간', () => {
   it('introCamera: 소수 배율이면 반올림하지 않는다', () => {
     const c = introCamera({ x: 300.3, y: 200 }, 2.5, { w: 1280, h: 720 });
     expect(Number.isInteger(c.x)).toBe(false);
-  });
-});
-
-describe('storage: introSeen', () => {
-  const memory = () => {
-    const m = new Map<string, string>();
-    return {
-      getItem: (k: string) => m.get(k) ?? null,
-      setItem: (k: string, v: string) => void m.set(k, v),
-    };
-  };
-  const broken = {
-    getItem: () => {
-      throw new Error('blocked');
-    },
-    setItem: () => {
-      throw new Error('blocked');
-    },
-  };
-  it('처음엔 false, 쓰고 나면 true', () => {
-    const s = memory();
-    expect(readSeen(s)).toBe(false);
-    writeSeen(s);
-    expect(readSeen(s)).toBe(true);
-  });
-  it('읽기 실패는 "본 것"으로 취급', () => {
-    expect(readSeen(broken)).toBe(true);
-    expect(() => writeSeen(broken)).not.toThrow();
-  });
-  it('저장소가 없으면(서버 렌더) 본 것으로 취급', () => {
-    expect(readSeen(null)).toBe(true);
   });
 });

@@ -13,7 +13,7 @@ import { preload } from 'react-dom';
 import { IntroOverlay } from '@/features/intro/IntroOverlay';
 import { CRITICAL_IMAGES } from '@/features/intro/preload';
 import { useIntro } from '@/features/intro/useIntro';
-import { GuidePanel, Logo, Menu, ReplayButton } from '@/features/hud/Hud';
+import { Logo, Menu, ReplayButton } from '@/features/hud/Hud';
 import { MapLauncher } from '@/features/hud/Minimap';
 import { TouchControls } from '@/features/hud/TouchControls';
 import { useRunner } from './useRunner';
@@ -46,7 +46,6 @@ export function Game() {
       <Menu onSelect={goTo} />
       <World worldRef={worldRef} onSelect={goTo} />
       <MapLauncher onSelect={goTo} />
-      <GuidePanel />
       <TouchControls stepStation={stepStation} />
       <ReplayButton onReplay={intro.replay} />
       {panelsNeeded && <PanelDialog />}

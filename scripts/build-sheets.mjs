@@ -2,7 +2,7 @@
 //
 // 왜: 첫 화면이 구조물·신호등·심판·이정표 PNG를 하나씩(10개 넘게) 따로 받았다. 시트 하나면 요청 1개.
 // 합치지 않는 것: 타일(background-repeat로 반복해야 함), 트랙 고리·지도 그림(크고 단독으로 쓰임),
-//                러너·소품·관중(이미 시트), 말풍선 조각(border-image는 파일 하나를 통째로 씀),
+//                러너·소품·관중(이미 시트), 말풍선 조각(인사·반응 구역, border-image는 파일 하나를 통째로 씀),
 //                전광판 빈 그림(인트로 큰 전광판이 background-size 100%로 늘려 씀 — 시트면 이웃 그림까지 늘어남).
 // 선택 외곽선(-selected)은 따로 한 장: 처음 선택될 때만 받던 지연 로드를 유지한다.
 //
@@ -39,8 +39,6 @@ const SHEETS = {
     ['reception-table-64x32-selected', 'structures/reception-table-64x32-selected.png'],
   ],
   ui: [
-    ['alert-1', 'ui/alert-bubble-1-16x16.png'],
-    ['alert-2', 'ui/alert-bubble-2-16x16.png'],
     ['keycap-up', 'ui/keycap-up-16x16.png'],
     ['keycap-down', 'ui/keycap-down-16x16.png'],
   ],

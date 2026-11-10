@@ -21,11 +21,9 @@
   --pos-water-b-64x32-selected: -166px -67px;
   --pos-tent-64x64-selected: -99px 0px;
   --pos-reception-table-64x32-selected: 0px -102px;
-  --sheet-ui: url('/sprites/sheets/ui-67x16.png');
-  --pos-alert-1: 0px 0px;
-  --pos-alert-2: -17px 0px;
-  --pos-keycap-up: -34px 0px;
-  --pos-keycap-down: -51px 0px;
+  --sheet-ui: url('/sprites/sheets/ui-33x16.png');
+  --pos-keycap-up: 0px 0px;
+  --pos-keycap-down: -17px 0px;
 }
 /* @generated sheets end */
 
@@ -191,21 +189,30 @@
 }
 
 /* ---------- UI ---------- */
-/* "!" 말풍선 2프레임을 번갈아(0.42s). reduced-motion이면 첫 프레임 고정 */
-.spr-alert {
-  width: 16px;
-  height: 16px;
-  background-image: var(--sheet-ui);
-  background-position: var(--pos-alert-1);
+/*
+ * 반응 구역 말풍선(11-10 6차): 시안 "!" 말풍선을 몸통(9-slice)·꼬리로 나눠(scripts/build-alert-bubble.mjs) 안에 글자를 넣는다.
+ * 시안 2프레임(같은 그림 1px 아래)은 transform으로 까딱인다 — 레이아웃 없음. reduced-motion이면 고정.
+ */
+.alert-bubble {
   animation: alert-bob 0.84s steps(1) infinite;
+}
+.alert-body {
+  border-style: solid;
+  border-width: 3px;
+  border-image: url('/sprites/ui/alert-body-14x11.png') 3 fill / 3px stretch;
+}
+.alert-tail {
+  width: 5px;
+  height: 3px;
+  background-image: url('/sprites/ui/alert-tail-5x3.png');
 }
 @keyframes alert-bob {
   50% {
-    background-position: var(--pos-alert-2);
+    transform: translateY(1px);
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .spr-alert {
+  .alert-bubble {
     animation: none;
   }
 }

@@ -7,7 +7,8 @@
  * 경과 시간은 performance.now()로 잰다 → 탭이 잠깐 느려져도 "지금 몇 초"가 정확하고, 밀린 틱을 몰아 돌지 않는다.
  *
  * 맡는 것: 단계 전환, 한 바퀴 위치, 배율(scaleOverride: 월드 전체 → 줌인 → 줌아웃, 소수 가능), 인트로 카메라,
- *          입력 잠금(inputEnabled), SKIP·아무 키로 건너뛰기(→ 인트로 끝 상태로), 첫 입력에 안내 지우기, introSeen 저장, REPLAY.
+ *          입력 잠금(inputEnabled), SKIP·아무 키로 건너뛰기(→ 인트로 끝 상태로), 첫 입력에 안내 지우기, REPLAY.
+ * 방문할 때마다 전체 인트로(11-10 6차 결정). REPLAY도 같은 길.
  * 맡지 않는 것: 평소 달리기·카메라(useRunner).
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -18,7 +19,6 @@ import { useGame } from '@/features/track/store';
 import { facing as laneFacing } from '@/features/track/trackPath';
 import { centerOn, sweepAngle, viewInWorld } from './camera';
 import { preloadAssets } from './preload';
-import { browserStorage, readSeen, writeSeen } from './storage';
 import { T, introAt, introCamera, introMode, lapDistance, type ScaleSet } from './timeline';
 
 /** 건너뛰기 키로 치지 않는 키: Tab 이동·보조 키는 "입력"이 아니라 탐색이다 */
@@ -32,7 +32,8 @@ export interface IntroControls {
 }
 
 export function useIntro(): IntroControls {
-  const [run, setRun] = useState({ token: 0, replay: false });
+  // REPLAY = 이 값을 올려 effect를 다시 돌린다(처음 방문과 같은 길)
+  const [run, setRun] = useState(0);
   const skipRef = useRef<() => void>(() => {});
 
   useEffect(() => {
@@ -41,12 +42,7 @@ export function useIntro(): IntroControls {
     let timer: ReturnType<typeof setInterval> | undefined;
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const storage = browserStorage();
-    const mode = run.replay
-      ? reduced
-        ? 'reduced'
-        : 'full'
-      : introMode(readSeen(storage), reduced);
+    const mode = introMode(reduced);
     let skipRequested = false;
 
     const s0 = store.getState();
@@ -84,7 +80,6 @@ export function useIntro(): IntroControls {
         ),
       });
       s.setIntro({ phase: 'ready', signal: 0, band: null, sweep: 360, elapsed: T.END });
-      writeSeen(storage);
     };
 
     const startFull = () => {
@@ -129,12 +124,6 @@ export function useIntro(): IntroControls {
       timer = setInterval(tick, TICK_MS);
     };
 
-    /**
-     * 재방문(11-10 시안 채택): 인사 없이 바로 인트로 끝 상태(키캡 안내).
-     * 버린 대안: 짧은 인사 1.5초 — 두 번째로 온 담당자에게는 기다림일 뿐이라 시안처럼 뺐다.
-     */
-    const startShort = () => enterReady();
-
     /** reduced-motion: 인사 말풍선을 첫 입력까지 고정(손 흔들기·줌 없음) */
     const startReduced = () => {
       const s = store.getState();
@@ -146,7 +135,6 @@ export function useIntro(): IntroControls {
         ),
       });
       s.setIntro({ phase: 'greet', sweep: 360 });
-      writeSeen(storage);
     };
 
     skipRef.current = () => {
@@ -156,7 +144,6 @@ export function useIntro(): IntroControls {
     preloadAssets().then(() => {
       if (cancelled) return;
       if (mode === 'full') startFull();
-      else if (mode === 'short') startShort();
       else startReduced();
     });
 
@@ -183,6 +170,6 @@ export function useIntro(): IntroControls {
   }, [run]);
 
   const skip = useCallback(() => skipRef.current(), []);
-  const replay = useCallback(() => setRun((r) => ({ token: r.token + 1, replay: true })), []);
+  const replay = useCallback(() => setRun((r) => r + 1), []);
   return { skip, replay };
 }
