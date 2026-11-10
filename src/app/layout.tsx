@@ -9,6 +9,7 @@
 import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
 import '@/styles/globals.css';
+import '@/styles/sprites.css';
 
 const pressStart = localFont({
   src: './fonts/PressStart2P-Regular.woff2',

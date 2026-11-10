@@ -14,4 +14,4 @@
 
 | 파일 | 출처 | 라이선스 |
 |---|---|---|
-| (작업 6부터 추가) `public/sprites/*` | Claude Design 시안(`design/design_handoff_track_portfolio/assets`), 직접 수정 | 본인 제작물 |
+| `public/sprites/{tiles,structures,props,ui,character,intro}/*.png` (32장) | Claude Design 시안(`design/design_handoff_track_portfolio/assets`)에서 그대로 복사(11-10) | 본인 제작물(Claude Design으로 생성) |

@@ -1,0 +1,134 @@
+/*
+ * 스프라이트 좌표·크기. 그림 파일 경로와 시트 안 위치는 이 파일에만 둔다(CLAUDE.md 5-2).
+ *
+ * 단위는 전부 "월드 px"다. 이 요소들은 World의 scale() 안에 있으므로 배율을 몰라도 된다.
+ * image-rendering은 World 컨테이너(.pixelated)에서 상속된다.
+ *
+ * 왜 <img>가 아니라 background-image인가:
+ *   시트 안 한 칸을 고르려면 background-position이 필요하고(소품·러너), 구조물도 같은 방식이면 규칙이 하나다.
+ *   그림은 장식이라 대체 텍스트가 필요 없다(이름은 HTML 글자·aria-label이 맡음).
+ */
+
+.spr {
+  background-repeat: no-repeat;
+}
+
+/* ---------- 타일 (32×32 반복) ---------- */
+.tile-grass {
+  background-image: url('/sprites/tiles/tile-grass-32x32.png');
+}
+.tile-stand {
+  background-image: url('/sprites/tiles/tile-stand-32x32.png');
+}
+.tile-track {
+  background-image: url('/sprites/tiles/tile-track-32x32.png');
+}
+
+/* ---------- 구조물 ---------- */
+.spr-arch-96x64 {
+  background-image: url('/sprites/structures/arch-96x64.png');
+}
+.spr-scoreboard-96x32 {
+  background-image: url('/sprites/structures/scoreboard-blank-96x32.png');
+}
+.spr-water-a-64x32 {
+  background-image: url('/sprites/structures/water-a-64x32.png');
+}
+.spr-water-b-64x32 {
+  background-image: url('/sprites/structures/water-b-64x32.png');
+}
+.spr-tent-64x64 {
+  background-image: url('/sprites/structures/tent-64x64.png');
+}
+.spr-reception-table-64x32 {
+  background-image: url('/sprites/structures/reception-table-64x32.png');
+}
+.spr-signpost-48x50 {
+  background-image: url('/sprites/structures/signpost-48x50.png');
+}
+
+/*
+ * 반응 구역 안: 1px accent 외곽선 그림(-selected, 사방 1px 큼).
+ * ::after로 겹쳐 두고 data-selected일 때만 보인다 — 그림을 바꾸는 대신 겹치기라 깜빡임(새 이미지 로드)이 없다.
+ */
+.spr-selected::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background-repeat: no-repeat;
+  opacity: 0;
+}
+[data-selected='true'].spr-selected::after {
+  opacity: 1;
+}
+.spr-arch-96x64::after {
+  background-image: url('/sprites/structures/arch-96x64-selected.png');
+}
+.spr-scoreboard-96x32::after {
+  background-image: url('/sprites/structures/scoreboard-96x32-selected.png');
+}
+.spr-water-a-64x32::after {
+  background-image: url('/sprites/structures/water-a-64x32-selected.png');
+}
+.spr-water-b-64x32::after {
+  background-image: url('/sprites/structures/water-b-64x32-selected.png');
+}
+.spr-tent-64x64::after {
+  background-image: url('/sprites/structures/tent-64x64-selected.png');
+}
+.spr-reception-table-64x32::after {
+  background-image: url('/sprites/structures/reception-table-64x32-selected.png');
+}
+
+/* ---------- 소품 시트 128×64 (4열 × 2행, 32×32) ----------
+ * 순서는 시안 코드(PROPS 배열) 기준: 1행 벤치·콘·물통·가방 / 2행 수건 걸이·잔디 1·잔디 2·아이스박스.
+ * (핸드오프 README 표의 2행 순서는 실제 PNG와 다르다.)
+ */
+.spr-prop {
+  background-image: url('/sprites/props/props-sheet-128x64.png');
+  width: 32px;
+  height: 32px;
+}
+.spr-prop-bench {
+  background-position: 0 0;
+}
+.spr-prop-cone {
+  background-position: -32px 0;
+}
+.spr-prop-bottle {
+  background-position: -64px 0;
+}
+.spr-prop-bag {
+  background-position: -96px 0;
+}
+.spr-prop-towel {
+  background-position: 0 -32px;
+}
+.spr-prop-grassA {
+  background-position: -32px -32px;
+}
+.spr-prop-grassB {
+  background-position: -64px -32px;
+}
+.spr-prop-cooler {
+  background-position: -96px -32px;
+}
+
+/* ---------- UI ---------- */
+/* "!" 말풍선 2프레임을 번갈아(0.42s). reduced-motion이면 첫 프레임 고정 */
+.spr-alert {
+  width: 16px;
+  height: 16px;
+  background-image: url('/sprites/ui/alert-bubble-1-16x16.png');
+  animation: alert-bob 0.84s steps(1) infinite;
+}
+@keyframes alert-bob {
+  50% {
+    background-image: url('/sprites/ui/alert-bubble-2-16x16.png');
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spr-alert {
+    animation: none;
+  }
+}

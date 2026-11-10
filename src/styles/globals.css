@@ -104,3 +104,24 @@ body {
     --tick: 0ms;
   }
 }
+
+/*
+ * 월드 포커스 표시: 월드 div는 화면보다 훨씬 크고 확대돼 있어서, 그 자체 outline은 화면 밖에 그려진다.
+ * 대신 화면 크기 바깥 틀(.world-frame) 안쪽 가장자리에 그린다(:has로 "안에 포커스가 있으면").
+ */
+[data-world]:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+.world-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+.world-frame:has([data-world]:focus-visible)::after {
+  box-shadow:
+    inset 0 0 0 2px var(--color-focus),
+    inset 0 0 0 6px var(--color-ink);
+}
