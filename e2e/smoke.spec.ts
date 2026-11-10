@@ -155,3 +155,15 @@ test('모바일: ▶ 를 누르고 있으면 달린다', async ({ page, isMobile
   const after = await runner.evaluate((el) => (el as HTMLElement).style.transform);
   expect(after).not.toBe(before);
 });
+
+test('방향키를 짧게 한 번 눌러도 한 걸음은 움직인다', async ({ page, isMobile }) => {
+  test.skip(isMobile, '키보드 시나리오는 PC');
+  await skipIntro(page);
+  await expect(page.getByText('WELCOME TO MY PORTFOLIO!')).toBeVisible();
+  const runner = page.locator('.spr-runner');
+  const before = await runner.evaluate((el) => (el as HTMLElement).style.transform);
+  await page.keyboard.press('ArrowLeft'); // keydown → keyup이 한 틱 안에
+  await expect
+    .poll(() => runner.evaluate((el) => (el as HTMLElement).style.transform))
+    .not.toBe(before);
+});

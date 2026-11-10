@@ -7,6 +7,7 @@
  */
 export const PRELOAD_IMAGES = [
   '/sprites/character/runner-sheet-128x240.png',
+  '/sprites/character/runner-idle-64x192.png',
   '/sprites/world/track-ring-512x232.png',
   '/sprites/tiles/tile-grass-32x32.png',
   '/sprites/tiles/tile-stand-32x32.png',

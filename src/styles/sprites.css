@@ -173,6 +173,24 @@
     background-position-x: -128px;
   }
 }
+/*
+ * 서 있을 때 숨쉬기(idle): 별도 시트 runner-idle-64x192(2프레임 × 방향 4줄, scripts/build-runner-idle.mjs).
+ * 프레임 0 = 달리기 시트의 서 있는 칸, 프레임 1 = 머리·어깨 1px 아래. 0.6초씩 번갈아.
+ * 줄 순서가 달리기 시트와 같아서 방향별 background-position-y 규칙을 그대로 쓴다.
+ */
+.spr-runner[data-running='false']:not([data-wave='true']) {
+  background-image: url('/sprites/character/runner-idle-64x192.png');
+  background-position-x: 0;
+  animation: runner-idle 1.2s steps(2) infinite;
+}
+@keyframes runner-idle {
+  from {
+    background-position-x: 0;
+  }
+  to {
+    background-position-x: -64px;
+  }
+}
 /* 인사(정면 손 흔들기 2프레임) — 인트로 작업 14에서 사용 */
 .spr-runner[data-wave='true'] {
   background-position-y: -192px;
@@ -188,7 +206,8 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .spr-runner[data-running='true'],
-  .spr-runner[data-wave='true'] {
+  .spr-runner[data-wave='true'],
+  .spr-runner[data-running='false'] {
     animation: none;
   }
 }

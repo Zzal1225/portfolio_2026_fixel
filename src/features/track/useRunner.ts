@@ -205,10 +205,16 @@ const sameSnapshot = (a: RunnerSnapshot, b: RunnerSnapshot) =>
  */
 export function useRunner(worldEl: RefObject<HTMLElement | null>): RunnerControls {
   const keys = useRef(new Set<string>());
+  /**
+   * 짧게 톡 누른 키: keydown과 keyup이 한 틱(60ms) 안에 끝나면 틱이 키를 못 본다.
+   * 눌린 적 있는 키를 다음 틱까지 남겨 두어 최소 한 걸음은 반영한다(틱이 읽고 비움).
+   */
+  const tapped = useRef(new Set<string>());
   const touch = useRef<KeyAxis>(0);
 
   const clearInput = useCallback(() => {
     keys.current.clear();
+    tapped.current.clear();
     touch.current = 0;
   }, []);
 
@@ -234,6 +240,7 @@ export function useRunner(worldEl: RefObject<HTMLElement | null>): RunnerControl
       if (KEY_VECTORS[e.code] && ownsArrows(e.target)) {
         e.preventDefault();
         keys.current.add(e.code);
+        tapped.current.add(e.code);
       } else if ((e.code === 'Enter' || e.code === 'Space') && s.zone && onWorld(e.target)) {
         e.preventDefault();
         s.openPanel(s.zone);
@@ -248,7 +255,8 @@ export function useRunner(worldEl: RefObject<HTMLElement | null>): RunnerControl
     const tick = () => {
       const s = useGame.getState();
       if (!s.inputEnabled) return;
-      const keyInput = combineKeys(keys.current);
+      const keyInput = combineKeys(new Set([...keys.current, ...tapped.current]));
+      tapped.current.clear();
       const input: RunnerInput =
         keyInput.dx !== 0 || keyInput.dy !== 0
           ? keyInput
