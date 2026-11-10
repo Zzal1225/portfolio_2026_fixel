@@ -20,5 +20,4 @@
 | `public/sprites/props/spectators-64x32.png`, `public/sprites/world/world-map-640x360.png` | Claude Design 시안 PNG 그대로(11-10) | 본인 제작물 |
 | `public/sprites/ui/speech-body-24x14.png`, `speech-tail-6x3.png` | 시안 speech-plate를 `scripts/build-speech-bubble.mjs`로 나눔 | 본인 제작물 |
 | `public/sprites/world/track-ring-512x232.png` | 시안 생성 코드(track-kit)를 `scripts/build-track-ring.mjs`로 실행해 레인 띠만 추출 | 본인 제작물 |
-
 | `public/sprites/sheets/*.png` (물건·선택 외곽선·UI 시트 3장) | 위 시안 PNG들을 `scripts/build-sheets.mjs`로 합침(11-10). 개별 PNG는 삭제 | 본인 제작물 |
