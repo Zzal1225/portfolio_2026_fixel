@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# 개인 학습 노트·면접 답안(CLAUDE.md 5-4: 커밋 금지)
+/private/
+
+# Next 16이 dev 실행 때 다시 쓰는 에이전트 파일은 커밋해 둔다(AGENTS.md 안내). 따로 무시하지 않음.

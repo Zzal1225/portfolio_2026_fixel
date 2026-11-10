@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galmuri@latest/dist/galmuri.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
+<script src="track-kit-v2.js"></script>
+<script src="track-kit-v3.js"></script>
+<script src="portfolio-content.js"></script>
+<script src="portfolio-game.js"></script>
+<style>
+html,body{margin:0;height:100%;overflow:hidden;background:#6FB24B;color:#1E2638;font-family:Pretendard,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#3D4E86}a:hover{color:#1E2638}
+button:focus-visible,a:focus-visible{outline:2px solid #F5C431;outline-offset:2px;box-shadow:0 0 0 4px #1E2638}
+</style>
+</helmet>
+<div ref="{{ rootRef }}" data-screen-label="Portfolio Game" style="position:fixed;inset:0;overflow:hidden;background:#6FB24B;user-select:none;-webkit-user-select:none;touch-action:manipulation">
+  <canvas ref="{{ botRef }}" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;filter:grayscale(1)"></canvas>
+  <canvas ref="{{ topRef }}" role="img" aria-label="400m 트랙 월드. 방향키로 이동하고, 구조물 앞에서 SPACE를 누르거나 구조물을 클릭하면 창이 열립니다." onClick="{{ onCanvasClick }}" style="position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;cursor:pointer"></canvas>
+
+  <div style="position:absolute;inset:0;pointer-events:none;filter:{{ ui.overlayFilter }}">
+    <sc-for list="{{ ui.labels }}" as="l" hint-placeholder-count="0">
+      <div style="position:absolute;left:{{ l.left }};top:{{ l.top }};transform:translate(-50%,-50%);font-family:{{ l.ff }};font-weight:{{ l.fw }};font-size:{{ l.fs }};line-height:1;color:{{ l.color }};text-shadow:{{ l.shadow }};white-space:nowrap">{{ l.text }}</div>
+    </sc-for>
+    <sc-if value="{{ ui.hasSpace }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;left:{{ ui.space.left }};top:{{ ui.space.top }};transform:translateY(-50%);display:flex;align-items:center;height:20px;padding:0 6px;background:#FFFFFF;box-shadow:0 0 0 2px #1E2638, 0 2px 0 2px #545D70;font-family:'Press Start 2P',monospace;font-size:8px;color:#1E2638;white-space:nowrap">SPACE</div>
+    </sc-if>
+    
+  </div>
+
+  <sc-if value="{{ ui.hasBig }}" hint-placeholder-val="{{ false }}">
+    <div aria-live="polite" style="position:absolute;left:{{ ui.big.left }};top:{{ ui.big.top }};width:{{ ui.big.w }};height:{{ ui.big.h }};background-image:url({{ ui.big.url }});background-size:100% 100%;image-rendering:pixelated;pointer-events:none">
+      <div style="position:absolute;left:5.2%;top:9.4%;width:89.6%;height:50%;display:flex;flex-direction:column;opacity:{{ ui.big.op }}">
+        <div style="flex-shrink:0;height:24%;display:flex;align-items:center;justify-content:center;gap:{{ ui.big.sgap }};background:#3D4E86;border-bottom:2px solid #1E2638">
+          <sc-for list="{{ ui.big.steps }}" as="sp" hint-placeholder-count="3">
+            <span style="display:flex;align-items:center;gap:{{ ui.big.sgap }};font-family:'Press Start 2P',monospace;font-size:{{ ui.big.fsS }};line-height:1;white-space:nowrap"><span style="color:{{ sp.color }};text-shadow:{{ sp.glow }}">{{ sp.text }}</span><span style="color:#959EAE">{{ sp.arrow }}</span></span>
+          </sc-for>
+        </div>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center">
+          <span style="font-family:Galmuri11,monospace;font-weight:700;font-size:{{ ui.big.fs2 }};line-height:1;color:#FFFFFF;white-space:nowrap;text-shadow:0 0 2px #F5C431,0 0 8px #F5C431,0 0 18px #F5C431,0 0 30px #F5C431">{{ ui.big.l2 }}</span>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ ui.hasBand }}" hint-placeholder-val="{{ false }}">
+    <div aria-live="polite" style="position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);height:96px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;background:#1E2638;border-top:4px solid #FFFFFF;border-bottom:4px solid #FFFFFF;pointer-events:none">
+      <span style="font-family:'Press Start 2P',monospace;font-size:{{ ui.bandFs }};color:#FFFFFF;white-space:nowrap">{{ ui.band }}</span>
+    </div>
+  </sc-if>
+  <sc-if value="{{ ui.hasDots }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:50%;bottom:24px;transform:translateX(-50%);display:flex;gap:12px;padding:8px 12px;background:#1E2638;pointer-events:none">
+      <sc-for list="{{ ui.dots }}" as="d" hint-placeholder-count="3">
+        <div style="width:16px;height:16px;box-sizing:border-box;border:2px solid #FFFFFF;background:{{ d.bg }}"></div>
+      </sc-for>
+    </div>
+  </sc-if>
+  <sc-if value="{{ ui.hasGreet }}" hint-placeholder-val="{{ false }}">
+    <div aria-live="polite" style="position:absolute;left:{{ ui.greet.left }};top:{{ ui.greet.top }};transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;pointer-events:none">
+      <div style="padding:6px 12px 2px;background:#FFFFFF;border-style:solid;border-width:16px;border-image:url({{ bubBody }}) 4 fill / 16px stretch;image-rendering:pixelated;font-family:'Press Start 2P',monospace;font-size:{{ ui.greetFs }};line-height:1.6;color:#1E2638;white-space:nowrap">{{ greeting }}</div>
+      <div style="width:24px;height:12px;margin-top:-4px;background-image:url({{ bubTail }});background-size:24px 12px;image-rendering:pixelated"></div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ ui.hasKeys }}" hint-placeholder-val="{{ false }}">
+    <sc-for list="{{ ui.keys }}" as="k" hint-placeholder-count="2">
+      <div aria-hidden="true" style="position:absolute;left:{{ k.left }};top:{{ k.top }};width:{{ k.size }};height:{{ k.size }};background-image:url({{ k.url }});background-size:100% 100%;image-rendering:pixelated;pointer-events:none">
+        <div style="position:absolute;left:0;right:0;top:{{ k.faceTop }};height:62%;display:flex;align-items:center;justify-content:center;font-family:Galmuri11,monospace;font-size:{{ k.fs }};font-weight:700;color:#1E2638;line-height:1">{{ k.arrow }}</div>
+      </div>
+    </sc-for>
+  </sc-if>
+
+  <sc-if value="{{ ui.hasHud }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:{{ ui.badgeLeft }};top:{{ ui.badgeTop }};opacity:{{ ui.hudOpacity }};display:flex;gap:8px;align-items:stretch">
+      <div style="display:flex;align-items:center;padding:4px 2px;box-sizing:border-box">
+      <div aria-label="ChanRyeong Portfolio" style="display:flex;flex-direction:column;align-items:flex-start;gap:{{ ui.logoGap }};font-family:'Press Start 2P',monospace;line-height:1;white-space:nowrap">
+          <span style="font-size:{{ ui.logoLg }};color:#FFFFFF;text-shadow:2px 0 0 #1E2638,-2px 0 0 #1E2638,0 2px 0 #1E2638,0 -2px 0 #1E2638,2px 2px 0 #1E2638,-2px 2px 0 #1E2638,2px -2px 0 #1E2638,-2px -2px 0 #1E2638,0 {{ ui.logoDrop }} 0 #1E2638">ChanRyeong</span>
+          <span style="font-size:{{ ui.logoSm }};color:#F5C431;letter-spacing:2px;text-shadow:2px 0 0 #1E2638,-2px 0 0 #1E2638,0 2px 0 #1E2638,0 -2px 0 #1E2638,2px 2px 0 #1E2638,-2px 2px 0 #1E2638,2px -2px 0 #1E2638,-2px -2px 0 #1E2638">PORTFOLIO</span>
+        </div>
+    </div>
+      
+    </div>
+    <button onClick="{{ replay }}" aria-label="인트로 다시 보기" title="인트로 다시 보기" style="position:absolute;left:16px;bottom:{{ ui.replayBottom }};opacity:{{ ui.hudOpacity }};height:44px;display:flex;align-items:center;gap:6px;padding:0 6px;cursor:pointer;background:#FFFFFF;border-style:solid;border-width:8px;border-image:url(&quot;data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20shape-rendering%3D'crispEdges'%3E%3Crect%20x%3D'2'%20y%3D'4'%20width%3D'20'%20height%3D'16'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'2'%20width%3D'16'%20height%3D'20'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'0'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'22'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'0'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'22'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'20'%20width%3D'16'%20height%3D'2'%20fill%3D'%23959EAE'%2F%3E%3Crect%20x%3D'20'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%23959EAE'%2F%3E%3C%2Fsvg%3E&quot;) 8 fill / 8px repeat;font-family:'Press Start 2P',monospace;font-size:{{ ui.replayFs }};color:#1E2638;white-space:nowrap">▶ REPLAY</button>
+    <sc-if value="{{ ui.isPC }}" hint-placeholder-val="{{ true }}">
+      <nav aria-label="메뉴" style="position:absolute;right:16px;top:16px;transform:{{ ui.menuT }};opacity:{{ ui.hudOpacity }};display:flex;gap:4px">
+        <sc-for list="{{ menu }}" as="m" hint-placeholder-count="6">
+          <button onClick="{{ m.go }}" aria-current="{{ m.current }}" style="height:44px;display:flex;align-items:center;padding:0 6px;cursor:pointer;background:{{ m.bg }};border-style:solid;border-width:8px;border-image:url(&quot;data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20shape-rendering%3D'crispEdges'%3E%3Crect%20x%3D'2'%20y%3D'4'%20width%3D'20'%20height%3D'16'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'2'%20width%3D'16'%20height%3D'20'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'0'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'22'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'0'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'22'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'20'%20width%3D'16'%20height%3D'2'%20fill%3D'%23959EAE'%2F%3E%3Crect%20x%3D'20'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%23959EAE'%2F%3E%3C%2Fsvg%3E&quot;) 8 fill / 8px repeat;outline:{{ m.outline }};outline-offset:-2px;font-family:'Press Start 2P',monospace;font-size:10px;color:#1E2638;white-space:nowrap">{{ m.label }}</button>
+        </sc-for>
+      </nav>
+      <button onClick="{{ openMap }}" aria-label="전체 지도 보기" title="전체 지도 보기" style="position:absolute;right:16px;bottom:16px;transform:{{ ui.mapT }};opacity:{{ ui.hudOpacity }};padding:2px;cursor:pointer;background:#FFFFFF;border-style:solid;border-width:8px;border-image:url(&quot;data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20shape-rendering%3D'crispEdges'%3E%3Crect%20x%3D'2'%20y%3D'4'%20width%3D'20'%20height%3D'16'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'2'%20width%3D'16'%20height%3D'20'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'0'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'22'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'0'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'22'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'20'%20width%3D'16'%20height%3D'2'%20fill%3D'%23959EAE'%2F%3E%3Crect%20x%3D'20'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%23959EAE'%2F%3E%3C%2Fsvg%3E&quot;) 8 fill / 8px repeat">
+        <div style="position:relative;width:160px;height:90px;background-image:url({{ ui.mini.url }});background-size:160px 90px;pointer-events:none">
+          <div style="position:absolute;left:{{ ui.mini.vl }};top:{{ ui.mini.vt }};width:{{ ui.mini.vw }};height:{{ ui.mini.vh }};box-sizing:border-box;border:2px solid #F5C431"></div>
+          <div style="position:absolute;left:{{ ui.mini.rl }};top:{{ ui.mini.rt }};width:6px;height:6px;background:#1E2638;box-shadow:0 0 0 1px #FFFFFF"></div>
+          <span style="position:absolute;right:-2px;bottom:-2px;padding:2px 3px;background:#1E2638;font-family:'Press Start 2P',monospace;font-size:7px;color:#FFFFFF">MAP</span>
+        </div>
+      </button>
+      <div style="position:absolute;left:50%;bottom:16px;transform:translateX(-50%) {{ ui.mapT }};opacity:{{ ui.hudOpacity }};display:flex;align-items:center;gap:8px;height:44px;box-sizing:border-box;padding:0 6px;background:#FFFFFF;border-style:solid;border-width:8px;border-image:url(&quot;data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20shape-rendering%3D'crispEdges'%3E%3Crect%20x%3D'2'%20y%3D'4'%20width%3D'20'%20height%3D'16'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'2'%20width%3D'16'%20height%3D'20'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'0'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'22'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'0'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'22'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'20'%20width%3D'16'%20height%3D'2'%20fill%3D'%23959EAE'%2F%3E%3Crect%20x%3D'20'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%23959EAE'%2F%3E%3C%2Fsvg%3E&quot;) 8 fill / 8px repeat;font-family:Galmuri11,monospace;font-size:13px;color:#1E2638;white-space:nowrap;pointer-events:none">↑ ↓ ← → 이동 · SPACE 또는 클릭으로 선택</div>
+    </sc-if>
+    <sc-if value="{{ ui.isMobile }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ openMap }}" aria-label="전체 지도 보기" style="position:absolute;right:8px;top:8px;height:44px;display:flex;align-items:center;padding:0 8px;cursor:pointer;background:#FFFFFF;border-style:solid;border-width:8px;border-image:url(&quot;data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20shape-rendering%3D'crispEdges'%3E%3Crect%20x%3D'2'%20y%3D'4'%20width%3D'20'%20height%3D'16'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'2'%20width%3D'16'%20height%3D'20'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'0'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'22'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'0'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'22'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'20'%20width%3D'16'%20height%3D'2'%20fill%3D'%23959EAE'%2F%3E%3Crect%20x%3D'20'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%23959EAE'%2F%3E%3C%2Fsvg%3E&quot;) 8 fill / 8px repeat;font-family:'Press Start 2P',monospace;font-size:9px;color:#1E2638;opacity:{{ ui.hudOpacity }}">MAP</button>
+      <button aria-label="이전 지점으로" onClick="{{ prevStation }}" style="position:absolute;left:12px;bottom:124px;width:64px;height:64px;padding:0;cursor:pointer;background:{{ ui.lBg }};border-style:solid;border-width:8px;border-image:url(&quot;data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20shape-rendering%3D'crispEdges'%3E%3Crect%20x%3D'2'%20y%3D'4'%20width%3D'20'%20height%3D'16'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'2'%20width%3D'16'%20height%3D'20'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'0'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'22'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'0'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'22'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'20'%20width%3D'16'%20height%3D'2'%20fill%3D'%23959EAE'%2F%3E%3Crect%20x%3D'20'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%23959EAE'%2F%3E%3C%2Fsvg%3E&quot;) 8 fill / 8px repeat;outline:{{ ui.lOut }};outline-offset:2px;font-family:Galmuri11,monospace;font-size:20px;color:#1E2638">◀</button>
+      <button aria-label="다음 지점으로" onClick="{{ nextStation }}" style="position:absolute;right:12px;bottom:124px;width:64px;height:64px;padding:0;cursor:pointer;background:{{ ui.rBg }};border-style:solid;border-width:8px;border-image:url(&quot;data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20shape-rendering%3D'crispEdges'%3E%3Crect%20x%3D'2'%20y%3D'4'%20width%3D'20'%20height%3D'16'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'2'%20width%3D'16'%20height%3D'20'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'0'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'22'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'0'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'22'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'20'%20width%3D'16'%20height%3D'2'%20fill%3D'%23959EAE'%2F%3E%3Crect%20x%3D'20'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%23959EAE'%2F%3E%3C%2Fsvg%3E&quot;) 8 fill / 8px repeat;outline:{{ ui.rOut }};outline-offset:2px;font-family:Galmuri11,monospace;font-size:20px;color:#1E2638">▶</button>
+      <nav aria-label="메뉴" style="position:absolute;left:0;right:0;bottom:0;height:112px;box-sizing:border-box;padding:8px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;background:#1E2638">
+        <sc-for list="{{ menu }}" as="m" hint-placeholder-count="6">
+          <button onClick="{{ m.go }}" aria-current="{{ m.current }}" style="height:44px;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;background:{{ m.bg }};border-style:solid;border-width:8px;border-image:url(&quot;data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20shape-rendering%3D'crispEdges'%3E%3Crect%20x%3D'2'%20y%3D'4'%20width%3D'20'%20height%3D'16'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'2'%20width%3D'16'%20height%3D'20'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'0'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'22'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'0'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'22'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'20'%20width%3D'16'%20height%3D'2'%20fill%3D'%23959EAE'%2F%3E%3Crect%20x%3D'20'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%23959EAE'%2F%3E%3C%2Fsvg%3E&quot;) 8 fill / 8px repeat;outline:{{ m.outline }};outline-offset:-2px;font-family:'Press Start 2P',monospace;font-size:9px;color:#1E2638;white-space:nowrap">{{ m.label }}</button>
+        </sc-for>
+      </nav>
+    </sc-if>
+  </sc-if>
+
+  <sc-if value="{{ ui.skip }}" hint-placeholder-val="{{ true }}">
+    <button onClick="{{ skip }}" style="position:absolute;right:16px;top:{{ ui.skipTop }};height:44px;display:flex;align-items:center;padding:0 10px;cursor:pointer;background:#FFFFFF;border-style:solid;border-width:8px;border-image:url(&quot;data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20shape-rendering%3D'crispEdges'%3E%3Crect%20x%3D'2'%20y%3D'4'%20width%3D'20'%20height%3D'16'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'2'%20width%3D'16'%20height%3D'20'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'0'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'22'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'0'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'22'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'20'%20width%3D'16'%20height%3D'2'%20fill%3D'%23959EAE'%2F%3E%3Crect%20x%3D'20'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%23959EAE'%2F%3E%3C%2Fsvg%3E&quot;) 8 fill / 8px repeat;font-family:'Press Start 2P',monospace;font-size:12px;color:#1E2638">SKIP</button>
+  </sc-if>
+
+  <sc-if value="{{ hasWin }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ close }}" style="position:absolute;inset:0;background:rgba(30,38,56,.55)"></div>
+    <div role="dialog" aria-modal="true" aria-labelledby="win-title" style="position:absolute;left:50%;top:{{ winTop }};bottom:{{ winBottom }};transform:translateX(-50%);width:{{ winW }};max-height:{{ winMaxH }};display:flex;flex-direction:column;background:#FFFFFF;border-style:solid;border-width:8px;border-image:url(&quot;data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20shape-rendering%3D'crispEdges'%3E%3Crect%20x%3D'2'%20y%3D'4'%20width%3D'20'%20height%3D'16'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'2'%20width%3D'16'%20height%3D'20'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'0'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'22'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'0'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'22'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'20'%20width%3D'16'%20height%3D'2'%20fill%3D'%23959EAE'%2F%3E%3Crect%20x%3D'20'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%23959EAE'%2F%3E%3C%2Fsvg%3E&quot;) 8 fill / 8px repeat">
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 8px 8px 12px;background:#2E9BE0;border-bottom:2px solid #1E2638;flex-shrink:0">
+        <button aria-label="이전 지점" onClick="{{ prevWin }}" style="width:40px;height:40px;padding:0;cursor:pointer;background:#FFFFFF;border-style:solid;border-width:8px;border-image:url(&quot;data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20shape-rendering%3D'crispEdges'%3E%3Crect%20x%3D'2'%20y%3D'4'%20width%3D'20'%20height%3D'16'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'2'%20width%3D'16'%20height%3D'20'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'0'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'22'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'0'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'22'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'20'%20width%3D'16'%20height%3D'2'%20fill%3D'%23959EAE'%2F%3E%3Crect%20x%3D'20'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%23959EAE'%2F%3E%3C%2Fsvg%3E&quot;) 8 fill / 8px repeat;font-family:Galmuri11,monospace;font-size:12px;color:#1E2638;line-height:1">◀</button>
+        <div style="flex:1;display:flex;flex-direction:column;gap:4px;min-width:0">
+          <span id="win-title" style="font-family:'Press Start 2P',monospace;font-size:16px;line-height:1.2;color:#1E2638;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ win.title }}</span>
+          
+        </div>
+        <button aria-label="다음 지점" onClick="{{ nextWin }}" style="width:40px;height:40px;padding:0;cursor:pointer;background:#FFFFFF;border-style:solid;border-width:8px;border-image:url(&quot;data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20shape-rendering%3D'crispEdges'%3E%3Crect%20x%3D'2'%20y%3D'4'%20width%3D'20'%20height%3D'16'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'2'%20width%3D'16'%20height%3D'20'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'0'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'22'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'0'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'22'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'20'%20width%3D'16'%20height%3D'2'%20fill%3D'%23959EAE'%2F%3E%3Crect%20x%3D'20'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%23959EAE'%2F%3E%3C%2Fsvg%3E&quot;) 8 fill / 8px repeat;font-family:Galmuri11,monospace;font-size:12px;color:#1E2638;line-height:1">▶</button>
+        <button ref="{{ closeRef }}" aria-label="닫기" onClick="{{ close }}" style="width:40px;height:40px;padding:0;cursor:pointer;background:#FFFFFF;border-style:solid;border-width:8px;border-image:url(&quot;data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20shape-rendering%3D'crispEdges'%3E%3Crect%20x%3D'2'%20y%3D'4'%20width%3D'20'%20height%3D'16'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'2'%20width%3D'16'%20height%3D'20'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'0'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'22'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'0'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'22'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'20'%20width%3D'16'%20height%3D'2'%20fill%3D'%23959EAE'%2F%3E%3Crect%20x%3D'20'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%23959EAE'%2F%3E%3C%2Fsvg%3E&quot;) 8 fill / 8px repeat;font-family:Galmuri11,monospace;font-size:14px;font-weight:700;color:#1E2638;line-height:1">✕</button>
+      </div>
+      <div style="padding:24px 28px 28px;display:flex;flex-direction:column;gap:28px;font-size:16px;line-height:1.6;overflow-y:auto;overflow-x:hidden;min-height:0;user-select:text;-webkit-user-select:text">
+        <sc-for list="{{ win.sections }}" as="sec" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <sc-if value="{{ sec.heading }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;align-items:center;gap:8px;font-family:Galmuri11,monospace;font-size:15px;font-weight:700"><span style="width:8px;height:8px;background:#2E9BE0;box-shadow:0 0 0 1px #3D4E86"></span>{{ sec.heading }}</div>
+            </sc-if>
+            <sc-if value="{{ sec.isText }}" hint-placeholder-val="{{ true }}">
+              <p style="margin:0;text-wrap:pretty;color:{{ sec.color }}">{{ sec.body }}</p>
+            </sc-if>
+            <sc-if value="{{ sec.isStats }}" hint-placeholder-val="{{ false }}">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+                <sc-for list="{{ sec.items }}" as="it" hint-placeholder-count="3">
+                  <div style="display:flex;flex-direction:column;gap:4px;padding:12px 14px;border:2px solid #1E2638;box-shadow:inset 0 -2px 0 #D6DBE3"><span style="font-size:13px;color:#545D70">{{ it.label }}</span><span style="font-family:Galmuri11,monospace;font-size:22px;font-weight:700;line-height:1.2">{{ it.value }}</span></div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ sec.isList }}" hint-placeholder-val="{{ false }}">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:12px 20px">
+                <sc-for list="{{ sec.items }}" as="it" hint-placeholder-count="3">
+                  <div style="display:flex;gap:10px;align-items:baseline">
+                    <span style="font-family:Galmuri11,monospace;font-size:13px;color:#3D4E86;flex-shrink:0">{{ it.num }}</span>
+                    <div style="display:flex;flex-direction:column;gap:2px"><strong style="font-weight:600">{{ it.tag }}</strong><span style="font-size:15px;color:{{ it.color }}">{{ it.desc }}</span></div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ sec.isTimeline }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:0">
+                <sc-for list="{{ sec.items }}" as="it" hint-placeholder-count="3">
+                  <div style="display:grid;grid-template-columns:120px minmax(0,1fr);gap:16px;padding:12px 0;border-bottom:2px solid #D6DBE3">
+                    <span style="font-family:Galmuri11,monospace;font-size:14px;color:#3D4E86">{{ it.period }}</span>
+                    <div style="display:flex;flex-direction:column;gap:2px"><strong style="font-weight:600">{{ it.title }}</strong><span style="font-size:15px;color:{{ it.color }}">{{ it.desc }}</span></div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ sec.isLinks }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;gap:12px;flex-wrap:wrap">
+                <sc-for list="{{ sec.items }}" as="it" hint-placeholder-count="2">
+                  <a href="{{ it.href }}" target="_blank" rel="noopener" style="display:flex;align-items:center;height:28px;padding:2px 14px;background:{{ it.bg }};border-style:solid;border-width:8px;border-image:url(&quot;data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20shape-rendering%3D'crispEdges'%3E%3Crect%20x%3D'2'%20y%3D'4'%20width%3D'20'%20height%3D'16'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'2'%20width%3D'16'%20height%3D'20'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'0'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'22'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'0'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'22'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'20'%20width%3D'16'%20height%3D'2'%20fill%3D'%23959EAE'%2F%3E%3Crect%20x%3D'20'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%23959EAE'%2F%3E%3C%2Fsvg%3E&quot;) 8 fill / 8px repeat;font-family:Galmuri11,monospace;font-size:14px;color:#1E2638;text-decoration:none">{{ it.label }}</a>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ mapOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeMap }}" style="position:absolute;inset:0;background:rgba(30,38,56,.55)"></div>
+    <div role="dialog" aria-modal="true" aria-labelledby="map-title" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;background:#FFFFFF;border-style:solid;border-width:8px;border-image:url(&quot;data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20shape-rendering%3D'crispEdges'%3E%3Crect%20x%3D'2'%20y%3D'4'%20width%3D'20'%20height%3D'16'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'2'%20width%3D'16'%20height%3D'20'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'0'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'22'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'0'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'22'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'20'%20width%3D'16'%20height%3D'2'%20fill%3D'%23959EAE'%2F%3E%3Crect%20x%3D'20'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%23959EAE'%2F%3E%3C%2Fsvg%3E&quot;) 8 fill / 8px repeat">
+      <div style="display:flex;align-items:center;gap:12px;padding:8px 8px 8px 12px;background:#2E9BE0;border-bottom:2px solid #1E2638">
+        <span id="map-title" style="font-family:'Press Start 2P',monospace;font-size:14px;color:#1E2638">MAP</span>
+        <span style="flex:1;font-family:Galmuri11,monospace;font-size:12px;color:#1E2638;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">구조물을 누르면 그곳으로 달려갑니다</span>
+        <button ref="{{ mapCloseRef }}" aria-label="지도 닫기" onClick="{{ closeMap }}" style="width:40px;height:40px;padding:0;cursor:pointer;background:#FFFFFF;border-style:solid;border-width:8px;border-image:url(&quot;data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'24'%20height%3D'24'%20shape-rendering%3D'crispEdges'%3E%3Crect%20x%3D'2'%20y%3D'4'%20width%3D'20'%20height%3D'16'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'2'%20width%3D'16'%20height%3D'20'%20fill%3D'%23FFFFFF'%2F%3E%3Crect%20x%3D'4'%20y%3D'0'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'22'%20width%3D'16'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'0'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'22'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'2'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'2'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'20'%20y%3D'20'%20width%3D'2'%20height%3D'2'%20fill%3D'%231E2638'%2F%3E%3Crect%20x%3D'4'%20y%3D'20'%20width%3D'16'%20height%3D'2'%20fill%3D'%23959EAE'%2F%3E%3Crect%20x%3D'20'%20y%3D'4'%20width%3D'2'%20height%3D'16'%20fill%3D'%23959EAE'%2F%3E%3C%2Fsvg%3E&quot;) 8 fill / 8px repeat;font-family:Galmuri11,monospace;font-size:14px;font-weight:700;color:#1E2638;line-height:1">✕</button>
+      </div>
+      <div style="padding:{{ map.pad }}">
+        <div style="position:relative;width:{{ map.w }};height:{{ map.h }};background-image:url({{ map.url }});background-size:100% 100%;image-rendering:pixelated">
+          <sc-for list="{{ map.items }}" as="it" hint-placeholder-count="0">
+            <button onClick="{{ it.go }}" aria-label="{{ it.aria }}" style="position:absolute;left:{{ it.left }};top:{{ it.top }};width:{{ it.w }};height:{{ it.h }};padding:0;cursor:pointer;box-sizing:border-box;background:transparent;border:2px solid #F5C431" style-hover="background:rgba(245,196,49,.35)">
+              <span style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:4px 5px;background:#1E2638;box-shadow:0 0 0 2px #FFFFFF;font-family:'Press Start 2P',monospace;font-size:{{ map.fs }};line-height:1;color:#FFFFFF;white-space:nowrap">{{ it.label }}</span>
+            </button>
+          </sc-for>
+          <div style="position:absolute;left:{{ map.rl }};top:{{ map.rt }};width:10px;height:10px;background:#1E2638;box-shadow:0 0 0 2px #FFFFFF;pointer-events:none"></div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;introMode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;always&quot;,&quot;firstVisit&quot;,&quot;never&quot;],&quot;default&quot;:&quot;always&quot;,&quot;tsType&quot;:&quot;'always'|'firstVisit'|'never'&quot;,&quot;section&quot;:&quot;인트로&quot;}}">
+class Component extends DCLogic {
+  rootRef=React.createRef(); botRef=React.createRef(); topRef=React.createRef(); closeRef=React.createRef(); mapCloseRef=React.createRef();
+  state={ui:null,mapOpen:false};
+  componentDidMount(){
+    const boot=()=>{ const K=window.buildKit3&&window.buildKit3(); if(!K||!window.PortfolioGame||!window.PORTFOLIO_CONTENT||!this.topRef.current){ this.t=setTimeout(boot,60); return; } this.start(K); };
+    boot();
+  }
+  start(K){
+    this.content=window.PORTFOLIO_CONTENT;
+    const P=K.speechPlate(); const body={w:24,h:14,p:P.p.slice(0,14).map(r=>r.slice())}; for(let x=2;x<=21;x++) body.p[13][x]='m';
+    const tail={w:6,h:3,p:P.p.slice(13,16).map(r=>r.slice(9,15))};
+    this.bubBody=window.PortfolioGame.blobURL(K.toCanvas(body,1)); this.bubTail=window.PortfolioGame.blobURL(K.toCanvas(tail,1));
+    let seen=false; try{ seen=localStorage.getItem('pcr_intro_seen')==='1'; }catch(e){}
+    const mode=this.props.introMode??'always';
+    this.game=window.PortfolioGame.create({bottom:this.botRef.current,top:this.topRef.current,content:this.content,
+      skipIntro:mode==='never'||(mode==='firstVisit'&&seen), onUpdate:ui=>{ this.ui=ui; if(!this.pending){ this.pending=true; setTimeout(()=>{ this.pending=false; this.setState({ui:this.ui}); },16); } }});
+    const fit=()=>{ const r=this.rootRef.current.getBoundingClientRect(); this.game.resize(r.width,r.height,r.width<700); };
+    fit(); this.ro=new ResizeObserver(fit); this.ro.observe(this.rootRef.current);
+    const DIRS={ArrowLeft:[-1,0],KeyA:[-1,0],ArrowRight:[1,0],KeyD:[1,0],ArrowUp:[0,-1],KeyW:[0,-1],ArrowDown:[0,1],KeyS:[0,1]};
+    const down=new Set();
+    const push=()=>{ let x=0,y=0; down.forEach(c=>{ x+=DIRS[c][0]; y+=DIRS[c][1]; }); this.game.move(Math.sign(x),Math.sign(y)); };
+    this.kd=e=>{ const g=this.game; const open=this.ui&&this.ui.open;
+      if(this.state.mapOpen){ if(e.code==='Escape') this.setState({mapOpen:false}); return; }
+      if(e.code==='Escape'){ g.close(); return; }
+      if(open){ if((e.code==='ArrowLeft'||e.code==='ArrowRight')&&!(e.target.closest&&e.target.closest('a,button'))){ e.preventDefault(); g.stepOpen(e.code==='ArrowLeft'?-1:1); } return; }
+      if(DIRS[e.code]){ e.preventDefault(); down.add(e.code); push(); }
+      else if((e.code==='Enter'||e.code==='Space')&&!(e.target.closest&&e.target.closest('a,button'))){ e.preventDefault(); g.confirm(); } };
+    this.ku=e=>{ if(DIRS[e.code]){ down.delete(e.code); push(); } };
+    this.bl=()=>{ down.clear(); this.game.move(0,0); };
+    window.addEventListener('keydown',this.kd); window.addEventListener('keyup',this.ku); window.addEventListener('blur',this.bl);
+  }
+  componentDidUpdate(){ if(this.state.mapOpen&&!this.lastMap&&this.mapCloseRef.current) this.mapCloseRef.current.focus(); this.lastMap=this.state.mapOpen; const now=this.state&&this.state.ui&&this.state.ui.open; if(now&&now!==this.lastOpen&&this.closeRef.current) this.closeRef.current.focus(); this.lastOpen=now; }
+  componentWillUnmount(){ clearTimeout(this.t); this.game&&this.game.destroy(); this.ro&&this.ro.disconnect(); window.removeEventListener('keydown',this.kd); window.removeEventListener('keyup',this.ku); window.removeEventListener('blur',this.bl); }
+  renderVals(){
+    const u=this.state.ui, C=this.content||window.PORTFOLIO_CONTENT||{stations:[]}, g=this.game;
+    const px=v=>Math.round(v)+'px';
+    const base={rootRef:this.rootRef,botRef:this.botRef,topRef:this.topRef,closeRef:this.closeRef,name:C.name,role:C.role,greeting:C.greeting,bubBody:this.bubBody||'',bubTail:this.bubTail||'',
+      onCanvasClick:e=>{ if(!g) return; const r=e.currentTarget.getBoundingClientRect(); g.clickWorld(e.clientX-r.left,e.clientY-r.top); },
+      skip:()=>g&&g.skip(), close:()=>g&&g.close(), prevWin:()=>g&&g.stepOpen(-1), nextWin:()=>g&&g.stepOpen(1),
+      prevStation:()=>g&&g.stepStation(-1), nextStation:()=>g&&g.stepStation(1), replay:()=>{ if(g){ g.close(); g.replay(); } },
+      mapCloseRef:this.mapCloseRef, mapOpen:!!this.state.mapOpen,
+      openMap:()=>{ if(!g) return; g.move(0,0); g.skip(); g.close(); this.setState({mapOpen:true}); }, closeMap:()=>this.setState({mapOpen:false})};
+    const menu=C.stations.map(s=>{ const cur=u&&(u.open===s.id||(!u.open&&u.zone===s.id)); return {label:s.menu,go:()=>g&&g.goTo(s.id),current:cur?'true':'false',bg:cur?'#FFF6D6':'#FFFFFF',outline:cur?'2px solid #F5C431':'none'}; });
+    if(!u) return Object.assign(base,{ui:{overlayFilter:'none',labels:[],hasSpace:false,space:{},dots:[],keys:[],mini:{},board:{},greet:{},big:{},skip:false,skipTop:'16px',hasBoard:false,hasBand:false,band:'',bandFs:'40px',hasDots:false,hasGreet:false,greetFs:'16px',hasKeys:false,hasHud:false,hasBig:false,badgeLeft:'16px',badgeTop:'16px',hudOpacity:'0',logoSm:'10px',logoLg:'24px',logoGap:'10px',logoDrop:'5px',replayFs:'10px',replayBottom:'16px',isPC:true,isMobile:false,menuT:'none',mapT:'none',yearLine:'',lBg:'#FFFFFF',rBg:'#FFFFFF',lOut:'none',rOut:'none'},menu,hasWin:false,win:{sections:[]},map:{items:[]}});
+    const S=u.S, k=u.hudK, slide=1-k;
+    const zoneItem=u.zone&&!u.open?(C.stations.find(s=>s.id===u.zone)||{}).item:null;
+    const ui={
+      overlayFilter:(u.intro&&!u.greet&&u.hudK===0&&u.board!==undefined&&u.dots!==null)||(u.intro&&u.band)?'grayscale(1)':'none',
+      labels:u.labels.map(l=>({ff:l.ff,fw:l.fw,text:l.text,left:px(l.x),top:px(l.y),fs:px(l.fs),color:l.color,shadow:l.glow?'0 0 4px #F5C431, 0 0 10px #F5C431':'none'})),
+      hasSpace:!!u.space&&!u.mobile, space:u.space?{left:px(u.space.x),top:px(u.space.y)}:{},
+      hasBand:!!u.band, band:u.band||'', bandFs:u.mobile?'22px':'40px',
+      hasDots:!!u.dots, dots:(u.dots||[]).map(on=>({bg:on?'#F5C431':'#1E2638'})),
+      hasGreet:!!u.greet, greet:u.greet?{left:px(u.greet.x),top:px(u.greet.y)}:{}, greetFs:u.mobile?'10px':'16px',
+      hasBig:!!u.big, big:u.big?{left:px(u.big.x),top:px(u.big.y),w:px(u.big.w),h:px(u.big.h),url:u.big.url,op:u.big.show&&u.big.on?'1':'0',l2:u.big.l2||'',fs2:px(u.big.h*0.13),fsS:px(Math.max(7,u.big.h*0.045)),sgap:px(u.big.h*0.04),
+        steps:(u.big.steps||[]).map((sp,j,arr)=>({text:sp.text,arrow:j<arr.length-1?'→':'',color:sp.on?'#F5C431':'#959EAE',glow:sp.on?'0 0 6px #F5C431':'none'}))}:{},
+      replayFs:u.mobile?'8px':'10px', replayBottom:u.mobile?'200px':'16px',
+      hasKeys:!!u.keys&&!u.mobile, keys:(u.keys||[]).map(kk=>({left:px(kk.x),top:px(kk.y),size:px(kk.size),url:kk.url,arrow:kk.arrow,fs:px(kk.size*0.45),faceTop:kk.pressed?'18%':'6%'})),
+      hasHud:k>0, hudOpacity:String(k), isPC:!u.mobile, isMobile:u.mobile,
+      badgeLeft:u.mobile?'8px':px(16-240*slide), badgeTop:u.mobile?'8px':'16px', logoSm:u.mobile?'8px':'10px', logoLg:u.mobile?'16px':'24px', logoGap:u.mobile?'8px':'10px', logoDrop:u.mobile?'4px':'5px',
+      menuT:'translateY('+Math.round(-80*slide)+'px)', mapT:'translateY('+Math.round(140*slide)+'px)',
+      mini:{url:u.mini.url,vl:px(Math.max(0,u.mini.vx)),vt:px(Math.max(0,u.mini.vy)),vw:px(Math.min(160,u.mini.vw)),vh:px(Math.min(90,u.mini.vh)),rl:px(u.mini.rx-3),rt:px(u.mini.ry-3)},
+      lBg:u.hint===0?'#F5C431':'#FFFFFF', rBg:u.hint===1?'#F5C431':'#FFFFFF',
+      lOut:u.hint===0?'2px solid #F5C431':'none', rOut:u.hint===1?'2px solid #F5C431':'none',
+      skip:u.skip, skipTop:u.mobile?'8px':'16px'
+    };
+    ui.overlayFilter=u.grayLabels?'grayscale(1)':'none';
+    const st=u.open?C.stations.find(s=>s.id===u.open):null;
+    const todo=v=>typeof v==='string'&&v.startsWith('TODO');
+    const win=st?{title:st.title||st.menu,sub:st.sub,sections:st.sections.map(sec=>({heading:sec.heading||'',isText:sec.type==='text',isStats:sec.type==='stats',isList:sec.type==='list',isTimeline:sec.type==='timeline',isLinks:sec.type==='links',
+      body:sec.body||'',color:todo(sec.body)?'#959EAE':'#1E2638',
+      items:(sec.items||[]).map((it,i)=>Object.assign({},it,{num:sec.numbered?String(i+1).padStart(2,'0'):'·',color:todo(it.desc)?'#959EAE':'#1E2638',bg:it.primary?'#2E9BE0':'#FFFFFF'}))}))}:{sections:[]};
+    let map={items:[]}; if(this.state.mapOpen&&g){ const r=this.rootRef.current?this.rootRef.current.getBoundingClientRect():{width:1280,height:720};
+      let M=Math.min((r.width-56)/640,(r.height-120)/360); M=M>=1?Math.floor(M*2)/2:M; const P=g.pos();
+      map={w:px(640*M),h:px(360*M),pad:'8px',url:g.worldURL,fs:M>=1?'10px':'7px',rl:px(P.x*M-5),rt:px((P.y-24)*M-5),
+        items:C.stations.map(s=>{ const R=g.rects[s.item]; return {label:s.menu,aria:s.menu+'로 이동',left:px(R.x0*M),top:px(R.y0*M),w:px(R.w*M),h:px(R.h*M),go:()=>{ this.setState({mapOpen:false}); g.goTo(s.id); }}; })}; }
+    return Object.assign(base,{ui,menu,hasWin:!!st,win,map,
+      winW:u.mobile?'calc(100% - 16px)':'min(720px, calc(100% - 32px))',winTop:u.mobile?'auto':'56px',winBottom:u.mobile?'8px':'auto',winMaxH:u.mobile?'78%':'calc(100% - 112px)'});
+  }
+}
+</script>
+</body>
+</html>

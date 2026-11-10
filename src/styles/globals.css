@@ -1,0 +1,106 @@
+/*
+ * 디자인 토큰 (라이트 값만, 다크 모드 없음 — 기획서 "범위 밖").
+ *
+ * 왜 Tailwind @theme에 직접 넣나:
+ *   Tailwind v4는 @theme 변수가 곧 유틸리티(bg-grass, text-ink …)와 CSS 변수 두 가지로 쓰인다.
+ *   스프라이트 CSS(sprites.css)나 인라인 style에서도 var(--color-ink)로 같은 값을 읽을 수 있어
+ *   "토큰 JSON → 빌드 스크립트" 단계를 두지 않았다(nanaki는 JSON이었지만 여기선 16색 고정이라 이득이 없음).
+ *
+ * 팔레트 규칙: 그림·UI 모두 아래 16색만 쓴다(Design 확정, 피부 그림자 #E3A68A 포함).
+ * UI 전용 예외는 menu-selected·dim 두 개뿐이고, 이 둘은 그림에 쓰지 않는다.
+ */
+@import 'tailwindcss';
+
+@theme {
+  /* --- 팔레트 16색 --- */
+  --color-track: #c0563f;
+  --color-track-dark: #7e3226;
+  --color-skin-shade: #e3a68a;
+  --color-grass: #6fb24b;
+  --color-grass-dark: #3e7a34;
+  --color-stand: #6f86c2;
+  --color-stand-dark: #3d4e86;
+  --color-metal-light: #d6dbe3;
+  --color-metal: #959eae;
+  --color-metal-dark: #545d70;
+  --color-skin: #f7cfb2;
+  --color-hair: #5b3a2b;
+  --color-tee: #2e9be0;
+  --color-white: #ffffff;
+  --color-accent: #f5c431;
+  --color-ink: #1e2638;
+
+  /* --- UI 의미 토큰: 컴포넌트는 가능하면 이쪽을 쓴다(색을 바꿀 때 한 곳만 고치도록) --- */
+  --color-bg: var(--color-grass);
+  --color-surface: var(--color-white);
+  --color-text: var(--color-ink);
+  --color-primary: var(--color-tee);
+  --color-focus: var(--color-accent);
+  --color-muted: var(--color-metal-dark);
+  --color-menu-selected: #fff6d6;
+
+  /* --- 간격 4px 단위, 모서리 0, 그림자 없음(픽셀 그림과 섞이면 흐릿해 보임) --- */
+  --spacing: 4px;
+  --radius-*: initial;
+
+  /* --- 폰트: 실제 font-family는 layout.tsx의 next/font가 만든 변수 --- */
+  --font-pixel: var(--font-press-start), ui-monospace, monospace;
+  --font-pixel-ko: var(--font-galmuri), var(--font-pretendard), sans-serif;
+  --font-sans: var(--font-pretendard), system-ui, sans-serif;
+}
+
+:root {
+  /*
+   * 월드 배율. 정수(2·3·4)만 들어온다. 소수·zoom 금지(CLAUDE.md 2장).
+   * 값은 JS(useScale)가 뷰포트를 보고 쓰고, 그 전 첫 그림은 아래 미디어 쿼리 기본값으로 그린다
+   * (하이드레이션 전에 배율이 튀지 않게).
+   */
+  --scale: 2;
+  /* 이동 틱 = CSS transition 길이. 둘이 다르면 캐릭터가 끊기거나 뒤처진다(useRunner와 같은 상수). */
+  --tick: 60ms;
+  --world-w: 640;
+  --world-h: 360;
+  --dim: rgb(30 38 56 / 0.55);
+}
+
+@media (min-width: 960px) and (min-height: 540px) {
+  :root {
+    --scale: 3;
+  }
+}
+@media (min-width: 1280px) and (min-height: 720px) {
+  :root {
+    --scale: 4;
+  }
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  /* 월드가 화면보다 크다. 스크롤이 아니라 카메라(transform)로 보여 준다. */
+  overflow: hidden;
+}
+
+/* 픽셀 그림은 확대해도 번지지 않게. 그림을 담는 요소에만 붙인다(글자에는 안 붙임). */
+.pixelated {
+  image-rendering: pixelated;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--color-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --tick: 0ms;
+  }
+}
