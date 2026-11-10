@@ -29,38 +29,37 @@ export function MapDialog({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="dialog-overlay fixed inset-0 z-40 bg-(--dim)" />
-        <Dialog.Content
-          aria-describedby="map-hint"
-          className="dialog-content nine-white font-body fixed top-1/2 left-1/2 z-50 -translate-x-1/2 -translate-y-1/2 outline-none"
-        >
-          {/* 머리 띠 없음(11-10, 창과 같은 모양): 제목·안내는 본문 위, 닫기 ✕는 모서리 */}
-          <div className="flex items-start gap-3 px-3 pt-3">
-            <div className="flex-1">
-              <Dialog.Title className="font-pixel text-ink text-base leading-tight">
-                {MAP_LABELS.title}
-              </Dialog.Title>
-              <p id="map-hint" className="font-pixel-ko mt-2 text-[13px] font-bold">
-                {MAP_LABELS.hint}
-              </p>
-            </div>
+        {/* 창과 같은 모양(11-10): 딤 배경이 스크롤, 닫기 ✕는 창 밖 화면 오른쪽 위, 제목 띠는 하늘색 */}
+        <Dialog.Overlay className="dialog-overlay fixed inset-0 z-40 grid place-items-center overflow-y-auto bg-(--dim) py-16">
+          <Dialog.Content
+            aria-describedby="map-hint"
+            className="dialog-content nine-white font-body relative outline-none"
+          >
             <Dialog.Close
               aria-label={MAP_LABELS.close}
-              className="nine-white text-ink grid size-10 shrink-0 place-items-center text-sm"
+              className="bg-track border-ink fixed top-4 right-6 z-50 grid size-11 place-items-center border-2 text-lg font-bold text-white shadow-[0_3px_0_var(--color-track-dark)] max-[699px]:top-3 max-[699px]:right-3"
             >
               <span aria-hidden>✕</span>
             </Dialog.Close>
-          </div>
-          <div className="p-3">
-            <TrackMap
-              width={Math.max(160, width)}
-              onSelect={(id) => {
-                onOpenChange(false);
-                onSelect(id);
-              }}
-            />
-          </div>
-        </Dialog.Content>
+            <div className="bg-tee border-ink flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b-2 px-4 py-3">
+              <Dialog.Title className="font-pixel text-ink text-base leading-tight">
+                {MAP_LABELS.title}
+              </Dialog.Title>
+              <p id="map-hint" className="font-pixel-ko text-ink text-[13px] font-bold">
+                {MAP_LABELS.hint}
+              </p>
+            </div>
+            <div className="p-3">
+              <TrackMap
+                width={Math.max(160, width)}
+                onSelect={(id) => {
+                  onOpenChange(false);
+                  onSelect(id);
+                }}
+              />
+            </div>
+          </Dialog.Content>
+        </Dialog.Overlay>
       </Dialog.Portal>
     </Dialog.Root>
   );
