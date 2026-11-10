@@ -52,27 +52,33 @@
 
 ## 3. 코드맵
 
-> 실제 구조가 생기면 채운다. `(예정)`은 아직 없는 폴더.
+> 11-10 실제 구조 기준. `(예정)`은 아직 없는 것.
 
 ```
 src/
   app/
-    page.tsx             게임 모드(인트로 → 트랙 월드)
-    layout.tsx           폰트·메타·OG
+    page.tsx             서버 컴포넌트. 숨은 h1 + <Game/>
+    layout.tsx           폰트 3종(next/font/local, fonts/ + licenses/)·메타
   features/
-    intro/               IntroScene(신호등·줌아웃 한 바퀴·흑백→컬러·줌인), Greeting(손 흔들기 + 말풍선), KeyHint(키캡 ← → / 모바일 ◀ ▶ 깜빡임),
-                         useIntroGate(첫 방문·reduced-motion), preload.ts
-    track/               World(카메라 컨테이너), TrackScene, Runner(캐릭터), Landmark(구조물 6 + 제목 판 HTML), Scoreboard(전광판 HTML 글자: 평소 "CAREER", 인트로 단계 띠 + 문구 4개), Signpost(장식 이정표 + HTML 글자 3줄), Props(소품, aria-hidden),
-                         store.ts, trackPath.ts, useRunner.ts, layout.ts(월드 배치·구조물 t·소품 좌표)
-    panels/              창 내용 컴포넌트(About[PROFILE|SKILLS 탭], Career, Project1, Project2, Education, Resume)
-    hud/                 번호표 이름 띠, 메뉴 아이콘 6개(PC 상단/모바일 하단), ◀ ▶ 버튼, Minimap(PC), MapDialog(모바일 MAP 창), ReplayButton (조작 안내는 intro/KeyHint)
-  content/               글 데이터(TS 객체). 문구는 여기에만
-  components/ui/         Dialog 래퍼(픽셀 테두리), 버튼, 토큰
-  styles/                globals.css(토큰), sprites.css(시트 좌표·애니메이션)
+    track/               Game.tsx(최상위: useScale·useIntro·useRunner를 한 번씩 부르고 goTo를 메뉴·지도·구조물에 나눔, 창 지연 로딩)
+                         World.tsx(카메라 = 컨테이너 transform 하나), TrackScene.tsx(타일 + 트랙 고리 PNG), Runner.tsx(러너·`!`),
+                         Landmark.tsx(구조물 6 버튼 + HTML 이름, 전광판 평소 "CAREER"), Decor.tsx(소품·이정표, aria-hidden),
+                         layout.ts(배치 데이터만), trackPath.ts(t ↔ 좌표·방향), useRunner.ts(stepRunner·cameraTarget·zoneAt + 틱 훅),
+                         store.ts(Zustand), runner-config.ts(틱·속도), scale.ts·useScale.ts(정수 배율)
+    intro/               timeline.ts(경과 ms → 화면, 순수), useIntro.ts(고정 틱 진행기·SKIP·REPLAY·introSeen), camera.ts(인트로 카메라·부채꼴 각도),
+                         storage.ts(introSeen try/catch), preload.ts(fonts.ready·decode), IntroOverlay.tsx(신호 띠·SKIP·큰 전광판·진행 점·흑백 부채꼴),
+                         WorldIntro.tsx(신호등·심판·인사 말풍선·키캡)
+    panels/              PanelDialog.tsx(Radix Dialog 하나에 6개 내용, 이전·다음, ABOUT 탭), Sections.tsx(섹션 타입 렌더러)
+    hud/                 Hud.tsx(이름 띠·메뉴 PC 상단/모바일 하단 3×2·REPLAY), Minimap.tsx(TrackMap SVG + 점 버튼, PC 미니맵, 모바일 MAP 버튼),
+                         MapDialog.tsx(모바일 큰 지도 창), TouchControls.tsx(모바일 ◀ ▶)
+  content/               intro.ts, menu.ts, hud.ts, panels.ts, world.ts — 문구는 여기에만
+  styles/                globals.css(16색 토큰·9-slice·창 애니메이션), sprites.css(그림 경로·시트 좌표·스프라이트 애니메이션)
 public/
-  sprites/               tiles.png, landmarks.png, props.png, runner.png, ui.png
-  resume.pdf             이력서(원본은 별도 보관)
-docs/                    기획서.md, performance.md, milestones.md, assets/credits.md, troubleshooting/
+  sprites/               tiles/ structures/ props/ ui/ character/ intro/ world/(track-ring) — Design 개별 PNG(시트 합치기는 step3 검토)
+  resume.pdf             (예정) 이력서
+scripts/                 extract-design-layout.mjs·build-track-ring.mjs(시안 코드에서 숫자·그림 1회 추출), lh-summary.mjs, measure-run.mjs(측정)
+e2e/                     smoke.spec.ts(Playwright: 크로미움 PC·모바일, WebKit PC + axe)
+docs/                    기획서.md, design-vs-plan.md, step1-plan.md, performance.md, milestones.md, assets/credits.md
 private/                 learning/, interview-questions.md (gitignore)
 ```
 

@@ -197,6 +197,8 @@ reduced-motion: transition none
 - 창 열림·닫힘 애니메이션(CSS): 완료. 손 흔들기·말풍선 깜빡임은 스프라이트 CSS로 이미 동작. idle 숨쉬기는 시트에 프레임이 없어 보류
 - E2E: WebKit PC·크로미움 모바일 추가(24 통과)
 - 화면 비교(스크린샷 기준선)는 CI 리눅스에서 기준선을 만들어야 해서 원격 저장소 연결 후
+- Lighthouse CI(GitHub Actions) + 로컬 측정 기록(docs/performance.md): 모바일 0.92, 첫 화면 JS 146.9KB, 달리기 중 Layout 1회
+- README 작성(GIF는 배포 후)
 
 ## 3. step1 작업 목록 (각 1~2시간, "끝났을 때 보이는 것" 포함)
 
