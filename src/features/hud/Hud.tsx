@@ -41,7 +41,7 @@ export function NameBib() {
   if (!useHudVisible()) return null;
   // 번호표 모양 이름 띠. 정적인 글이라 버튼이 아니다
   return (
-    <div className="nine-white text-ink fixed top-4 left-4 z-20 flex items-baseline gap-2 px-2 py-1 max-[699px]:top-2 max-[699px]:left-2">
+    <div className="hud-in-left nine-white text-ink fixed top-4 left-4 z-20 flex items-baseline gap-2 px-2 py-1 max-[699px]:top-2 max-[699px]:left-2">
       <span className="font-pixel-ko text-sm font-bold">{BIB.name}</span>
       <span className="font-pixel text-[10px]">{BIB.level}</span>
     </div>
@@ -50,11 +50,13 @@ export function NameBib() {
 
 export function Menu({ onSelect }: { onSelect: (id: LandmarkId) => void }) {
   const open = useGame((s) => s.open);
+  // 반응 구역에 서 있으면 그 메뉴도 강조(시안). aria-current는 실제로 열린 창에만 둔다(서 있는 것은 '현재 페이지'가 아님)
+  const zone = useGame((s) => s.zone);
   if (!useHudVisible()) return null;
   return (
     <nav
       aria-label={HUD_LABELS.menu}
-      className="fixed top-4 right-4 z-20 max-[699px]:inset-x-0 max-[699px]:top-auto max-[699px]:bottom-0 max-[699px]:h-28 max-[699px]:bg-ink max-[699px]:p-2"
+      className="hud-in-top fixed top-4 right-4 z-20 max-[699px]:inset-x-0 max-[699px]:top-auto max-[699px]:bottom-0 max-[699px]:h-28 max-[699px]:bg-ink max-[699px]:p-2"
     >
       {/* PC: 오른쪽 위 가로 한 줄 / 모바일(폭 700 미만): 하단 112px 바에 3×2 격자(시안). DOM은 하나라 Tab 순서가 같다 */}
       <ul className="flex gap-1 max-[699px]:grid max-[699px]:h-full max-[699px]:grid-cols-3 max-[699px]:grid-rows-2">
@@ -64,8 +66,9 @@ export function Menu({ onSelect }: { onSelect: (id: LandmarkId) => void }) {
               type="button"
               aria-label={openLabel(id)}
               aria-current={open === id ? 'true' : undefined}
+              data-active={open === id || (open === null && zone === id)}
               onClick={() => onSelect(id)}
-              className="nine-white font-pixel text-ink aria-[current=true]:bg-menu-selected h-11 px-1.5 text-[10px] max-[699px]:w-full max-[699px]:text-[9px] aria-[current=true]:outline-2 aria-[current=true]:-outline-offset-4 aria-[current=true]:outline-(--color-accent)"
+              className="nine-white font-pixel text-ink data-[active=true]:bg-menu-selected h-11 px-1.5 text-[10px] max-[699px]:w-full max-[699px]:text-[9px] data-[active=true]:outline-2 data-[active=true]:-outline-offset-4 data-[active=true]:outline-(--color-accent)"
             >
               {MENU_LABEL[id]}
             </button>

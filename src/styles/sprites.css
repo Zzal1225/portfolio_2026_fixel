@@ -239,3 +239,49 @@
     opacity: 1;
   }
 }
+
+/* ---------- 관중 시트 64×32 (열: 옷 색 4종, 행: 손 듦·손 내림) ----------
+ * 두 층(layer 0·1)을 겹쳐 두고 opacity만 0.45초마다 번갈아(합성 단계 애니메이션, Decor.tsx 주석).
+ */
+.spr-spect {
+  width: 16px;
+  height: 16px;
+  background-image: url('/sprites/props/spectators-64x32.png');
+}
+.spect-layer-1 {
+  opacity: 0;
+}
+.spect-layer-0 {
+  animation: spect-a 0.9s steps(1) infinite;
+}
+.spect-layer-1 {
+  animation: spect-b 0.9s steps(1) infinite;
+}
+@keyframes spect-a {
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes spect-b {
+  50% {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spect-layer-0,
+  .spect-layer-1 {
+    animation: none;
+  }
+}
+
+/* ---------- 인사 말풍선(시안 판을 몸통·꼬리로 나눔, scripts/build-speech-bubble.mjs) ---------- */
+.speech-bubble {
+  border-style: solid;
+  border-width: 4px;
+  border-image: url('/sprites/ui/speech-body-24x14.png') 4 fill / 4px stretch;
+}
+.speech-tail {
+  width: 6px;
+  height: 3px;
+  background-image: url('/sprites/ui/speech-tail-6x3.png');
+}

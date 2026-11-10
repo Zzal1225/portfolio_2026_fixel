@@ -21,7 +21,7 @@ import type { RefObject } from 'react';
 import { zoneHint } from '@/content/menu';
 import { WORLD_DESCRIPTION, WORLD_LABEL } from '@/content/world';
 import { Greeting, IntroActors, KeyHint } from '@/features/intro/WorldIntro';
-import { Props, Signpost } from './Decor';
+import { GrassDetails, Props, Signpost, Spectators } from './Decor';
 import { Landmarks } from './Landmark';
 import { WORLD, type LandmarkId } from './layout';
 import { Runner, ZoneAlert } from './Runner';
@@ -73,6 +73,8 @@ export function World({
         }}
       >
         <TrackScene />
+        <GrassDetails />
+        <Spectators />
         <Props />
         <IntroActors />
         <Signpost />

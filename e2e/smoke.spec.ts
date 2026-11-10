@@ -69,6 +69,15 @@ test('ABOUT 탭은 화살표 키로 PROFILE ↔ SKILLS', async ({ page }) => {
 
 test('axe: 트랙 화면과 창에 위반이 없다', async ({ page }) => {
   await skipIntro(page);
+  // HUD 등장 애니메이션(투명도 0에서 시작) 도중에 재면 대비가 낮게 나온다 → 끝나는 반복 애니메이션만 기다림
+  await page.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((x) => x.effect?.getTiming().iterations !== Infinity)
+        .map((x) => x.finished),
+    ),
+  );
   const track = await new AxeBuilder({ page }).analyze();
   expect(track.violations).toEqual([]);
 

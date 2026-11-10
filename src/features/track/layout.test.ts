@@ -19,6 +19,7 @@ import {
   type Rect,
 } from './layout';
 import { BOARD_LINES } from '@/content/intro';
+import { GRASS_DETAILS, SPECTATORS } from './layout-stands';
 
 const TWO_TILES = 2 * WORLD.tile; // 64px
 
@@ -152,6 +153,35 @@ describe('content: 인트로 전광판 문구', () => {
     for (const t of ts) {
       expect(t).toBeGreaterThan(0);
       expect(t).toBeLessThan(1);
+    }
+  });
+});
+
+describe('layout: 관중·잔디 디테일(생성 파일)', () => {
+  it('관중 16×16은 전부 관중석 안이고 트랙·구조물과 겹치지 않는다', () => {
+    expect(SPECTATORS.length).toBeGreaterThan(50);
+    for (const [x, y] of SPECTATORS) {
+      const r = rectFromTopLeft({ x, y }, { w: 16, h: 16 });
+      for (const [px, py] of pixels(r)) {
+        expect(
+          STANDS.some((s) => inRect(s, px, py)),
+          `관중 (${x},${y})`,
+        ).toBe(true);
+      }
+      for (const l of LANDMARKS) {
+        expect(rectGap(r, landmarkRect(l.id)), `관중 (${x},${y}) ↔ ${l.id}`).toBeGreaterThanOrEqual(
+          0,
+        );
+      }
+    }
+  });
+
+  it('잔디 디테일은 트랙 레인 위에 없다', () => {
+    for (const [x, y, w, h] of GRASS_DETAILS) {
+      for (const [px, py] of pixels({ x0: x, y0: y, x1: x + w - 1, y1: y + h - 1 })) {
+        const d = distToSpine(px, py);
+        expect(d >= TRACK.innerRadius && d < TRACK.outerRadius).toBe(false);
+      }
     }
   });
 });

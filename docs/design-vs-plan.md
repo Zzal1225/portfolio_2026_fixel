@@ -1,7 +1,7 @@
 # Design 결과물 ↔ 기획서·CLAUDE.md 차이 보고
 
 2026-11-09 작성. `design/design_handoff_track_portfolio/`(README·track-kit-v3·portfolio-game·PNG)를 기획서·CLAUDE.md와 대조한 결과다.
-규칙(CLAUDE.md 2장): **다르면 기획서가 우선**, 다른 점은 구현 전에 보고한다. "결정 필요" 항목은 `docs/step1-plan.md` 맨 위에 모아 두었다.
+규칙(CLAUDE.md 2장, 11-10 변경): **다르면 자동으로 어느 쪽도 따르지 않고 사용자에게 물어 결정한다.** 이 문서의 11-10 이전 항목 중 "기획대로"는 옛 규칙(기획서 우선)으로 처리한 것이라 다시 물을 수 있다. "결정 필요" 항목은 `docs/step1-plan.md` 맨 위에 모아 두었다.
 
 ## 1. 구현에 영향이 큰 차이
 
@@ -71,3 +71,19 @@
 | 20 | 창 제목·주요 버튼 글자색 | 파란 띠(tee #2E9BE0) 위 흰 글자 | 접근성: 대비 WCAG AA | **11-10 ink로 변경.** 흰색/tee 대비 약 3:1로 axe color-contrast 위반. ink/tee 약 5:1 |
 | 21 | 흑백 → 컬러 방식 | 캔버스 두 장 + 부채꼴 마스크 | 기획서 "CSS grayscale 보간" | **11-10 시안의 부채꼴 모양 채택, 구현은 DOM.** 덮개 한 장(backdrop-filter: grayscale) + conic-gradient 마스크. 월드를 두 벌 그리지 않는다 |
 | 22 | 창 애니메이션 | – | CLAUDE.md "Radix Dialog + Framer Motion" | **11-10 CSS 애니메이션으로.** 필요한 건 나타나기·사라지기뿐이라 Framer Motion(30KB+)을 넣지 않음. Radix data-state + steps(3) |
+
+## 6. 11-10 시안 대비 빠졌던 것 채움 (기획서와 충돌 없음)
+
+| 항목 | 처리 |
+|---|---|
+| 관중 100명 + 손 흔들기 | 시안 SPECTS 배치를 `layout-stands.ts`로 추출(생성 파일). 두 층 opacity 교대(합성 단계 애니메이션) |
+| 잔디 점·관중석 경계 1px 선 | 시안 월드 격자의 grassDark 픽셀을 사각형 41개로 합쳐 DOM으로 |
+| 인사 말풍선 | 시안 판을 몸통(9-slice)·꼬리로 나눠 픽셀 말풍선으로(`scripts/build-speech-bubble.mjs`) |
+| 미니맵·MAP 창 그림 | 시안 정적 월드 PNG(29KB)를 지도 배경으로. 브라우저가 한가해진 뒤 붙여 첫 화면 로딩과 겹치지 않게 |
+| HUD 등장 연출 | 이름 띠는 왼쪽, 메뉴는 위(모바일은 아래), 미니맵은 아래에서 0.4초 steps(4) |
+| 반응 구역 메뉴 강조 | 서 있는 구조물의 메뉴 버튼도 노란 강조(aria-current는 열린 창에만) |
+
+## 7. 11-10 규칙 변경 이후 사용자 결정이 필요한 차이 (옛 규칙으로 "기획대로" 처리했던 것)
+
+이동 방식(트랙 위 vs 자유 8방향), HUD 로고, 메뉴명(ABOUT ME·SKILL), 하단 안내 판, 키캡 4개, SPACE 태그, PC 큰 지도 창,
+모바일 ◀ ▶ 동작, 인트로 길이·6배 줌, 큰 전광판 커지기·네온 깜빡임. 하나씩 정하면 이 표에 결정을 적는다.

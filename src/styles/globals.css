@@ -193,3 +193,48 @@ body {
     animation: none !important;
   }
 }
+
+/*
+ * HUD 등장(시안): 인트로가 끝나 HUD가 처음 나타날 때 이름 띠는 왼쪽에서, 메뉴는 위에서(모바일 하단 바는 아래에서),
+ * 미니맵은 아래에서 들어온다. 렌더 시작 때 한 번만 돈다(HUD는 인트로 중 렌더하지 않으므로 = 첫 등장).
+ * steps(4)로 끊어 도트 느낌. reduced-motion이면 없음.
+ */
+@keyframes hud-from-left {
+  from {
+    transform: translateX(-240px);
+    opacity: 0;
+  }
+}
+@keyframes hud-from-top {
+  from {
+    transform: translateY(-80px);
+    opacity: 0;
+  }
+}
+@keyframes hud-from-bottom {
+  from {
+    transform: translateY(140px);
+    opacity: 0;
+  }
+}
+.hud-in-left {
+  animation: hud-from-left 400ms steps(4, end);
+}
+.hud-in-top {
+  animation: hud-from-top 400ms steps(4, end);
+}
+.hud-in-bottom {
+  animation: hud-from-bottom 400ms steps(4, end);
+}
+@media (max-width: 699px) {
+  .hud-in-top {
+    animation-name: hud-from-bottom;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hud-in-left,
+  .hud-in-top,
+  .hud-in-bottom {
+    animation: none;
+  }
+}

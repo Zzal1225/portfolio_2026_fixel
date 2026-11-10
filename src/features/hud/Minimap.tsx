@@ -9,7 +9,7 @@
  * 현재 화면 네모·러너 점: 카메라·러너 위치를 지도 비율로 줄여 transform으로 움직인다(아래 RunnerDot 주석).
  */
 import dynamic from 'next/dynamic';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { HUD_LABELS, MAP_LABELS } from '@/content/hud';
 import { MENU_LABEL, openLabel } from '@/content/menu';
 import { LANDMARKS, TRACK, WORLD, rectFromAnchor, type LandmarkId } from '@/features/track/layout';
@@ -64,6 +64,33 @@ function ViewRect({ k }: { k: number }) {
   );
 }
 
+/** 지도 그림: 시안 정적 월드(관중 1프레임·구조물·소품 포함, 29KB). 신호등·러너 없음 */
+const MAP_IMAGE = '/sprites/world/world-map-640x360.png';
+
+/**
+ * 지도 그림을 브라우저가 한가해진 뒤에 붙인다. PC 미니맵은 첫 화면에 보이지만 29KB 그림이
+ * 트랙 그림(LCP)과 다운로드를 다투지 않게 한다. 그 전에는 SVG 트랙 모양이 보인다.
+ */
+let mapImageReady = false; // 한 번 준비되면 MAP 창처럼 나중에 생긴 지도는 기다리지 않는다
+
+function useIdleImage(): boolean {
+  const [ready, setReady] = useState(mapImageReady);
+  useEffect(() => {
+    if (mapImageReady) return;
+    const done = () => {
+      mapImageReady = true;
+      setReady(true);
+    };
+    if (typeof requestIdleCallback === 'function') {
+      const id = requestIdleCallback(done, { timeout: 2000 });
+      return () => cancelIdleCallback(id);
+    }
+    const id = setTimeout(done, 500); // Safari: requestIdleCallback 없음
+    return () => clearTimeout(id);
+  }, []);
+  return ready;
+}
+
 /**
  * 지도 본체. width(px)에 맞춰 축소 비율 k = 640 / width.
  * labels=true면 점 옆에 구조물 이름(큰 지도용).
@@ -79,8 +106,11 @@ export function TrackMap({
 }) {
   const k = WORLD.w / width;
   const height = WORLD.h / k;
+  const picture = useIdleImage();
   return (
-    <div className="relative" style={{ width, height }}>
+    // overflow clip: 화면 네모가 지도보다 클 때(큰 화면·작은 지도) 밖으로 삐져나오지 않게
+    <div className="relative overflow-clip" style={{ width, height }}>
+      {/* 시안 월드 축소 그림(관중·구조물 포함). 준비 전에는 아래 SVG 트랙 모양이 자리를 지킨다 */}
       <svg
         aria-hidden
         width={width}
@@ -94,6 +124,13 @@ export function TrackMap({
           fillRule="evenodd"
         />
       </svg>
+      {picture && (
+        <div
+          aria-hidden
+          className={`absolute inset-0 ${k <= 1 ? 'pixelated' : ''}`}
+          style={{ backgroundImage: `url(${MAP_IMAGE})`, backgroundSize: '100% 100%' }}
+        />
+      )}
       <ViewRect k={k} />
       <RunnerDot k={k} size={labels ? 10 : 6} />
       <ul>
@@ -108,6 +145,8 @@ export function TrackMap({
               : cx > width * 0.8
                 ? 'right-0'
                 : 'left-1/2 -translate-x-1/2';
+          // 아래쪽 점은 이름을 점 위에 붙인다(지도 밖으로 잘리지 않게)
+          const vertical = cy > height * 0.75 ? 'bottom-full' : 'top-full';
           return (
             <li key={l.id}>
               {/* 보이는 점은 작아도 누르는 영역은 넉넉히(작은 화면에서 손가락 실수 줄이기) */}
@@ -125,7 +164,7 @@ export function TrackMap({
                 {labels && (
                   <span
                     aria-hidden
-                    className={`font-pixel text-ink absolute top-full bg-white px-1 text-[10px] whitespace-nowrap ${edge}`}
+                    className={`font-pixel text-ink absolute bg-white px-1 text-[10px] whitespace-nowrap ${edge} ${vertical}`}
                   >
                     {MENU_LABEL[l.id]}
                   </span>
@@ -145,7 +184,7 @@ export function Minimap({ onSelect }: { onSelect: (id: LandmarkId) => void }) {
   return (
     <nav
       aria-label={HUD_LABELS.minimap}
-      className="border-ink fixed right-4 bottom-4 z-20 border-2 max-[699px]:hidden"
+      className="hud-in-bottom border-ink fixed right-4 bottom-4 z-20 border-2 max-[699px]:hidden"
     >
       <TrackMap width={WORLD.w / 4} onSelect={onSelect} />
     </nav>

@@ -45,29 +45,34 @@ export function IntroActors() {
   );
 }
 
-/** 인사 말풍선 "WELCOME TO MY PORTFOLIO!" — 러너 머리 위. 입력이 오면 바로 사라진다(useIntro) */
+/**
+ * 인사 말풍선 "WELCOME TO MY PORTFOLIO!" — 러너 머리 위. 입력이 오면 바로 사라진다(useIntro).
+ * 시안 말풍선 판을 몸통(9-slice, 글 길이만큼 늘어남)과 꼬리로 나눠 붙인다(sprites.css .speech-bubble).
+ * 테두리 4px은 월드 px라 배율과 함께 커져 다른 도트 그림과 굵기가 맞는다.
+ */
 export function Greeting() {
   const show = useGame((s) => s.intro.phase === 'greet');
   const t = useGame((s) => s.t);
   if (!show) return null;
   const p = toWorld(t);
   return (
-    <p
-      role="status"
-      className="bg-white border-ink font-pixel text-ink absolute leading-none whitespace-nowrap"
-      style={{
-        left: p.x,
-        top: p.footY - 52,
-        transform: 'translate(-50%, -100%)',
-        // 화면에서 PC 16px(4×4), 모바일 12px 이상
-        fontSize: 'max(4px, calc(12px / var(--scale)))',
-        padding: '0.5em 0.6em',
-        borderWidth: 1,
-        zIndex: 4,
-      }}
+    <div
+      className="absolute flex flex-col items-center"
+      style={{ left: p.x, top: p.footY - 50, transform: 'translate(-50%, -100%)', zIndex: 4 }}
     >
-      {GREETING}
-    </p>
+      <p
+        role="status"
+        className="speech-bubble font-pixel text-ink leading-none whitespace-nowrap"
+        style={{
+          // 화면에서 PC 16px(4×4), 모바일 12px 이상
+          fontSize: 'max(4px, calc(12px / var(--scale)))',
+          padding: '0.15em 0.3em 0',
+        }}
+      >
+        {GREETING}
+      </p>
+      <div aria-hidden className="speech-tail" style={{ marginTop: -1 }} />
+    </div>
   );
 }
 
