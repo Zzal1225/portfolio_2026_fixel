@@ -8,4 +8,4 @@
 | 2 | [인트로 큰 전광판이 매 프레임 레이아웃](02-intro-board-transform.md) | left·top·width·height 애니메이션 | 인트로 전체 103 → 44회 |
 | 3 | [첫 화면 LCP 2.6초, JS 예산 초과](03-first-screen-loading.md) | 한글 폰트가 LCP 그림과 다운로드 경쟁 / `dynamic`만으로는 JS가 안 줄어듦 | LCP 1.5초, JS 164.9 → 146.9 KB |
 | 4 | [WebKit에서만 가끔 SKIP이 안 눌림](04-skip-before-hydration.md) | 하이드레이션 전 서버 HTML의 버튼을 누름 | 'boot' 단계 추가, 3회 연속 통과 |
-| 5 | [CI가 10분 넘게 멈춤](05-ci-install-stall.md) | 브라우저 설치 중 리눅스 패키지 내려받기 멈춤 | 3분 제한 + 재시도, CI 약 4분 |
+| 5 | [CI가 10분 넘게 멈춤](05-ci-install-stall.md) | 브라우저 설치 중 리눅스 패키지 내려받기 멈춤(재시도로도 불안정) | Playwright 공식 이미지로 설치 제거, CI 3분 28초 |
