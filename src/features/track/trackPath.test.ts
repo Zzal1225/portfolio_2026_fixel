@@ -100,7 +100,7 @@ describe.runIf(TRACK_PATH_READY)('trackPath', () => {
       ['오른쪽 커브 한가운데', S.rightCurveMid, 0, -1],
       ['위 직선', S.topMid, -1, 0],
       ['왼쪽 커브 한가운데', S.leftCurveMid, 0, 1],
-    ])('%s → (%f, %f)', (_n, s, x, y) => {
+    ])('%s (s=%f) → (%f, %f)', (_n, s, x, y) => {
       const v = tangent(t(s));
       expect(v.x).toBeCloseTo(x, 6);
       expect(v.y).toBeCloseTo(y, 6);
