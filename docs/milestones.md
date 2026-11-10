@@ -10,4 +10,5 @@ step마다 배포 주소에서 E2E·Lighthouse를 돌리고 여기에 남긴다(
 | 2026-11-10 | 단위 테스트 | 141 통과(trackPath·useRunner 포함) |
 | 2026-11-10 | E2E 3환경(크로미움 PC·모바일, WebKit PC) | 24 통과(6 건너뜀: 기기별 시나리오), 3회 연속 |
 | 2026-11-10 | Lighthouse 모바일(로컬, devtools 스로틀링) | 성능 0.92 · 접근성 1.00 · 권장 사항 1.00 · SEO 1.00, 첫 화면 JS 146.9 KB |
-| – | Vercel 배포 | 아직(저장소 원격·Vercel 연결 필요) |
+| 2026-11-10 | Vercel 배포 https://portfolio2026fixel.vercel.app (커밋 3b29f14) | 배포 주소 E2E 26 통과(크로미움 PC·모바일, WebKit PC), Lighthouse 모바일 0.93 · PC 0.91 · 접근성 1.00 · 첫 화면 JS 148.9 KB |
+| 2026-11-10 | GitHub Actions CI | lint·typecheck·unit·build·E2E·Lighthouse 통과 |

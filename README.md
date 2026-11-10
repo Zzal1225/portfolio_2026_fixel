@@ -1,5 +1,7 @@
 # 박찬령 포트폴리오 — 400m 트랙
 
+**https://portfolio2026fixel.vercel.app**
+
 > README 맨 위 15초 GIF(신호등 → 한 바퀴 → 메뉴 클릭 → 창)는 배포 후 추가한다.
 
 도트 그림 육상 트랙 위를 캐릭터가 달리는 1인 포트폴리오입니다. 트랙 위 구조물 6개 앞에 서거나 메뉴·미니맵을 누르면
@@ -18,7 +20,7 @@ ABOUT · CAREER · PROJECT 1 · PROJECT 2 · EDUCATION · RESUME 창이 열립�
 | 루프 | `requestAnimationFrame` 없이 60 ms 고정 틱 + CSS transition 보간 | `runner-config.ts` |
 | 인트로 | "경과 ms → 화면" 순수 함수 시간표 + 고정 틱 진행기. 정수 줌(2→3→4), 부채꼴 흑백→컬러 | `src/features/intro/` |
 | 접근성 | 글·버튼은 전부 DOM, 구조물·메뉴·지도 점은 `<button>`, Radix Dialog, 키보드만으로 6개 창, reduced-motion | E2E + axe 위반 0 |
-| 성능 | 첫 화면 JS 146.9 KB, Lighthouse 모바일 0.92 / 접근성 1.00, 달리기 중 Layout 1회 | `docs/performance.md` |
+| 성능 | 배포 주소 Lighthouse 모바일 0.93 · PC 0.91 · 접근성 1.00, 첫 화면 JS 148.9 KB, 달리기 중 Layout 1회 | `docs/performance.md` |
 
 ## 실행
 
@@ -27,6 +29,7 @@ npm install
 npm run dev            # http://localhost:3000
 npm run check          # lint + typecheck + 단위 테스트
 npm run build && npm run test:e2e   # Playwright(크로미움 PC·모바일, WebKit PC) + axe
+E2E_BASE_URL=https://portfolio2026fixel.vercel.app npx playwright test   # 배포 주소 대상
 ```
 
 - 단위 테스트(Vitest): 트랙 경로·최단 방향·반응 구역·카메라 경계·상태 머신·인트로 시간표·배율·배치 규칙.

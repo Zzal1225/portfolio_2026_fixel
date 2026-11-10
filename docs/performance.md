@@ -1,8 +1,23 @@
 # 성능 기록
 
 규칙(CLAUDE.md 4장): 바꾸기 전 수치를 먼저 재고, 전후를 측정 조건·스크립트와 함께 남긴다.
-아래는 전부 **로컬 프로덕션 빌드**(`npm run build && next start`, Windows 10, Chrome 안정판) 기준이다.
-배포 주소(Vercel) 측정은 배포 후 같은 표에 추가한다.
+0장은 **배포 주소**, 1·2장은 **로컬 프로덕션 빌드**(`npm run build && next start`, Windows 10, Chrome 안정판) 기준이다.
+
+## 0. 배포 주소 (https://portfolio2026fixel.vercel.app, 2026-11-10, 커밋 3b29f14)
+
+측정: `CHROME_PATH=<chrome> npx lhci collect --url=https://portfolio2026fixel.vercel.app/ --numberOfRuns=3 [옵션]` → `node scripts/lh-summary.mjs`. 3회 중앙값.
+
+| 조건 | 성능 | 접근성 | 권장 사항 | SEO | FCP | LCP | TBT | CLS | 첫 화면 JS(압축) | 전체 전송량 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 모바일(모의 측정, 기본값) | **0.93** | 1.00 | 1.00 | 1.00 | 1.7 s | 1.7 s | 80 ms | 0 | 148.9 KB | 365 KB |
+| 모바일(devtools 스로틀링) | 0.92 | 1.00 | 1.00 | 1.00 | 1.8 s | 1.8 s | 120 ms | 0 | 148.9 KB | 365 KB |
+| 데스크톱 | 0.91 | 1.00 | 1.00 | 1.00 | 0.3 s | 0.3 s | 0 ms | 0 | 149.0 KB | 366 KB |
+
+- 기획서 완료 조건 "Lighthouse 모바일·PC 모두 성능 90 이상(첫 화면)"을 배포 주소에서 충족.
+- 데스크톱 0.91의 이유: **Speed Index 4.4 s**(점수 0.07). Lighthouse는 저장소가 비어 늘 첫 방문 인트로를 보고, 인트로가 약 7초 동안 화면을 바꾸므로 "화면이 늦게 완성"된다고 본다(마지막 화면 변화 12.1 s).
+  FCP·LCP 0.3 s, TBT 0이라 실제 첫 화면은 빠르다. 의도된 연출이라 고치지 않는다. 재방문(인트로 없음)에는 해당 없음.
+- 배포 주소에서는 모의 측정도 0.93: localhost에서 JS가 즉시 받아져 생기던 착시(1장)가 실제 네트워크에서는 없다.
+- E2E도 배포 주소에서 통과: `E2E_BASE_URL=https://portfolio2026fixel.vercel.app npx playwright test` → 26 통과(7 기기별 건너뜀).
 
 ## 1. 첫 화면 로딩 (Lighthouse 모바일, 2026-11-10)
 
