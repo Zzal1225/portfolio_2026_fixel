@@ -29,8 +29,13 @@ export type Section =
       heading?: string;
       items: readonly { label: string; href: string; primary?: boolean; download?: boolean }[];
     }
-  /** ABOUT PROFILE의 캐릭터 확대 그림 자리 */
-  | { type: 'portrait' };
+  /** 캐릭터 확대 그림(픽셀 러너). 사진 대신 쓸 때 */
+  | { type: 'portrait' }
+  /**
+   * 사진. src는 확장자·폭 없는 이름(public/img/{src}-320.webp·-640.webp, scripts/build-photos.mjs가 굽는다).
+   * alt는 사진에 보이는 것을 글로(스크린리더가 읽는다).
+   */
+  | { type: 'photo'; src: string; alt: string };
 
 export interface Panel {
   id: LandmarkId;
@@ -51,7 +56,11 @@ export const PANELS: Record<LandmarkId, Panel> = {
     id: 'about',
     title: 'ABOUT ME',
     sections: [
-      { type: 'portrait' },
+      {
+        type: 'photo',
+        src: 'about-me',
+        alt: '마라톤 완주 기록판(00:41:46) 앞에서 찍은 사진 두 장',
+      },
       {
         type: 'text',
         body: 'TODO: 한 줄 소개(예: 다른 길에서 와서, 기록을 재고 끝까지 닿게 하는 프론트엔드 개발자)',

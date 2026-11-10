@@ -98,8 +98,9 @@ src/
   styles/                globals.css(16색 토큰·9-slice·창 애니메이션), sprites.css(그림 경로·시트 좌표·스프라이트 애니메이션)
 public/
   sprites/               tiles/ structures/ props/ ui/ character/ intro/ world/(track-ring) — Design 개별 PNG(시트 합치기는 step3 검토)
+  img/                   창 사진(about-me-320·640.webp, 원본은 private/img/)
   resume.pdf             (예정) 이력서
-scripts/                 extract-design-layout.mjs·build-track-ring.mjs(시안 코드에서 숫자·그림 1회 추출), lh-summary.mjs, measure-run.mjs(측정)
+scripts/                 extract-design-layout.mjs·build-track-ring.mjs(시안 코드에서 숫자·그림 1회 추출), build-photos.mjs(창 사진 → WebP 2장), lh-summary.mjs, measure-run.mjs(측정)
 e2e/                     smoke.spec.ts(Playwright: 크로미움 PC·모바일, WebKit PC + axe)
 docs/                    기획서.md, design-vs-plan.md, step1-plan.md, performance.md, milestones.md, assets/credits.md
 private/                 learning/, interview-questions.md (gitignore)

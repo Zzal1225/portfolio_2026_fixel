@@ -22,3 +22,4 @@
 | `public/sprites/ui/alert-body-14x11.png`, `alert-tail-5x3.png` | 시안 "!" 말풍선을 `scripts/build-alert-bubble.mjs`로 나눔("!" 지움, 11-10 6차) | 본인 제작물 |
 | `public/sprites/world/track-ring-512x232.png` | 시안 생성 코드(track-kit)를 `scripts/build-track-ring.mjs`로 실행해 레인 띠만 추출 | 본인 제작물 |
 | `public/sprites/sheets/*.png` (물건·선택 외곽선·UI(키캡) 시트 3장) | 위 시안 PNG들을 `scripts/build-sheets.mjs`로 합침(11-10). 개별 PNG는 삭제 | 본인 제작물 |
+| `public/img/about-me-{320,640}.webp` | 본인 사진(원본 `private/img/`, gitignore)을 `scripts/build-photos.mjs`로 줄임(WebP, EXIF 제거, 11-10) | 본인 사진 |

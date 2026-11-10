@@ -1,5 +1,5 @@
 /**
- * 창 본문 섹션 렌더러. content/panels.ts의 섹션 타입(text·stats·list·timeline·links·portrait)만 보고 그린다.
+ * 창 본문 섹션 렌더러. content/panels.ts의 섹션 타입(text·stats·list·timeline·links·portrait·photo)만 보고 그린다.
  *
  * 왜 섹션 타입 방식인가: 창 6개가 "수치 → 문제 → 고민 → 품질 → 회고" 같은 비슷한 뼈대를 공유한다.
  * 창마다 JSX를 따로 짜면 문구 수정이 컴포넌트 수정이 되고, 문구가 content/ 밖으로 샌다.
@@ -38,6 +38,26 @@ function Portrait() {
   );
 }
 
+/**
+ * 사진: 1배·2배 WebP 두 장을 srcset으로(브라우저가 화면 밀도에 맞는 것만 받는다).
+ * width·height(320×426, 3:4)를 적어 두는 이유: 사진이 늦게 와도 자리가 먼저 잡혀 창 내용이 밀리지 않는다(CLS 0).
+ * 창은 열 때 지연 로딩되므로 loading="lazy"는 필요 없다(열면 바로 보이는 맨 위 그림).
+ */
+function Photo({ src, alt }: { src: string; alt: string }) {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element -- 미리 구운 정적 파일. next/image 런타임 최적화가 필요 없다(scripts/build-photos.mjs)
+    <img
+      src={`/img/${src}-320.webp`}
+      srcSet={`/img/${src}-320.webp 1x, /img/${src}-640.webp 2x`}
+      alt={alt}
+      width={320}
+      height={426}
+      decoding="async"
+      className="border-ink mx-auto block h-auto w-full max-w-[280px] border-2"
+    />
+  );
+}
+
 function Links({ items }: { items: Extract<Section, { type: 'links' }>['items'] }) {
   return (
     <div className="flex flex-wrap gap-2">
@@ -72,6 +92,8 @@ export function SectionView({ section }: { section: Section }) {
   switch (section.type) {
     case 'portrait':
       return <Portrait />;
+    case 'photo':
+      return <Photo src={section.src} alt={section.alt} />;
     case 'text':
       return (
         <section>
