@@ -1,50 +1,76 @@
 'use client';
 /**
- * HUD(화면에 고정된 DOM, 월드 배율과 무관): 번호표 이름 띠 + 메뉴 아이콘 6개 + 미니맵(PC).
+ * HUD(화면에 고정된 DOM, 월드 배율과 무관): 로고 + 메뉴 6개 + 하단 조작 안내 판(PC) + REPLAY.
+ * 미니맵·MAP 버튼은 Minimap.tsx, ◀ ▶는 TouchControls.tsx.
  *
  * 메뉴 = 키보드 사용자의 기본 길(CLAUDE.md 접근성): Tab으로 6개를 돌고 Enter면 캐릭터가 달려가 창이 열린다.
  * 그래서 메뉴는 DOM 순서상 월드보다 앞에 둔다(Game.tsx).
- *
  * 메뉴 위치: PC(폭 700 이상) 오른쪽 위 가로 한 줄, 모바일은 하단 바 3×2(같은 DOM, CSS만 다름).
  */
-import { BIB, HUD_LABELS, MENU_ORDER } from '@/content/hud';
+import { GUIDE, HUD_LABELS, LOGO, MENU_ORDER } from '@/content/hud';
 import { INTRO_LABELS } from '@/content/intro';
 import { MENU_LABEL, openLabel } from '@/content/menu';
 import type { LandmarkId } from '@/features/track/layout';
 import { useGame } from '@/features/track/store';
 
 /**
- * HUD는 인트로 연출(프리로드·신호등·한 바퀴) 동안 숨기고, 줌인과 함께 나타난다(기획서 화면 1의 3번).
- * 숨김은 렌더하지 않는 방식: 숨긴 메뉴에 Tab이 걸리지 않게.
+ * HUD는 인트로 연출 동안 숨기고, 줌아웃(13.6초)과 함께 미끄러져 들어온다(시안).
+ * 재방문·reduced의 인사처럼 입력이 열려 있으면 보인다. 숨김은 렌더하지 않는 방식: 숨긴 메뉴에 Tab이 걸리지 않게.
  */
 export function useHudVisible(): boolean {
-  return useGame((s) => !['boot', 'preload', 'signal', 'lap'].includes(s.intro.phase));
+  return useGame((s) => s.inputEnabled || s.intro.phase === 'zoomout' || s.intro.phase === 'done');
 }
 
-/** ▶ REPLAY(왼쪽 아래): 인사 이후부터. 누르면 열린 창을 닫고 신호등부터 다시(useIntro.replay) */
+/** ▶ REPLAY(왼쪽 아래): 인트로가 끝난 뒤. 누르면 열린 창을 닫고 신호등부터 다시(useIntro.replay) */
 export function ReplayButton({ onReplay }: { onReplay: () => void }) {
-  const show = useGame((s) => ['greet', 'hint', 'done'].includes(s.intro.phase));
-  if (!show) return null;
+  if (!useHudVisible()) return null;
   return (
     <button
       type="button"
       onClick={onReplay}
       aria-label={INTRO_LABELS.replayAria}
-      className="nine-white font-pixel text-ink fixed bottom-4 left-4 z-20 h-11 px-2 text-[10px] max-[699px]:bottom-[200px] max-[699px]:left-3"
+      className="hud-in-left nine-white font-pixel text-ink fixed bottom-4 left-4 z-20 h-11 px-1.5 text-[10px] max-[699px]:bottom-[200px] max-[699px]:text-[8px]"
     >
       {INTRO_LABELS.replay}
     </button>
   );
 }
 
-export function NameBib() {
+/**
+ * 로고(시안): "ChanRyeong" 흰 글자 + 2px ink 픽셀 외곽선(8방향 그림자, 흐림 0) + 아래 그림자, "PORTFOLIO" 노랑.
+ * 판·테두리 없이 월드 위에 바로 얹는다. 스크린리더는 보이는 글자 그대로 "ChanRyeong PORTFOLIO"를 읽는다
+ * (p에는 aria-label을 붙일 수 없다: axe aria-prohibited-attr).
+ */
+const OUTLINE =
+  '2px 0 0 var(--color-ink), -2px 0 0 var(--color-ink), 0 2px 0 var(--color-ink), 0 -2px 0 var(--color-ink), 2px 2px 0 var(--color-ink), -2px 2px 0 var(--color-ink), 2px -2px 0 var(--color-ink), -2px -2px 0 var(--color-ink)';
+
+export function Logo() {
   if (!useHudVisible()) return null;
-  // 번호표 모양 이름 띠. 정적인 글이라 버튼이 아니다
   return (
-    <div className="hud-in-left nine-white text-ink fixed top-4 left-4 z-20 flex items-baseline gap-2 px-2 py-1 max-[699px]:top-2 max-[699px]:left-2">
-      <span className="font-pixel-ko text-sm font-bold">{BIB.name}</span>
-      <span className="font-pixel text-[10px]">{BIB.level}</span>
-    </div>
+    <p className="hud-in-left font-pixel pointer-events-none fixed top-4 left-4 z-20 flex flex-col items-start gap-2.5 leading-none whitespace-nowrap max-[699px]:top-2 max-[699px]:left-2 max-[699px]:gap-2">
+      <span
+        className="text-2xl text-white max-[699px]:text-base"
+        style={{ textShadow: `${OUTLINE}, 0 5px 0 var(--color-ink)` }}
+      >
+        {LOGO.name}
+      </span>
+      <span
+        className="text-accent text-[10px] tracking-[2px] max-[699px]:text-[8px]"
+        style={{ textShadow: OUTLINE }}
+      >
+        {LOGO.sub}
+      </span>
+    </p>
+  );
+}
+
+/** PC 하단 가운데 조작 안내 판(시안). 모바일은 ◀ ▶·하단 메뉴가 같은 역할이라 없음 */
+export function GuidePanel() {
+  if (!useHudVisible()) return null;
+  return (
+    <p className="hud-in-bottom nine-white font-pixel-ko text-ink pointer-events-none fixed bottom-4 left-1/2 z-20 flex h-11 -translate-x-1/2 items-center px-1.5 text-[13px] font-bold whitespace-nowrap max-[699px]:hidden">
+      {GUIDE}
+    </p>
   );
 }
 

@@ -17,10 +17,10 @@
  * 같은 팔레트의 ink(대비 약 5:1)로 바꿨다. docs/design-vs-plan.md #20.
  */
 import * as Dialog from '@radix-ui/react-dialog';
-import * as Tabs from '@radix-ui/react-tabs';
 import { useRef, type KeyboardEvent } from 'react';
 import { DIALOG_LABELS, PANELS } from '@/content/panels';
 import { LANDMARKS, type LandmarkId } from '@/features/track/layout';
+import { frontPoint } from '@/features/track/movement';
 import { useGame } from '@/features/track/store';
 import { SectionList } from './Sections';
 
@@ -44,8 +44,15 @@ export function PanelDialog() {
   const go = (delta: 1 | -1) => {
     if (!open) return;
     const next = neighbor(open, delta);
-    const lm = LANDMARKS.find((l) => l.id === next)!;
-    useGame.setState({ open: next, t: lm.t, zone: next, auto: null, phase: 'idle' });
+    // 창이 화면을 덮고 있으니 러너는 그 구조물 앞으로 바로 옮긴다(시안 stepOpen과 같음)
+    useGame.setState({
+      open: next,
+      pos: frontPoint(next),
+      facing: 'down',
+      zone: next,
+      route: null,
+      phase: 'idle',
+    });
   };
 
   const onKeyDown = (e: KeyboardEvent) => {
@@ -100,28 +107,7 @@ export function PanelDialog() {
                 tabIndex={0}
                 className="overflow-y-auto px-7 pt-6 pb-7 text-base leading-[1.6] focus-visible:shadow-none focus-visible:outline-offset-[-4px]"
               >
-                {panel.tabs ? (
-                  <Tabs.Root defaultValue={panel.tabs[0]!.id}>
-                    <Tabs.List className="mb-6 flex gap-2" aria-label={panel.title}>
-                      {panel.tabs.map((t) => (
-                        <Tabs.Trigger
-                          key={t.id}
-                          value={t.id}
-                          className="nine-white font-pixel data-[state=active]:bg-menu-selected min-h-11 px-2 text-[10px] data-[state=active]:outline-2 data-[state=active]:-outline-offset-4 data-[state=active]:outline-(--color-accent)"
-                        >
-                          {t.label}
-                        </Tabs.Trigger>
-                      ))}
-                    </Tabs.List>
-                    {panel.tabs.map((t) => (
-                      <Tabs.Content key={t.id} value={t.id}>
-                        <SectionList sections={t.sections} />
-                      </Tabs.Content>
-                    ))}
-                  </Tabs.Root>
-                ) : (
-                  <SectionList sections={panel.sections ?? []} />
-                )}
+                <SectionList sections={panel.sections} />
               </div>
             </>
           )}

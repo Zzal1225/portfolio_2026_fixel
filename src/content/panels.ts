@@ -36,9 +36,7 @@ export interface Panel {
   id: LandmarkId;
   /** 창 머리 띠 제목(영어 픽셀 폰트) */
   title: string;
-  /** 탭이 있으면 탭별 섹션, 없으면 sections */
-  tabs?: readonly { id: string; label: string; sections: readonly Section[] }[];
-  sections?: readonly Section[];
+  sections: readonly Section[];
 }
 
 export const TODO_PREFIX = 'TODO';
@@ -49,75 +47,53 @@ const GITHUB = 'https://github.com/Zzal1225';
 export const PANELS: Record<LandmarkId, Panel> = {
   about: {
     id: 'about',
-    title: 'ABOUT',
-    tabs: [
+    title: 'ABOUT ME',
+    sections: [
+      { type: 'portrait' },
       {
-        id: 'profile',
-        label: 'PROFILE',
-        sections: [
-          { type: 'portrait' },
-          {
-            type: 'text',
-            body: 'TODO: 한 줄 소개(예: 다른 길에서 와서, 기록을 재고 끝까지 닿게 하는 프론트엔드 개발자)',
-          },
-          {
-            type: 'stats',
-            items: [
-              { label: 'LEVEL', value: 'LV.3 FRONTEND' },
-              { label: 'CAREER', value: '2Y 9M' },
-              { label: 'PROJECTS', value: '2' },
-            ],
-          },
-          {
-            type: 'list',
-            heading: '일하는 방식',
-            numbered: true,
-            items: [
-              { tag: 'TODO', desc: 'TODO: 일하는 방식 1' },
-              { tag: 'TODO', desc: 'TODO: 일하는 방식 2' },
-              { tag: 'TODO', desc: 'TODO: 일하는 방식 3' },
-            ],
-          },
-          {
-            type: 'text',
-            heading: 'AI와 일하는 법',
-            body: 'TODO: AI를 어디에 쓰고, 무엇은 직접 책임지는지',
-          },
-          { type: 'text', heading: '러닝', body: 'TODO: 꾸준함에 관한 한 줄' },
+        type: 'text',
+        body: 'TODO: 한 줄 소개(예: 다른 길에서 와서, 기록을 재고 끝까지 닿게 하는 프론트엔드 개발자)',
+      },
+      {
+        type: 'stats',
+        items: [
+          { label: 'LEVEL', value: 'LV.3 FRONTEND' },
+          { label: 'CAREER', value: '2Y 9M' },
+          { label: 'PROJECTS', value: '2' },
         ],
       },
       {
-        id: 'skills',
-        label: 'SKILLS',
-        sections: [
-          {
-            type: 'list',
-            heading: '실무',
-            items: [
-              { tag: 'HTML', desc: 'TODO: 마트 대상 문자 발송 서비스에서 어디에 썼는지' },
-              { tag: 'CSS', desc: 'TODO: 어디서 썼는지' },
-              { tag: 'SCSS', desc: 'TODO: 어디서 썼는지' },
-              { tag: 'JavaScript', desc: 'TODO: 어디서 썼는지' },
-              { tag: 'jQuery', desc: 'TODO: 어디서 썼는지' },
-              { tag: 'React (초급)', desc: 'TODO: 어디서 썼는지' },
-              { tag: 'PHP 템플릿', desc: 'TODO: 어디서 썼는지' },
-            ],
-          },
-          {
-            type: 'list',
-            heading: '프로젝트',
-            items: [
-              { tag: 'TypeScript', desc: 'TODO: nanaki·dahda에서 어디에 썼는지' },
-              { tag: 'Next.js', desc: 'TODO: 어디서 썼는지' },
-              { tag: 'TanStack Query', desc: 'TODO: 어디서 썼는지' },
-              { tag: 'Zustand', desc: 'TODO: 어디서 썼는지' },
-              { tag: 'Supabase', desc: 'TODO: 어디서 썼는지' },
-              { tag: 'Tailwind', desc: 'TODO: 어디서 썼는지' },
-              { tag: 'Vitest', desc: 'TODO: 어디서 썼는지' },
-              { tag: 'Playwright', desc: 'TODO: 어디서 썼는지' },
-              { tag: 'GitHub Actions', desc: 'TODO: 어디서 썼는지' },
-            ],
-          },
+        type: 'list',
+        heading: '일하는 방식',
+        numbered: true,
+        items: [
+          { tag: 'TODO', desc: 'TODO: 일하는 방식 1' },
+          { tag: 'TODO', desc: 'TODO: 일하는 방식 2' },
+          { tag: 'TODO', desc: 'TODO: 일하는 방식 3' },
+        ],
+      },
+      {
+        type: 'text',
+        heading: 'AI와 일하는 법',
+        body: 'TODO: AI를 어디에 쓰고, 무엇은 직접 책임지는지',
+      },
+      { type: 'text', heading: '러닝', body: 'TODO: 꾸준함에 관한 한 줄' },
+      {
+        type: 'timeline',
+        heading: '교육',
+        items: [
+          { period: '2023.03 ~ 08', title: '국비 웹 퍼블리셔 과정', desc: 'TODO: 한 줄 요약' },
+          { period: '~ 2027.02', title: '학점은행제 컴퓨터공학', desc: '졸업 예정' },
+          { period: 'TODO', title: '검정고시', desc: 'TODO' },
+        ],
+      },
+      {
+        type: 'list',
+        heading: '자격증',
+        items: [
+          { tag: '공인중개사', desc: 'TODO: 취득 연도' },
+          { tag: '한국사 2급', desc: 'TODO: 취득 연도' },
+          { tag: '네트워크관리사 2급', desc: 'TODO: 취득 연도' },
         ],
       },
     ],
@@ -236,26 +212,36 @@ export const PANELS: Record<LandmarkId, Panel> = {
     ],
   },
 
-  education: {
-    id: 'education',
-    title: 'EDUCATION',
+  skill: {
+    id: 'skill',
+    title: 'SKILL',
     sections: [
       {
-        type: 'timeline',
-        heading: '교육',
+        type: 'list',
+        heading: '실무',
         items: [
-          { period: '2023.03 ~ 08', title: '국비 웹 퍼블리셔 과정', desc: 'TODO: 한 줄 요약' },
-          { period: '~ 2027.02', title: '학점은행제 컴퓨터공학', desc: '졸업 예정' },
-          { period: 'TODO', title: '검정고시', desc: 'TODO' },
+          { tag: 'HTML', desc: 'TODO: 마트 대상 문자 발송 서비스에서 어디에 썼는지' },
+          { tag: 'CSS', desc: 'TODO: 어디서 썼는지' },
+          { tag: 'SCSS', desc: 'TODO: 어디서 썼는지' },
+          { tag: 'JavaScript', desc: 'TODO: 어디서 썼는지' },
+          { tag: 'jQuery', desc: 'TODO: 어디서 썼는지' },
+          { tag: 'React (초급)', desc: 'TODO: 어디서 썼는지' },
+          { tag: 'PHP 템플릿', desc: 'TODO: 어디서 썼는지' },
         ],
       },
       {
         type: 'list',
-        heading: '자격증',
+        heading: '프로젝트',
         items: [
-          { tag: '공인중개사', desc: 'TODO: 취득 연도' },
-          { tag: '한국사 2급', desc: 'TODO: 취득 연도' },
-          { tag: '네트워크관리사 2급', desc: 'TODO: 취득 연도' },
+          { tag: 'TypeScript', desc: 'TODO: nanaki·dahda에서 어디에 썼는지' },
+          { tag: 'Next.js', desc: 'TODO: 어디서 썼는지' },
+          { tag: 'TanStack Query', desc: 'TODO: 어디서 썼는지' },
+          { tag: 'Zustand', desc: 'TODO: 어디서 썼는지' },
+          { tag: 'Supabase', desc: 'TODO: 어디서 썼는지' },
+          { tag: 'Tailwind', desc: 'TODO: 어디서 썼는지' },
+          { tag: 'Vitest', desc: 'TODO: 어디서 썼는지' },
+          { tag: 'Playwright', desc: 'TODO: 어디서 썼는지' },
+          { tag: 'GitHub Actions', desc: 'TODO: 어디서 썼는지' },
         ],
       },
     ],

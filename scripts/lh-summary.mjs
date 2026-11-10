@@ -26,7 +26,13 @@ for (const f of files) {
   const items = a['network-requests']?.details?.items ?? [];
   const js = items.filter((i) => i.resourceType === 'Script');
   const kb = (n) => (n / 1024).toFixed(1);
-  console.log('   JS 전송량(KB, 압축)', kb(js.reduce((s, i) => s + (i.transferSize ?? 0), 0)), '/', js.length, '개');
+  console.log(
+    '   JS 전송량(KB, 압축)',
+    kb(js.reduce((s, i) => s + (i.transferSize ?? 0), 0)),
+    '/',
+    js.length,
+    '개',
+  );
   console.log('   전체 전송량(KB)', kb(items.reduce((s, i) => s + (i.transferSize ?? 0), 0)));
   const lcpEl = a['largest-contentful-paint-element']?.details?.items?.[0]?.items?.[0]?.node;
   if (lcpEl) console.log('   LCP 요소', lcpEl.snippet?.slice(0, 160));

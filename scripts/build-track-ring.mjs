@@ -24,11 +24,17 @@ const K = sandbox.window.buildKit3();
 const { g, band } = K.BG;
 
 // 띠의 바운딩 박스(월드 좌표). 스타디움 바깥 반지름 116 → x 64..575, y 64..295
-let x0 = Infinity, y0 = Infinity, x1 = -1, y1 = -1;
+let x0 = Infinity,
+  y0 = Infinity,
+  x1 = -1,
+  y1 = -1;
 for (let y = 0; y < K.H; y++)
   for (let x = 0; x < K.W; x++)
     if (band[y][x]) {
-      x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y);
+      x0 = Math.min(x0, x);
+      y0 = Math.min(y0, y);
+      x1 = Math.max(x1, x);
+      y1 = Math.max(y1, y);
     }
 const w = x1 - x0 + 1;
 const h = y1 - y0 + 1;
@@ -45,11 +51,15 @@ const raw = Buffer.alloc((w * 4 + 1) * h);
 for (let y = 0; y < h; y++) {
   raw[y * (w * 4 + 1)] = 0;
   for (let x = 0; x < w; x++) {
-    const wx = x0 + x, wy = y0 + y;
+    const wx = x0 + x,
+      wy = y0 + y;
     if (!band[wy][wx]) continue; // 띠 밖 = 투명(0,0,0,0)
     const [r, gg, b] = hex(g.p[wy][wx]);
     const o = y * (w * 4 + 1) + 1 + x * 4;
-    raw[o] = r; raw[o + 1] = gg; raw[o + 2] = b; raw[o + 3] = 255;
+    raw[o] = r;
+    raw[o + 1] = gg;
+    raw[o + 2] = b;
+    raw[o + 3] = 255;
   }
 }
 
@@ -64,14 +74,18 @@ const crc32 = (buf) => {
   return (c ^ 0xffffffff) >>> 0;
 };
 const chunk = (type, data) => {
-  const len = Buffer.alloc(4); len.writeUInt32BE(data.length);
+  const len = Buffer.alloc(4);
+  len.writeUInt32BE(data.length);
   const td = Buffer.concat([Buffer.from(type), data]);
-  const crc = Buffer.alloc(4); crc.writeUInt32BE(crc32(td));
+  const crc = Buffer.alloc(4);
+  crc.writeUInt32BE(crc32(td));
   return Buffer.concat([len, td, crc]);
 };
 const ihdr = Buffer.alloc(13);
-ihdr.writeUInt32BE(w, 0); ihdr.writeUInt32BE(h, 4);
-ihdr[8] = 8; ihdr[9] = 6; // 8bit RGBA
+ihdr.writeUInt32BE(w, 0);
+ihdr.writeUInt32BE(h, 4);
+ihdr[8] = 8;
+ihdr[9] = 6; // 8bit RGBA
 const png = Buffer.concat([
   Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
   chunk('IHDR', ihdr),
@@ -83,4 +97,6 @@ const outDir = new URL('../public/sprites/world/', import.meta.url);
 fs.mkdirSync(outDir, { recursive: true });
 const name = `track-ring-${w}x${h}.png`;
 fs.writeFileSync(new URL(name, outDir), png);
-console.log(JSON.stringify({ file: name, origin: { x: x0, y: y0 }, size: { w, h }, bytes: png.length }));
+console.log(
+  JSON.stringify({ file: name, origin: { x: x0, y: y0 }, size: { w, h }, bytes: png.length }),
+);

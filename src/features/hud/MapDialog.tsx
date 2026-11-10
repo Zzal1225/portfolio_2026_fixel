@@ -1,6 +1,6 @@
 'use client';
 /**
- * 모바일 큰 지도 창. 지도 위 구조물을 누르면 창을 닫고 그곳으로 달려간다(도착하면 그 창이 열림).
+ * 큰 지도 창(PC 미니맵·모바일 MAP 버튼 공통, 11-10 시안 채택). 지도 위 구조물을 누르면 창을 닫고 그곳으로 달려간다(도착하면 그 창이 열림).
  * 작은 화면에서 미니맵 점은 너무 작아 누르기 어려워서 시안대로 창으로 크게 보여 준다.
  * 이 파일은 MAP 버튼을 처음 누를 때 받는다(Minimap.tsx의 dynamic import).
  * 닫히면 Radix가 포커스를 MAP 버튼으로 되돌린다(열리기 직전 포커스 요소).
@@ -21,8 +21,10 @@ export function MapDialog({
   onSelect: (id: LandmarkId) => void;
 }) {
   const vp = useGame((s) => s.viewportPx);
-  // 창 테두리·여백을 뺀 폭, 세로는 머리 띠·안내 문구 몫을 뺀 높이에 맞춤
-  const width = Math.floor(Math.min(vp.w - 56, ((vp.h - 160) * WORLD.w) / WORLD.h));
+  // 시안: 배율 M = min((w−56)/640, (h−120)/360), 1 이상이면 0.5 단위로 내림(도트가 덜 뭉개지게)
+  let M = Math.min((vp.w - 56) / WORLD.w, (vp.h - 120) / WORLD.h);
+  if (M >= 1) M = Math.floor(M * 2) / 2;
+  const width = Math.floor(WORLD.w * M);
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -49,7 +51,6 @@ export function MapDialog({
           <div className="p-3">
             <TrackMap
               width={Math.max(160, width)}
-              labels
               onSelect={(id) => {
                 onOpenChange(false);
                 onSelect(id);

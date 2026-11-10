@@ -1,27 +1,30 @@
-/** HUD 문구. 라벨은 영어, 이름만 한국어(번호표 이름 띠). */
+/** HUD 문구(영어 라벨, 안내 문장만 한국어). 11-10 시안 채택: 로고·하단 안내 판·◀ ▶ = 이전·다음 지점. */
 import type { LandmarkId } from '@/features/track/layout';
 
-export const BIB = { name: '박찬령', level: 'LV.3 FRONTEND' } as const;
+/** 왼쪽 위 로고(시안) */
+export const LOGO = { name: 'ChanRyeong', sub: 'PORTFOLIO' } as const;
 
-/** 화면 메뉴 순서(기획서 표 순서). 창 이전·다음은 트랙 순서라 다를 수 있다 */
+/** 화면 메뉴 순서(시안). 창 이전·다음은 트랙 순서라 다를 수 있다 */
 export const MENU_ORDER: readonly LandmarkId[] = [
   'about',
   'career',
   'project1',
   'project2',
-  'education',
+  'skill',
   'resume',
 ];
 
 export const HUD_LABELS = {
   menu: 'Menu',
-  minimap: 'Track map',
 } as const;
 
-/** 모바일 ◀ ▶(누르고 있는 동안 달림). 화면 기준 왼쪽·오른쪽 */
-export const TOUCH_LABELS = { left: 'Run left', right: 'Run right' } as const;
+/** PC 하단 가운데 조작 안내 판(시안) */
+export const GUIDE = '↑ ↓ ← → 이동 · SPACE 또는 클릭으로 선택';
 
-/** 모바일 MAP 버튼·큰 지도 창 */
+/** 모바일 ◀ ▶: 트랙 순서로 이전·다음 지점까지 달려가 창을 연다(시안) */
+export const TOUCH_LABELS = { prev: 'Go to previous stop', next: 'Go to next stop' } as const;
+
+/** 미니맵(PC)·MAP 버튼(모바일) → 큰 지도 창 */
 export const MAP_LABELS = {
   button: 'MAP',
   open: 'Open track map',

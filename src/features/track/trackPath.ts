@@ -17,6 +17,7 @@ import { TRACK, type Point } from './layout';
 
 export type Direction = 'ccw' | 'cw';
 export type Facing = 'left' | 'right' | 'up' | 'down';
+/** 방향키 한 축(useRunner 입력) */
 export type KeyAxis = -1 | 0 | 1;
 
 const R = TRACK.laneRadius;
@@ -28,9 +29,6 @@ const FIRST = B.x - TRACK.startX; // 140
 const S_RIGHT_END = FIRST + HALF_CIRCLE;
 const S_TOP_END = S_RIGHT_END + TRACK.straight;
 const S_LEFT_END = S_TOP_END + HALF_CIRCLE;
-
-/** 키 벡터와 접선의 내적이 이보다 작으면 "수직"으로 보고 멈춘다(약 ±11.5°) */
-const PERPENDICULAR = 0.2;
 
 /**
  * 0 이상 1 미만으로 감는다. JS의 %는 음수에서 음수를 돌려주므로 한 번 더 더해 나눈다.
@@ -104,25 +102,23 @@ export function shortestDirection(from: number, to: number): Direction {
 }
 
 /**
- * 네 방향 키 → 트랙 진행 방향(B안). 키 벡터(정규화)와 접선의 내적 부호.
- * |내적| < 0.2면 수직으로 보고 null(직선에서 ↑↓, 커브 한가운데서 ←→).
- * strict=false(터치 ◀ ▶)면 문턱 없이 부호만 보고, 정확히 0이면 키의 x 방향으로 정한다
- * (▶는 ccw, ◀는 cw) — 손가락으로 누른 버튼이 "아무 일 없음"이 되지 않게.
+ * 월드 좌표 → 가장 가까운 레인 지점의 트랙 거리 s(px, 0 이상 둘레 미만). toWorld의 역방향.
+ * 자유 이동(11-10 시안 채택)에서 메뉴 자동 이동이 "가까운 레인 지점 → 레인 따라 → 목표" 경로를 짤 때 쓴다.
+ * 직선 구간은 x로, 반원 구간은 중심에서 본 각도로 정한다(시안 trackParam과 같은 식).
  */
-export function keyToDirection(
-  t: number,
-  dx: KeyAxis,
-  dy: KeyAxis,
-  strict = true,
-): Direction | null {
-  const n = Math.hypot(dx, dy);
-  if (n === 0) return null;
-  const v = tangent(t);
-  const dot = (dx * v.x + dy * v.y) / n;
-  if (strict) {
-    if (Math.abs(dot) < PERPENDICULAR) return null;
-    return dot > 0 ? 'ccw' : 'cw';
+export function nearestS(x: number, y: number): number {
+  const L = TRACK.length;
+  let s: number;
+  if (x >= A.x && x <= B.x) {
+    if (y >= A.y) s = x >= TRACK.startX ? x - TRACK.startX : L - (TRACK.startX - x);
+    else s = S_RIGHT_END + (B.x - x);
+  } else if (x > B.x) {
+    const th = Math.atan2(y - B.y, x - B.x); // 아래 π/2 → 위 −π/2
+    s = FIRST + (Math.PI / 2 - th) * R;
+  } else {
+    const th = Math.atan2(y - A.y, x - A.x); // 위 −π/2 → 왼쪽 ±π → 아래 π/2
+    const phi = th < 0 ? -th : 2 * Math.PI - th; // 위 π/2 → 왼쪽 π → 아래 3π/2
+    s = S_TOP_END + (phi - Math.PI / 2) * R;
   }
-  if (Math.abs(dot) < 1e-9) return dx >= 0 ? 'ccw' : 'cw';
-  return dot > 0 ? 'ccw' : 'cw';
+  return ((s % L) + L) % L;
 }

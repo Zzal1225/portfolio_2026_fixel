@@ -43,7 +43,7 @@ const sToT = (s: number): number => s / TRACK.length;
 // 타입
 // ---------------------------------------------------------------------------
 
-export type LandmarkId = 'about' | 'career' | 'project1' | 'project2' | 'education' | 'resume';
+export type LandmarkId = 'about' | 'career' | 'project1' | 'project2' | 'skill' | 'resume';
 
 /** public/sprites/structures/{sprite}.png 파일 이름과 같다 */
 export type LandmarkSprite =
@@ -85,6 +85,10 @@ export interface Landmark {
   /** 스프라이트 가운데 x, 바닥 y. 좌상단 = (x − w/2, y − h) */
   anchor: Point;
   size: Size;
+  /**
+   * 자동 이동이 멈추는 "앞 지점"(발 위치). 없으면 s 지점의 레인 위(toWorld). 천막만 레인에서 멀어 따로 둔다(시안 (86,106)).
+   */
+  front?: Point;
   /** 구조물 안 HTML 이름: 글자 중심(스프라이트 좌상단 기준)과 월드 px 글자 크기 */
   label: { dx: number; dy: number; fontSize: number };
 }
@@ -169,7 +173,8 @@ export const LANDMARKS: readonly Landmark[] = [
     label: { dx: 32, dy: 22, fontSize: 5 },
   },
   {
-    id: 'education',
+    id: 'skill',
+    front: { x: 86, y: 106 },
     sprite: 'tent-64x64',
     s: 823,
     t: sToT(823),

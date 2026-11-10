@@ -57,7 +57,7 @@ describe('layout: 구조물', () => {
   it('id 6개가 한 번씩 있고 t는 [0,1) 범위·오름차순', () => {
     const ids = LANDMARKS.map((l) => l.id);
     expect(new Set(ids)).toEqual(
-      new Set(['about', 'career', 'project1', 'project2', 'education', 'resume']),
+      new Set(['about', 'career', 'project1', 'project2', 'skill', 'resume']),
     );
     expect(ids).toHaveLength(6);
     for (const l of LANDMARKS) {

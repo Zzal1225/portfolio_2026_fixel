@@ -10,7 +10,10 @@ import { spawn } from 'node:child_process';
 import { chromium } from '@playwright/test';
 
 const PORT = Number(process.argv[2] ?? 3400);
-const server = spawn('npx', ['next', 'start', '-p', String(PORT)], { shell: true, stdio: 'ignore' });
+const server = spawn('npx', ['next', 'start', '-p', String(PORT)], {
+  shell: true,
+  stdio: 'ignore',
+});
 await new Promise((r) => setTimeout(r, 4000));
 
 const browser = await chromium.launch();
@@ -26,6 +29,7 @@ try {
     await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
     await page.goto(`http://localhost:${PORT}/`);
     await page.getByRole('button', { name: 'Skip intro' }).click();
+    await page.getByRole('navigation', { name: 'Menu' }).waitFor();
     await page.waitForTimeout(800);
 
     const metrics = async () => {
@@ -73,9 +77,9 @@ try {
     );
     await page.waitForTimeout(500);
     const menuButton = page.getByRole('navigation', { name: 'Menu' }).getByRole('button', {
-      name: 'Open EDUCATION',
+      name: 'Open SKILL',
     });
-    await measure('메뉴 자동 이동(EDUCATION)', () => menuButton.click(), 3000);
+    await measure('메뉴 자동 이동(SKILL)', () => menuButton.click(), 3000);
     await page.close();
   }
 } finally {

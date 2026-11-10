@@ -213,18 +213,39 @@
 }
 
 /* ---------- 인트로 ---------- */
-/* 키캡 ← →: 뗌/눌림 두 그림을 0.9초마다 번갈아. 두 키는 animation-delay로 엇갈림 */
+/* 키캡 4개: 뗌/눌림 두 그림. 1.8초 한 바퀴 중 자기 차례 0.45초만 눌림(animation-delay로 엇갈림, 시안).
+   눌리면 글자도 아래로(얼굴 위치 6% → 18%). */
 .keycap {
   background-image: url('/sprites/ui/keycap-up-16x16.png');
-  animation: keycap-press 0.9s steps(1) infinite;
+  animation: keycap-press 1.8s steps(1) infinite backwards;
+}
+.keycap-face {
+  top: 6%;
+  height: 62%;
+  font-size: 7px;
+  line-height: 1;
+  animation: keycap-face 1.8s steps(1) infinite backwards;
+  animation-delay: inherit;
 }
 @keyframes keycap-press {
-  50% {
+  0% {
     background-image: url('/sprites/ui/keycap-down-16x16.png');
+  }
+  25% {
+    background-image: url('/sprites/ui/keycap-up-16x16.png');
+  }
+}
+@keyframes keycap-face {
+  0% {
+    top: 18%;
+  }
+  25% {
+    top: 6%;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .keycap {
+  .keycap,
+  .keycap-face {
     animation: none;
   }
 }

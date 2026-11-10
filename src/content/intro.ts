@@ -44,5 +44,5 @@ export const INTRO_LABELS = {
   progress: 'Intro progress',
 } as const;
 
-/** 키캡 안내(러너 양옆 ← →). 그림이라 aria-hidden, 같은 뜻은 월드 설명(WORLD_DESCRIPTION)이 맡는다 */
-export const KEY_HINT = ['←', '→'] as const;
+/** 키캡 안내(시안: ← ↑ → ↓ 4개, 0.45초마다 차례로 눌림). 그림이라 aria-hidden, 같은 뜻은 월드 설명이 맡는다 */
+export const KEY_HINT = ['←', '↑', '→', '↓'] as const;

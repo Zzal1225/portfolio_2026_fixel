@@ -1,22 +1,36 @@
 /**
- * step1 완료 조건 E2E(기획서 "완료 조건"의 앞부분):
- *  1. 첫 방문: 인트로 → SKIP → 트랙 → 메뉴 클릭 → 창 열림 → ESC로 닫힘
+ * 완료 조건 E2E(기획서 "완료 조건"):
+ *  1. 첫 방문: 인트로 → SKIP → 트랙 → 메뉴 클릭 → (달려간 뒤) 창 열림 → ESC로 닫힘
  *  2. 키보드만으로 6개 창을 모두 열고 닫기
  *  3. axe 위반 0(트랙 화면·창 화면)
  *  4. 재방문은 신호등 없이 바로 인사, reduced-motion은 인트로 생략
+ *  5. 자유 이동(11-10 시안 채택): 방향키로 달려가 반응 구역에서 Enter, 지도 창, 모바일 ◀ ▶
  *
- * 메뉴 클릭 후 창은 "캐릭터가 달려간 뒤" 열린다(useRunner 작성 후). 그래서 창이 보일 때까지 넉넉히 기다린다.
+ * 메뉴 클릭 후 창은 "캐릭터가 달려간 뒤" 열린다. 그래서 창이 보일 때까지 넉넉히 기다린다.
  */
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 
-const MENU = ['ABOUT', 'CAREER', 'PROJECT 1', 'PROJECT 2', 'EDUCATION', 'RESUME'];
+const MENU = ['ABOUT ME', 'CAREER', 'PROJECT1', 'PROJECT2', 'SKILL', 'RESUME'];
 const OPEN_TIMEOUT = 8_000;
 
+/** SKIP → 인트로 끝 상태(시안: 바로 플레이 준비). HUD 등장 애니메이션까지 끝난 뒤 돌려준다 */
 async function skipIntro(page: Page) {
   await page.goto('/');
   await page.getByRole('button', { name: 'Skip intro' }).click();
   await expect(page.getByRole('navigation', { name: 'Menu' })).toBeVisible();
+}
+
+/** 반복하지 않는 애니메이션(HUD 등장·창 열림)이 끝날 때까지. 투명도 중간에 axe가 대비를 재면 실제보다 낮게 나온다 */
+async function settle(page: Page) {
+  await page.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((x) => x.effect?.getTiming().iterations !== Infinity)
+        .map((x) => x.finished),
+    ),
+  );
 }
 
 test('첫 방문: 인트로 → SKIP → 메뉴 → 창 → ESC', async ({ page }) => {
@@ -38,15 +52,13 @@ test('키보드만으로 6개 창을 모두 열고 닫는다', async ({ page, is
   test.skip(isMobile, '키보드 시나리오는 PC');
   await skipIntro(page);
   for (const name of MENU) {
-    const button = page.getByRole('navigation', { name: 'Menu' }).getByRole('button', {
-      name: `Open ${name}`,
-    });
+    const button = page
+      .getByRole('navigation', { name: 'Menu' })
+      .getByRole('button', { name: `Open ${name}` });
     await button.focus();
     await page.keyboard.press('Enter');
     const dialog = page.getByRole('dialog');
-    await expect(dialog.getByRole('heading', { level: 2 })).toContainText(name, {
-      timeout: OPEN_TIMEOUT,
-    });
+    await expect(dialog).toBeVisible({ timeout: OPEN_TIMEOUT });
     // 열리면 닫기 버튼에 포커스(포커스 트랩 안)
     await expect(dialog.getByRole('button', { name: 'Close' })).toBeFocused();
     await page.keyboard.press('Escape');
@@ -54,42 +66,18 @@ test('키보드만으로 6개 창을 모두 열고 닫는다', async ({ page, is
   }
 });
 
-test('ABOUT 탭은 화살표 키로 PROFILE ↔ SKILLS', async ({ page }) => {
-  await skipIntro(page);
-  await page
-    .getByRole('navigation', { name: 'Menu' })
-    .getByRole('button', { name: 'Open ABOUT' })
-    .click();
-  const profile = page.getByRole('tab', { name: 'PROFILE' });
-  await expect(profile).toBeVisible({ timeout: OPEN_TIMEOUT });
-  await profile.focus();
-  await page.keyboard.press('ArrowRight');
-  await expect(page.getByRole('tab', { name: 'SKILLS' })).toHaveAttribute('aria-selected', 'true');
-});
-
 test('axe: 트랙 화면과 창에 위반이 없다', async ({ page }) => {
   await skipIntro(page);
-  // HUD 등장 애니메이션(투명도 0에서 시작) 도중에 재면 대비가 낮게 나온다 → 끝나는 반복 애니메이션만 기다림
-  await page.evaluate(() =>
-    Promise.all(
-      document
-        .getAnimations()
-        .filter((x) => x.effect?.getTiming().iterations !== Infinity)
-        .map((x) => x.finished),
-    ),
-  );
+  await settle(page);
   const track = await new AxeBuilder({ page }).analyze();
   expect(track.violations).toEqual([]);
 
   await page
     .getByRole('navigation', { name: 'Menu' })
-    .getByRole('button', { name: 'Open PROJECT 1' })
+    .getByRole('button', { name: 'Open PROJECT1' })
     .click();
   await expect(page.getByRole('dialog')).toBeVisible({ timeout: OPEN_TIMEOUT });
-  // 열림 애니메이션(투명도) 도중에 대비를 재면 실제보다 낮게 나온다 → 끝날 때까지 기다림
-  await page
-    .getByRole('dialog')
-    .evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+  await settle(page);
   const dialog = await new AxeBuilder({ page }).include('[role="dialog"]').analyze();
   expect(dialog.violations).toEqual([]);
 });
@@ -108,17 +96,17 @@ test.describe('reduced-motion', () => {
     await page.goto('/');
     await expect(page.getByText('WELCOME TO MY PORTFOLIO!')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Skip intro' })).toHaveCount(0);
-    await page.waitForTimeout(3000); // 평소 인사(2.5초)보다 길게 기다려도 그대로
+    await page.waitForTimeout(3000); // 평소 인사(2.8초)보다 길게 기다려도 그대로
     await expect(page.getByText('WELCOME TO MY PORTFOLIO!')).toBeVisible();
     await page.keyboard.press('ArrowRight');
     await expect(page.getByText('WELCOME TO MY PORTFOLIO!')).toBeHidden();
   });
 });
 
-test('키보드로 달려가 반응 구역에서 Enter로 창을 연다', async ({ page, isMobile }) => {
+test('키보드로 달려가 반응 구역에서 Enter로 창을 연다(자유 이동)', async ({ page, isMobile }) => {
   test.skip(isMobile, '키보드 시나리오는 PC');
   await skipIntro(page);
-  // 인트로가 끝난 자리(출발선 +80px)에서 ← 를 누르고 있으면 시계 방향으로 RESUME(접수 테이블)에 닿는다
+  // 인트로가 끝난 자리(출발선 +80px)에서 ← 를 누르고 있으면 왼쪽으로 달려 접수 테이블(RESUME) 반응 구역에 닿는다
   await page.keyboard.down('ArrowLeft');
   await expect(page.getByText('Press Enter to open RESUME')).toBeAttached({ timeout: 6_000 });
   await page.keyboard.up('ArrowLeft');
@@ -126,53 +114,43 @@ test('키보드로 달려가 반응 구역에서 Enter로 창을 연다', async 
   await expect(page.getByRole('dialog').getByRole('heading', { level: 2 })).toHaveText('RESUME');
 });
 
+test('방향키를 짧게 한 번 눌러도 한 걸음은 움직인다', async ({ page, isMobile }) => {
+  test.skip(isMobile, '키보드 시나리오는 PC');
+  await skipIntro(page);
+  const runner = page.locator('.spr-runner');
+  const before = await runner.evaluate((el) => (el as HTMLElement).style.transform);
+  await page.keyboard.press('ArrowUp'); // keydown → keyup이 한 틱 안에
+  await expect
+    .poll(() => runner.evaluate((el) => (el as HTMLElement).style.transform))
+    .not.toBe(before);
+});
+
 test('메뉴를 누르면 캐릭터가 달려간 뒤 창이 열린다(바로 열리지 않음)', async ({ page }) => {
   await skipIntro(page);
   await page
     .getByRole('navigation', { name: 'Menu' })
-    .getByRole('button', { name: 'Open EDUCATION' })
+    .getByRole('button', { name: 'Open SKILL' })
     .click();
-  // 달리는 동안에는 창이 없다
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.getByRole('dialog')).toBeVisible({ timeout: OPEN_TIMEOUT });
 });
 
-test('모바일: MAP 창에서 구조물을 누르면 달려가 창이 열린다', async ({ page, isMobile }) => {
-  test.skip(!isMobile, '모바일 전용(MAP 버튼은 폭 700 미만에서만)');
+test('지도 창: 구조물을 누르면 달려가 그 창이 열린다(PC 미니맵·모바일 MAP 공통)', async ({
+  page,
+}) => {
   await skipIntro(page);
-  await page.getByRole('button', { name: 'Open track map' }).click();
+  await page.getByRole('button', { name: 'Open track map' }).locator('visible=true').click();
   const map = page.getByRole('dialog', { name: 'MAP' });
   await expect(map).toBeVisible();
-  await map.getByRole('button', { name: 'Open EDUCATION' }).click();
-  await expect(page.getByRole('dialog').getByRole('heading', { level: 2 })).toHaveText(
-    'EDUCATION',
-    {
-      timeout: OPEN_TIMEOUT,
-    },
-  );
+  await map.getByRole('button', { name: 'Open SKILL' }).click();
+  await expect(page.getByRole('dialog').getByRole('heading', { level: 2 })).toHaveText('SKILL', {
+    timeout: OPEN_TIMEOUT,
+  });
 });
 
-test('모바일: ▶ 를 누르고 있으면 달린다', async ({ page, isMobile }) => {
+test('모바일: ▶ 를 누르면 다음 지점으로 달려가 창이 열린다', async ({ page, isMobile }) => {
   test.skip(!isMobile, '모바일 전용');
   await skipIntro(page);
-  const runner = page.locator('.spr-runner');
-  const before = await runner.evaluate((el) => (el as HTMLElement).style.transform);
-  const right = page.getByRole('button', { name: 'Run right' });
-  await right.dispatchEvent('pointerdown');
-  await page.waitForTimeout(600);
-  await right.dispatchEvent('pointerup');
-  const after = await runner.evaluate((el) => (el as HTMLElement).style.transform);
-  expect(after).not.toBe(before);
-});
-
-test('방향키를 짧게 한 번 눌러도 한 걸음은 움직인다', async ({ page, isMobile }) => {
-  test.skip(isMobile, '키보드 시나리오는 PC');
-  await skipIntro(page);
-  await expect(page.getByText('WELCOME TO MY PORTFOLIO!')).toBeVisible();
-  const runner = page.locator('.spr-runner');
-  const before = await runner.evaluate((el) => (el as HTMLElement).style.transform);
-  await page.keyboard.press('ArrowLeft'); // keydown → keyup이 한 틱 안에
-  await expect
-    .poll(() => runner.evaluate((el) => (el as HTMLElement).style.transform))
-    .not.toBe(before);
+  await page.getByRole('button', { name: 'Go to next stop' }).click();
+  await expect(page.getByRole('dialog')).toBeVisible({ timeout: OPEN_TIMEOUT });
 });

@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest';
 import { LANDMARKS, TRACK, rectFromAnchor } from './layout';
 import {
   facing,
-  keyToDirection,
+  nearestS,
   shortestDirection,
   signedDistance,
   tangent,
@@ -168,47 +168,6 @@ describe('trackPath', () => {
     });
   });
 
-  describe('keyToDirection (B안)', () => {
-    it.each([
-      // 아래 직선: 접선 (1, 0)
-      ['아래 직선 ←', 70, -1, 0, 'cw'],
-      ['아래 직선 →', 70, 1, 0, 'ccw'],
-      ['아래 직선 ↑ (수직)', 70, 0, -1, null],
-      ['아래 직선 ↓ (수직)', 70, 0, 1, null],
-      ['아래 직선 ↑+→', 70, 1, -1, 'ccw'],
-      // 오른쪽 커브 한가운데: 접선 (0, −1)
-      ['오른쪽 커브 ↑', S.rightCurveMid, 0, -1, 'ccw'],
-      ['오른쪽 커브 ↓', S.rightCurveMid, 0, 1, 'cw'],
-      ['오른쪽 커브 ← (수직)', S.rightCurveMid, -1, 0, null],
-      ['오른쪽 커브 ↑+←', S.rightCurveMid, -1, -1, 'ccw'],
-      // 위 직선: 접선 (−1, 0)
-      ['위 직선 ←', S.topMid, -1, 0, 'ccw'],
-      ['위 직선 →', S.topMid, 1, 0, 'cw'],
-      // 왼쪽 커브 한가운데: 접선 (0, 1)
-      ['왼쪽 커브 ↑', S.leftCurveMid, 0, -1, 'cw'],
-      ['왼쪽 커브 ↓', S.leftCurveMid, 0, 1, 'ccw'],
-      // 아무 키도 없음
-      ['입력 없음', 70, 0, 0, null],
-    ] as const)('%s', (_n, s, dx, dy, expected) => {
-      expect(keyToDirection(t(s), dx, dy)).toBe(expected);
-    });
-
-    it('터치(strict=false)는 커브 한가운데서도 멈추지 않는다: ▶ = ccw, ◀ = cw', () => {
-      expect(keyToDirection(t(S.rightCurveMid), 1, 0, false)).toBe('ccw');
-      expect(keyToDirection(t(S.rightCurveMid), -1, 0, false)).toBe('cw');
-      // 문턱 안쪽이지만 0은 아닌 곳: 부호대로
-      expect(keyToDirection(t(S.rightCurveMid - 10), 1, 0, false)).toBe('ccw');
-      expect(keyToDirection(t(S.rightCurveMid + 10), 1, 0, false)).toBe('cw');
-    });
-
-    it('오른쪽 커브 45° 지점(접선 ≈ (0.71, −0.71))에서 → 와 ↑ 는 둘 다 ccw', () => {
-      const s45 = S.rightCurveStart + HALF_CIRCLE / 4;
-      expect(keyToDirection(t(s45), 1, 0)).toBe('ccw');
-      expect(keyToDirection(t(s45), 0, -1)).toBe('ccw');
-      expect(keyToDirection(t(s45), -1, 0)).toBe('cw');
-    });
-  });
-
   describe('구조물 앞 지점', () => {
     it('각 구조물의 t에 선 러너 발이 그 구조물 그림에서 48px 안에 있다', () => {
       for (const lm of LANDMARKS) {
@@ -219,5 +178,25 @@ describe('trackPath', () => {
         expect(Math.hypot(nx - p.x, ny - p.footY), lm.id).toBeLessThanOrEqual(48);
       }
     });
+  });
+});
+
+describe('nearestS (좌표 → 가장 가까운 레인 지점)', () => {
+  it('레인 위 점은 toWorld의 역함수', () => {
+    for (let i = 0; i < 100; i++) {
+      const s = (i / 100) * L;
+      const p = toWorld(s / L);
+      const back = nearestS(p.x, p.y);
+      const diff = Math.min(Math.abs(back - s), L - Math.abs(back - s));
+      expect(diff, `s=${s}`).toBeLessThan(1e-6);
+    }
+  });
+  it.each([
+    ['아래 직선 바깥 잔디', 400, 330, 80],
+    ['위 직선 안쪽 인필드', 320, 120, 140 + Math.PI * 100 + 140],
+    ['오른쪽 커브 바깥(오른쪽)', 600, 180, 140 + (Math.PI * 100) / 2],
+    ['왼쪽 커브 안쪽', 120, 180, 140 + Math.PI * 100 + 280 + (Math.PI * 100) / 2],
+  ])('%s (%i, %i) → s≈%f', (_n, x, y, s) => {
+    expect(nearestS(x, y)).toBeCloseTo(s, 6);
   });
 });

@@ -15,7 +15,7 @@ export function Props() {
         <div
           key={i}
           className={`spr spr-prop spr-prop-${p.kind} absolute`}
-          style={{ left: p.x, top: p.y }}
+          style={{ left: p.x, top: p.y, zIndex: p.y + 32 }}
         />
       ))}
     </div>
@@ -32,6 +32,7 @@ export function Signpost() {
         top: SIGNPOST.topLeft.y,
         width: SIGNPOST.size.w,
         height: SIGNPOST.size.h,
+        zIndex: SIGNPOST.topLeft.y + SIGNPOST.size.h,
       }}
     >
       {SIGNPOST.lines.map((pos, i) => (

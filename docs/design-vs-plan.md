@@ -83,7 +83,21 @@
 | HUD 등장 연출 | 이름 띠는 왼쪽, 메뉴는 위(모바일은 아래), 미니맵은 아래에서 0.4초 steps(4) |
 | 반응 구역 메뉴 강조 | 서 있는 구조물의 메뉴 버튼도 노란 강조(aria-current는 열린 창에만) |
 
-## 7. 11-10 규칙 변경 이후 사용자 결정이 필요한 차이 (옛 규칙으로 "기획대로" 처리했던 것)
+## 7. 11-10 사용자 결정: 아래 10개 모두 시안대로
 
-이동 방식(트랙 위 vs 자유 8방향), HUD 로고, 메뉴명(ABOUT ME·SKILL), 하단 안내 판, 키캡 4개, SPACE 태그, PC 큰 지도 창,
-모바일 ◀ ▶ 동작, 인트로 길이·6배 줌, 큰 전광판 커지기·네온 깜빡임. 하나씩 정하면 이 표에 결정을 적는다.
+| 항목 | 이전(기획서) | 결정(시안) | 구현 |
+|---|---|---|---|
+| 이동 | 트랙 위 두 방향(B안) | 잔디·인필드 8방향 자유 이동 + 충돌 | movement.ts(속도 110px/s, 충돌 칸·관중석, 반응 구역, 자동 경로) |
+| 왼쪽 위 HUD | 번호표 이름 띠 | 로고 ChanRyeong / PORTFOLIO | Hud.tsx Logo |
+| 메뉴명 | ABOUT · EDUCATION | ABOUT ME · PROJECT1 · SKILL | 천막 id = skill, EDUCATION 내용은 ABOUT ME 창으로, ABOUT 탭·Radix Tabs 제거 |
+| 하단 안내 판 | 없음 | PC 하단 가운데 | Hud.tsx GuidePanel |
+| 키캡 | ← → 2개 | ↑ ← → ↓ 4개 | WorldIntro KeyHint |
+| SPACE 태그 | 없음 | 반응 구역에서 러너 오른쪽(PC) | Runner.tsx ZoneAlert |
+| PC 미니맵 | 점 클릭 = 바로 이동 | 미니맵 클릭 = 큰 지도 창 | Minimap.tsx MapLauncher |
+| 모바일 ◀ ▶ | 누르는 동안 달리기 | 이전·다음 지점 자동 이동 | useRunner.stepStation |
+| 인트로 | 약 9초, 정수 줌 | 시안 14.3초, 소수 배율 줌인·줌아웃 | timeline.ts introAt, CLAUDE.md 배율 예외 |
+| 큰 전광판 | 가운데에 바로 | 제자리에서 커지기 + 네온 깜빡임 | timeline.boardAt + IntroOverlay |
+
+결정 목록 밖이라 유지: 카메라 여유 구간 40%(시안은 항상 가운데), 자동 이동 2배(시안 1.6배), PROJECT 1·2 급수대 배치(D1, 시안과 반대),
+평소 배율 상한 4(시안은 상한 없음), 재방문 짧은 인사(시안은 바로 플레이), 창 제목 "PROJECT 1 · nanaki"(시안은 프로젝트명만), 창 머리 띠 버튼 순서.
+이것들도 시안대로 바꿀지 정하면 이 표에 적는다.
