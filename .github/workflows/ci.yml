@@ -28,9 +28,16 @@ jobs:
       - run: npm run typecheck
       - run: npm run test
       - run: npm run build
-      # 리눅스 패키지 내려받기가 가끔 멈춘다(11-10 두 번 관찰). 오래 매달리지 않고 실패 → 재실행이 빠르다
-      - run: npx playwright install --with-deps chromium webkit
-        timeout-minutes: 6
+      # 리눅스 패키지 내려받기가 가끔 멈춘다(11-10 세 번 관찰, 평소 1분 안쪽). 멈추면 3분에 끊고 다시 시도(최대 3번).
+      # 6분 제한만 걸었을 때는 실패로 끝나 사람이 다시 돌려야 했다
+      - name: Install Playwright browsers (retry)
+        run: |
+          for i in 1 2 3; do
+            timeout 180 npx playwright install --with-deps chromium webkit && exit 0
+            echo "::warning::playwright install attempt $i stalled or failed, retrying"
+          done
+          exit 1
+        timeout-minutes: 10
       # 화면 비교 기준(e2e/__screenshots__)이 커밋돼 있으면 함께 비교한다
       - run: npm run test:e2e
         env:
