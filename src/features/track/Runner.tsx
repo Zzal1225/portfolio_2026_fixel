@@ -1,6 +1,7 @@
 'use client';
 /**
- * 캐릭터(지금은 32×48 네모, 작업 12에서 스프라이트 시트로 교체) + 반응 구역 `!` 말풍선.
+ * 캐릭터(러너 스프라이트 시트, 좌표는 sprites.css) + 반응 구역 `!` 말풍선.
+ * 어느 행(방향)·달리는지 여부만 data-* 속성으로 넘기고, 프레임 넘기기는 CSS steps()가 한다(JS 타이머 없음).
  *
  * 위치는 transform만 바꾼다(left/top 금지 — 바꿀 때마다 레이아웃 재계산이 일어난다. CLAUDE.md 성능 목표).
  * 틱(60ms)마다 목표 좌표만 바뀌고, 사이 구간은 CSS transition(--tick, linear)이 메운다.
@@ -32,12 +33,14 @@ function useRunnerTransform(): CSSProperties {
 export function Runner() {
   const t = useGame((s) => s.t);
   const dir = useGame((s) => s.dir);
+  const running = useGame((s) => s.phase === 'running');
   const style = useRunnerTransform();
   return (
     <div
       aria-hidden
       data-facing={facing(t, dir)}
-      className="bg-tee border-ink pointer-events-none absolute top-0 left-0 border-2"
+      data-running={running}
+      className="spr-runner pointer-events-none absolute top-0 left-0"
       style={style}
     />
   );

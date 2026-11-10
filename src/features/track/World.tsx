@@ -15,18 +15,17 @@
  *
  * 정수 픽셀: 카메라 좌표(정수, cameraTarget이 반올림) × 정수 배율 = 정수 CSS px → 그림이 번지지 않는다.
  * 포커스: 월드는 Tab 정지점 하나(tabIndex 0). 방향키는 여기 포커스가 있을 때만 달린다(useRunner가 처리).
+ * 입력 훅(useRunner)·배율(useScale)은 Game.tsx가 부른다. World는 그리기만.
  */
-import { useRef } from 'react';
+import type { RefObject } from 'react';
 import { zoneHint } from '@/content/menu';
 import { WORLD_DESCRIPTION, WORLD_LABEL } from '@/content/world';
 import { Props, Signpost } from './Decor';
 import { Landmarks } from './Landmark';
-import { WORLD } from './layout';
+import { WORLD, type LandmarkId } from './layout';
 import { Runner, ZoneAlert } from './Runner';
 import { useGame } from './store';
 import { TrackScene } from './TrackScene';
-import { useRunner } from './useRunner';
-import { useScale } from './useScale';
 
 /** 반응 구역에 들어가면 스크린리더에 "Press Enter to open CAREER"를 한 번 읽어 준다(`!` 그림의 글 버전) */
 function ZoneAnnouncer() {
@@ -38,11 +37,13 @@ function ZoneAnnouncer() {
   );
 }
 
-export function World() {
-  useScale();
-  const worldRef = useRef<HTMLDivElement>(null);
-  const controls = useRunner(worldRef);
-
+export function World({
+  worldRef,
+  onSelect,
+}: {
+  worldRef: RefObject<HTMLDivElement | null>;
+  onSelect: (id: LandmarkId) => void;
+}) {
   const scale = useGame((s) => s.scale);
   const cam = useGame((s) => s.camera);
 
@@ -72,7 +73,7 @@ export function World() {
         <Props />
         <Signpost />
         <Runner />
-        <Landmarks onSelect={controls.goTo} />
+        <Landmarks onSelect={onSelect} />
         <ZoneAlert />
       </div>
     </div>

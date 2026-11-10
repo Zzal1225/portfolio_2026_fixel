@@ -15,3 +15,5 @@
 | 파일 | 출처 | 라이선스 |
 |---|---|---|
 | `public/sprites/{tiles,structures,props,ui,character,intro}/*.png` (32장) | Claude Design 시안(`design/design_handoff_track_portfolio/assets`)에서 그대로 복사(11-10) | 본인 제작물(Claude Design으로 생성) |
+| `public/sprites/ui/nine-{white,tee}-24.svg` | 시안 9-slice 테두리(프로토타입 HTML의 SVG)를 파일로 옮김 | 본인 제작물 |
+| `public/sprites/world/track-ring-512x232.png` | 시안 생성 코드(track-kit)를 `scripts/build-track-ring.mjs`로 실행해 레인 띠만 추출 | 본인 제작물 |

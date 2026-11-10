@@ -125,3 +125,22 @@ body {
     inset 0 0 0 2px var(--color-focus),
     inset 0 0 0 6px var(--color-ink);
 }
+
+/*
+ * 9-slice 픽셀 테두리(시안: 24×24 원본, slice 8, repeat). 판 안쪽은 보통 HTML이다.
+ * 흰 판(창·버튼)과 파란 판(주요 버튼) 두 가지. SVG는 public/sprites/ui/nine-*.svg.
+ */
+.nine-white,
+.nine-tee {
+  border: 8px solid transparent;
+  border-image-slice: 8 fill;
+  border-image-width: 8px;
+  border-image-repeat: repeat;
+  image-rendering: pixelated;
+}
+.nine-white {
+  border-image-source: url('/sprites/ui/nine-white-24.svg');
+}
+.nine-tee {
+  border-image-source: url('/sprites/ui/nine-tee-24.svg');
+}

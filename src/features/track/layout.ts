@@ -208,6 +208,12 @@ export const SIGNPOST: Decor = {
   ],
 };
 
+/**
+ * 트랙 고리 그림(곡선 레인 띠만 담은 투명 PNG, scripts/build-track-ring.mjs가 굽는다).
+ * 곡선은 타일 반복으로 안 나와서 이것만 한 장 그림이다(11-10 결정, design-vs-plan #15).
+ */
+export const TRACK_RING = { topLeft: { x: 64, y: 64 }, size: { w: 512, h: 232 } } as const;
+
 /** 전광판 그림 안의 검은 화면 영역(월드 px). 평소 "CAREER"·인트로 문구를 이 안에 얹는다 */
 export const SCOREBOARD_SCREEN: Rect = { x0: 277, y0: 111, x1: 362, y1: 126 };
 

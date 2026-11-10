@@ -23,6 +23,10 @@
 .tile-track {
   background-image: url('/sprites/tiles/tile-track-32x32.png');
 }
+/* 곡선 레인 띠(유일한 큰 그림, scripts/build-track-ring.mjs) */
+.spr-track-ring {
+  background-image: url('/sprites/world/track-ring-512x232.png');
+}
 
 /* ---------- 구조물 ---------- */
 .spr-arch-96x64 {
@@ -129,6 +133,61 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .spr-alert {
+    animation: none;
+  }
+}
+
+/* ---------- 러너 시트 128×240 (칸 32×48) ----------
+ * 행: 아래(정면)·위·오른쪽·왼쪽 각 4프레임, 5행째 손 흔들기 2프레임.
+ * 달릴 때만 steps(4)로 가로 4칸을 넘긴다. 서 있으면 시안처럼 1번 칸(두 번째 프레임) 고정.
+ * 한 바퀴 4프레임 0.48s ≈ 6px/틱 속도에서 발이 미끄러져 보이지 않는 값(시안: 7px마다 1프레임).
+ */
+.spr-runner {
+  width: 32px;
+  height: 48px;
+  background-image: url('/sprites/character/runner-sheet-128x240.png');
+  background-repeat: no-repeat;
+  background-position-x: -32px;
+}
+.spr-runner[data-facing='down'] {
+  background-position-y: 0;
+}
+.spr-runner[data-facing='up'] {
+  background-position-y: -48px;
+}
+.spr-runner[data-facing='right'] {
+  background-position-y: -96px;
+}
+.spr-runner[data-facing='left'] {
+  background-position-y: -144px;
+}
+.spr-runner[data-running='true'] {
+  animation: runner-run 0.48s steps(4) infinite;
+}
+@keyframes runner-run {
+  from {
+    background-position-x: 0;
+  }
+  to {
+    background-position-x: -128px;
+  }
+}
+/* 인사(정면 손 흔들기 2프레임) — 인트로 작업 14에서 사용 */
+.spr-runner[data-wave='true'] {
+  background-position-y: -192px;
+  animation: runner-wave 0.5s steps(2) infinite;
+}
+@keyframes runner-wave {
+  from {
+    background-position-x: 0;
+  }
+  to {
+    background-position-x: -64px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spr-runner[data-running='true'],
+  .spr-runner[data-wave='true'] {
     animation: none;
   }
 }

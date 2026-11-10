@@ -1,0 +1,19 @@
+/** HUD 문구. 라벨은 영어, 이름만 한국어(번호표 이름 띠). */
+import type { LandmarkId } from '@/features/track/layout';
+
+export const BIB = { name: '박찬령', level: 'LV.3 FRONTEND' } as const;
+
+/** 화면 메뉴 순서(기획서 표 순서). 창 이전·다음은 트랙 순서라 다를 수 있다 */
+export const MENU_ORDER: readonly LandmarkId[] = [
+  'about',
+  'career',
+  'project1',
+  'project2',
+  'education',
+  'resume',
+];
+
+export const HUD_LABELS = {
+  menu: 'Menu',
+  minimap: 'Track map',
+} as const;
