@@ -83,7 +83,7 @@ private/                 learning/, interview-questions.md (gitignore)
 - 트랙 위치는 `t`(0 이상 1 미만, 출발선 = 0, 시계 반대 방향으로 증가). 월드 픽셀 좌표는 `{ x, y }`(배율 적용 전). 변환은 `trackPath.ts`의 `toWorld(t)` 한 곳. 화면 좌표는 카메라 컨테이너가 맡으므로 컴포넌트에서 직접 계산하지 않는다.
 - 진행 방향은 `'ccw' | 'cw'`. 바라보는 방향(스프라이트)은 `'left' | 'right' | 'up' | 'down'`으로 `trackPath`가 계산.
 - 키 입력은 `{ dx: -1|0|1, dy: -1|0|1 }`(↑↓←→·WASD 합산)로 받고, `trackPath.keyToDirection(t, dx, dy)`가 현재 지점의 접선과 내적해 `'ccw' | 'cw' | null`을 돌려준다(수직이면 null = 멈춤). 캐릭터는 어떤 입력에도 트랙을 벗어나지 않는다(B안, 11-09).
-- 메뉴·구조물 id는 `'about' | 'career' | 'project1' | 'project2' | 'education' | 'resume'`. 화면 라벨은 `content/menu.ts`의 영어 문자열. 인트로 전광판 글은 `content/intro.ts`의 `boardSteps`·`boardLines`(t·문구), 이정표 3줄은 `content/intro.ts`의 `signLines`.
+- 메뉴·구조물 id는 `'about' | 'career' | 'project1' | 'project2' | 'education' | 'resume'`. 화면 라벨은 `content/menu.ts`의 영어 문자열. 인트로 전광판 글은 `content/intro.ts`의 `BOARD_STEPS`·`BOARD_LINES`(t·문구), 이정표 3줄은 같은 파일의 `SIGN_LINES`.
 
 ### 게임 상태와 렌더
 - 이동은 고정 틱(예: 60ms)마다 `t`를 갱신하고 CSS transition이 보간한다. 카메라 목표도 같은 틱에서 계산한다. `requestAnimationFrame` 루프 금지.
