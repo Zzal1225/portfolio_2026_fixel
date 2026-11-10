@@ -34,20 +34,23 @@ export function MapDialog({
           aria-describedby="map-hint"
           className="dialog-content nine-white font-body fixed top-1/2 left-1/2 z-50 -translate-x-1/2 -translate-y-1/2 outline-none"
         >
-          <header className="bg-tee border-ink flex items-center gap-2 border-b-2 py-2 pr-2 pl-3">
-            <Dialog.Title className="font-pixel text-ink flex-1 text-base">
-              {MAP_LABELS.title}
-            </Dialog.Title>
+          {/* 머리 띠 없음(11-10, 창과 같은 모양): 제목·안내는 본문 위, 닫기 ✕는 모서리 */}
+          <div className="flex items-start gap-3 px-3 pt-3">
+            <div className="flex-1">
+              <Dialog.Title className="font-pixel text-ink text-base leading-tight">
+                {MAP_LABELS.title}
+              </Dialog.Title>
+              <p id="map-hint" className="font-pixel-ko mt-2 text-[13px] font-bold">
+                {MAP_LABELS.hint}
+              </p>
+            </div>
             <Dialog.Close
               aria-label={MAP_LABELS.close}
-              className="nine-white text-ink grid size-10 place-items-center text-sm"
+              className="nine-white text-ink grid size-10 shrink-0 place-items-center text-sm"
             >
               <span aria-hidden>✕</span>
             </Dialog.Close>
-          </header>
-          <p id="map-hint" className="font-pixel-ko px-3 pt-3 text-[13px] font-bold">
-            {MAP_LABELS.hint}
-          </p>
+          </div>
           <div className="p-3">
             <TrackMap
               width={Math.max(160, width)}

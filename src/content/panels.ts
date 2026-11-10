@@ -275,6 +275,8 @@ export const PANELS: Record<LandmarkId, Panel> = {
 /** 창 공통 라벨(영어 UI 고정) */
 export const DIALOG_LABELS = {
   close: 'Close',
+  /** 창 아래쪽 이전·다음 묶음 이름 */
+  nav: 'Other windows',
   prev: (title: string) => `Previous: ${title}`,
   next: (title: string) => `Next: ${title}`,
 } as const;
