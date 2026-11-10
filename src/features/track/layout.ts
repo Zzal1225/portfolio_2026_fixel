@@ -190,7 +190,13 @@ export const LANDMARKS: readonly Landmark[] = [
   },
 ];
 
-/** 인트로에만 보이는 신호등·심판. 반응 구역 없음 */
+/**
+ * 인트로 한 바퀴가 끝나고 서는 자리: 출발선에서 80px 더(x=400, 아치 오른쪽).
+ * 출발선(t=0)에 서면 인사하는 얼굴이 아치 현수막에 가려진다(11-10 화면 확인, 시안과 같은 해법).
+ */
+export const INTRO_FINISH_T = sToT(80);
+
+/** 신호등·심판(인트로 연출용, 늘 서 있음). 반응 구역 없음 */
 export const ACTORS: readonly Actor[] = [
   { id: 'signal', anchor: { x: 392, y: 360 }, size: { w: 32, h: 64 } },
   { id: 'referee', anchor: { x: 428, y: 356 }, size: { w: 32, h: 48 } },

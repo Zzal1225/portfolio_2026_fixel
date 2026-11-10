@@ -34,12 +34,15 @@ export function Runner() {
   const t = useGame((s) => s.t);
   const dir = useGame((s) => s.dir);
   const running = useGame((s) => s.phase === 'running');
+  // 인사 단계: 정면 손 흔들기 2프레임(reduced-motion이면 sprites.css가 애니메이션을 끔)
+  const waving = useGame((s) => s.intro.phase === 'greet' && !s.intro.reduced);
   const style = useRunnerTransform();
   return (
     <div
       aria-hidden
       data-facing={facing(t, dir)}
       data-running={running}
+      data-wave={waving}
       className="spr-runner pointer-events-none absolute top-0 left-0"
       style={style}
     />

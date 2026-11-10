@@ -42,7 +42,7 @@ function Links({ items }: { items: Extract<Section, { type: 'links' }>['items'] 
   return (
     <div className="flex flex-wrap gap-2">
       {items.map((l) => {
-        const cls = `${l.primary ? 'nine-tee text-white' : 'nine-white text-ink'} inline-flex min-h-11 items-center px-2 text-[15px] font-bold`;
+        const cls = `${l.primary ? 'nine-tee text-ink' : 'nine-white text-ink'} inline-flex min-h-11 items-center px-2 text-[15px] font-bold`;
         if (isTodo(l.href)) {
           // 주소가 아직 없으면 누를 수 없는 표시만(가짜 링크 금지)
           return (

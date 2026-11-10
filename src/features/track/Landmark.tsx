@@ -13,7 +13,7 @@
  */
 import type { CSSProperties } from 'react';
 import { BOARD_IDLE } from '@/content/intro';
-import { MENU_LABEL, openLabel } from '@/content/menu';
+import { ARCH_INTRO_LABEL, MENU_LABEL, openLabel } from '@/content/menu';
 import {
   LANDMARKS,
   rectFromAnchor,
@@ -41,15 +41,25 @@ export const worldFont = (worldPx: number) => `max(${worldPx}px, calc(12px / var
 function LandmarkButton({
   data,
   selected,
+  intro,
   onSelect,
 }: {
   data: LandmarkData;
   selected: boolean;
+  /** 인트로 연출 중: 아치는 START, 전광판은 비움(큰 전광판이 따로 뜸) */
+  intro: boolean;
   onSelect: (id: LandmarkId) => void;
 }) {
   const r = rectFromAnchor(data.anchor, data.size);
   // 전광판은 평소 "CAREER"를 화면에 띄운다(인트로 문구는 작업 13에서 Scoreboard가 맡음)
-  const text = data.id === 'career' ? BOARD_IDLE : MENU_LABEL[data.id];
+  const text =
+    data.id === 'career'
+      ? intro
+        ? ''
+        : BOARD_IDLE
+      : data.id === 'about' && intro
+        ? ARCH_INTRO_LABEL
+        : MENU_LABEL[data.id];
 
   return (
     <button
@@ -89,6 +99,7 @@ export function Landmarks({ onSelect }: { onSelect: (id: LandmarkId) => void }) 
   // zone만 구독: t가 바뀌어도 zone이 같으면 구조물 6개는 다시 그려지지 않는다
   const zone = useGame((s) => s.zone);
   const open = useGame((s) => s.open);
+  const intro = useGame((s) => ['preload', 'signal', 'lap', 'zoom'].includes(s.intro.phase));
   return (
     <>
       {LANDMARKS.map((l) => (
@@ -96,6 +107,7 @@ export function Landmarks({ onSelect }: { onSelect: (id: LandmarkId) => void }) 
           key={l.id}
           data={l}
           selected={zone === l.id && open === null}
+          intro={intro}
           onSelect={onSelect}
         />
       ))}

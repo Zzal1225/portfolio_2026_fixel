@@ -12,6 +12,9 @@
  * 그 구조물 앞으로 바로 옮긴다(시안 stepOpen과 같음). 순서 강제가 아니라 편의 기능.
  *
  * 애니메이션(Framer Motion)은 step2. 지금은 즉시 열고 닫는다.
+ *
+ * 제목 글자색: 시안은 파란 띠(tee) 위 흰 글자인데 대비가 약 3:1이라 WCAG AA(4.5:1)에 못 미친다(axe 확인).
+ * 같은 팔레트의 ink(대비 약 5:1)로 바꿨다. docs/design-vs-plan.md #20.
  */
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Tabs from '@radix-ui/react-tabs';
@@ -77,7 +80,7 @@ export function PanelDialog() {
           {panel && (
             <>
               <header className="bg-tee border-ink flex items-center gap-2 border-b-2 py-2 pr-2 pl-3">
-                <Dialog.Title className="font-pixel min-w-0 flex-1 truncate text-base leading-tight text-white">
+                <Dialog.Title className="font-pixel min-w-0 flex-1 truncate text-ink text-base leading-tight">
                   {panel.title}
                 </Dialog.Title>
                 <HeadButton label={DIALOG_LABELS.prev(prevTitle)} onClick={() => go(-1)}>
@@ -92,7 +95,11 @@ export function PanelDialog() {
                   </HeadButton>
                 </Dialog.Close>
               </header>
-              <div className="overflow-y-auto px-7 pt-6 pb-7 text-base leading-[1.6]">
+              {/* tabIndex 0: 본문이 길면 키보드(↑↓·PageDown)로도 스크롤할 수 있어야 한다(axe scrollable-region-focusable) */}
+              <div
+                tabIndex={0}
+                className="overflow-y-auto px-7 pt-6 pb-7 text-base leading-[1.6] focus-visible:shadow-none focus-visible:outline-offset-[-4px]"
+              >
                 {panel.tabs ? (
                   <Tabs.Root defaultValue={panel.tabs[0]!.id}>
                     <Tabs.List className="mb-6 flex gap-2" aria-label={panel.title}>

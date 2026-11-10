@@ -8,11 +8,37 @@
  * 메뉴 위치: PC(폭 700 이상) 오른쪽 위 가로 한 줄. 모바일 하단 바는 step2.
  */
 import { BIB, HUD_LABELS, MENU_ORDER } from '@/content/hud';
+import { INTRO_LABELS } from '@/content/intro';
 import { MENU_LABEL, openLabel } from '@/content/menu';
 import type { LandmarkId } from '@/features/track/layout';
 import { useGame } from '@/features/track/store';
 
+/**
+ * HUD는 인트로 연출(프리로드·신호등·한 바퀴) 동안 숨기고, 줌인과 함께 나타난다(기획서 화면 1의 3번).
+ * 숨김은 렌더하지 않는 방식: 숨긴 메뉴에 Tab이 걸리지 않게.
+ */
+export function useHudVisible(): boolean {
+  return useGame((s) => !['preload', 'signal', 'lap'].includes(s.intro.phase));
+}
+
+/** ▶ REPLAY(왼쪽 아래): 인사 이후부터. 누르면 열린 창을 닫고 신호등부터 다시(useIntro.replay) */
+export function ReplayButton({ onReplay }: { onReplay: () => void }) {
+  const show = useGame((s) => ['greet', 'hint', 'done'].includes(s.intro.phase));
+  if (!show) return null;
+  return (
+    <button
+      type="button"
+      onClick={onReplay}
+      aria-label={INTRO_LABELS.replayAria}
+      className="nine-white font-pixel text-ink fixed bottom-4 left-4 z-20 h-11 px-2 text-[10px]"
+    >
+      {INTRO_LABELS.replay}
+    </button>
+  );
+}
+
 export function NameBib() {
+  if (!useHudVisible()) return null;
   // 번호표 모양 이름 띠. 정적인 글이라 버튼이 아니다
   return (
     <div className="nine-white text-ink fixed top-4 left-4 z-20 flex items-baseline gap-2 px-2 py-1 max-[699px]:top-2 max-[699px]:left-2">
@@ -24,6 +50,7 @@ export function NameBib() {
 
 export function Menu({ onSelect }: { onSelect: (id: LandmarkId) => void }) {
   const open = useGame((s) => s.open);
+  if (!useHudVisible()) return null;
   return (
     <nav aria-label={HUD_LABELS.menu} className="fixed top-4 right-4 z-20 max-[699px]:hidden">
       <ul className="flex gap-1">

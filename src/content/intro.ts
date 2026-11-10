@@ -30,3 +30,19 @@ export const BOARD_IDLE = 'CAREER';
 export const SIGN_LINES = ['경험은 넓게', '실행은 빠르게', '성장은 꾸준히'] as const;
 
 export const GREETING = 'WELCOME TO MY PORTFOLIO!';
+
+/** 신호등 단계별 화면 가운데 띠(색만으로 뜻을 전하지 않기: 신호등 색 + 글자) */
+export const SIGNAL_BANDS = ['ON YOUR MARKS', 'SET', 'GO'] as const;
+
+export const INTRO_LABELS = {
+  skip: 'SKIP',
+  skipAria: 'Skip intro',
+  replay: '▶ REPLAY',
+  replayAria: 'Replay intro',
+  loading: 'LOADING',
+  /** 진행 점 그룹 이름(스크린리더) */
+  progress: 'Intro progress',
+} as const;
+
+/** 키캡 안내(러너 양옆 ← →). 그림이라 aria-hidden, 같은 뜻은 월드 설명(WORLD_DESCRIPTION)이 맡는다 */
+export const KEY_HINT = ['←', '→'] as const;

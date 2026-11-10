@@ -191,3 +191,31 @@
     animation: none;
   }
 }
+
+/* ---------- 인트로 ---------- */
+/* 키캡 ← →: 뗌/눌림 두 그림을 0.9초마다 번갈아. 두 키는 animation-delay로 엇갈림 */
+.keycap {
+  background-image: url('/sprites/ui/keycap-up-16x16.png');
+  animation: keycap-press 0.9s steps(1) infinite;
+}
+@keyframes keycap-press {
+  50% {
+    background-image: url('/sprites/ui/keycap-down-16x16.png');
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .keycap {
+    animation: none;
+  }
+}
+
+/* LOADING: 프리로드가 0.3초 안에 끝나면 아예 안 보인다(깜빡임 방지). 실제 완료와 무관한 대기는 없다 */
+.intro-loading {
+  opacity: 0;
+  animation: intro-loading-in 0s linear 0.3s forwards;
+}
+@keyframes intro-loading-in {
+  to {
+    opacity: 1;
+  }
+}

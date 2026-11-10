@@ -14,6 +14,7 @@ import { openLabel } from '@/content/menu';
 import { LANDMARKS, TRACK, WORLD, rectFromAnchor, type LandmarkId } from '@/features/track/layout';
 import { useGame } from '@/features/track/store';
 import { toWorld } from '@/features/track/trackPath';
+import { useHudVisible } from './Hud';
 
 const K = 4; // 월드 → 미니맵 축소 비율
 const MW = WORLD.w / K;
@@ -37,6 +38,7 @@ function RunnerDot() {
 }
 
 export function Minimap({ onSelect }: { onSelect: (id: LandmarkId) => void }) {
+  if (!useHudVisible()) return null;
   return (
     <nav
       aria-label={HUD_LABELS.minimap}

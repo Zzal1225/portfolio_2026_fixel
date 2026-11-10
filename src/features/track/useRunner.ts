@@ -11,6 +11,10 @@
  * 구조: 계산은 아래 순수 함수 3개(stepRunner·cameraTarget·zoneAt), 훅은 "틱 돌리기 + 키 리스너 + store에 쓰기"만.
  * 순수 함수는 store·DOM 없이 테스트된다. 다 짰으면 USE_RUNNER_READY를 true로.
  *
+ * 인트로와의 약속: store.inputEnabled가 false인 동안(신호등·한 바퀴·줌) 틱은 아무것도 하지 않는다.
+ * 그동안 t·카메라·배율(scaleOverride)은 인트로(features/intro/useIntro.ts)가 직접 움직인다.
+ * 배율은 scaleOverride ?? scale 을 쓴다(effectiveScale).
+ *
  * 쓸 재료:
  *  - trackPath: wrapT, toWorld, keyToDirection, signedDistance, shortestDirection
  *  - layout: LANDMARKS(t·zoneHalfLength), TRACK.length, WORLD

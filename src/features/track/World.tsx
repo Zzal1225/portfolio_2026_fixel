@@ -20,11 +20,12 @@
 import type { RefObject } from 'react';
 import { zoneHint } from '@/content/menu';
 import { WORLD_DESCRIPTION, WORLD_LABEL } from '@/content/world';
+import { Greeting, IntroActors, KeyHint } from '@/features/intro/WorldIntro';
 import { Props, Signpost } from './Decor';
 import { Landmarks } from './Landmark';
 import { WORLD, type LandmarkId } from './layout';
 import { Runner, ZoneAlert } from './Runner';
-import { useGame } from './store';
+import { selectScale, useGame } from './store';
 import { TrackScene } from './TrackScene';
 
 /** 반응 구역에 들어가면 스크린리더에 "Press Enter to open CAREER"를 한 번 읽어 준다(`!` 그림의 글 버전) */
@@ -44,7 +45,7 @@ export function World({
   worldRef: RefObject<HTMLDivElement | null>;
   onSelect: (id: LandmarkId) => void;
 }) {
-  const scale = useGame((s) => s.scale);
+  const scale = useGame(selectScale);
   const cam = useGame((s) => s.camera);
 
   return (
@@ -62,6 +63,8 @@ export function World({
         data-world
         className="pixelated absolute top-0 left-0 origin-top-left"
         style={{
+          // 월드 안 글자 크기(calc(12px / var(--scale)))가 인트로 줌 배율도 따르게
+          ['--scale' as string]: scale,
           width: WORLD.w,
           height: WORLD.h,
           transform: `translate3d(${-cam.x * scale}px, ${-cam.y * scale}px, 0) scale(${scale})`,
@@ -71,10 +74,13 @@ export function World({
       >
         <TrackScene />
         <Props />
+        <IntroActors />
         <Signpost />
         <Runner />
         <Landmarks onSelect={onSelect} />
         <ZoneAlert />
+        <Greeting />
+        <KeyHint />
       </div>
     </div>
   );

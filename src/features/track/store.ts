@@ -29,11 +29,35 @@ export interface RunnerSnapshot {
   camera: Point;
 }
 
+/** 인트로 단계. features/intro/timeline.ts 참고 */
+export type IntroPhase = 'preload' | 'signal' | 'lap' | 'zoom' | 'greet' | 'hint' | 'done';
+
+export interface IntroState {
+  phase: IntroPhase;
+  /** 신호등: 0 꺼짐, 1 빨강, 2 노랑, 3 초록 */
+  signal: 0 | 1 | 2 | 3;
+  /** 화면 가운데 띠 글자 인덱스(ON YOUR MARKS·SET·GO), 없으면 null */
+  band: number | null;
+  /** 큰 전광판 문구 인덱스(content/intro BOARD_LINES), 없으면 -1 */
+  boardLine: number;
+  /** reduced-motion이면 손 흔들기·애니메이션 없음 */
+  reduced: boolean;
+}
+
 export interface GameState extends RunnerSnapshot {
   /** 정수 배율 2·3·4 */
   scale: number;
   /** 화면 크기(CSS px) */
   viewportPx: Size;
+  /** 인트로가 배율을 잠시 바꿀 때(절반 배율·정수 줌). null이면 scale을 쓴다 */
+  scaleOverride: number | null;
+  /**
+   * 달리기 입력을 받는가. 인트로(신호등·한 바퀴·줌) 동안 false.
+   * useRunner(사용자 작성)는 이 값이 false면 틱에서 아무것도 하지 않는다(인트로가 t·카메라를 직접 움직이므로).
+   */
+  inputEnabled: boolean;
+  intro: IntroState;
+  setIntro: (next: Partial<IntroState>) => void;
   setSnapshot: (next: Partial<RunnerSnapshot>) => void;
   setViewport: (viewportPx: Size, scale: number) => void;
   openPanel: (id: LandmarkId) => void;
@@ -55,8 +79,15 @@ export const useGame = create<GameState>()((set) => ({
   ...INITIAL_SNAPSHOT,
   scale: 2,
   viewportPx: { w: 1280, h: 720 },
+  scaleOverride: null,
+  inputEnabled: false,
+  intro: { phase: 'preload', signal: 0, band: null, boardLine: -1, reduced: false },
+  setIntro: (next) => set((s) => ({ intro: { ...s.intro, ...next } })),
   setSnapshot: (next) => set(next),
   setViewport: (viewportPx, scale) => set({ viewportPx, scale }),
   openPanel: (id) => set({ open: id, auto: null }),
   closePanel: () => set({ open: null, phase: 'idle' }),
 }));
+
+/** 지금 화면에 쓰는 배율: 인트로가 잠시 바꾼 값이 있으면 그것, 아니면 화면 크기로 정한 값 */
+export const selectScale = (s: GameState): number => s.scaleOverride ?? s.scale;
