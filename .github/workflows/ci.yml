@@ -28,7 +28,9 @@ jobs:
       - run: npm run typecheck
       - run: npm run test
       - run: npm run build
+      # 리눅스 패키지 내려받기가 가끔 멈춘다(11-10 두 번 관찰). 오래 매달리지 않고 실패 → 재실행이 빠르다
       - run: npx playwright install --with-deps chromium webkit
+        timeout-minutes: 6
       # 화면 비교 기준(e2e/__screenshots__)이 커밋돼 있으면 함께 비교한다
       - run: npm run test:e2e
         env:
