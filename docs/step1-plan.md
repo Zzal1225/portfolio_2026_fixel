@@ -1,6 +1,6 @@
 # step1 준비: 배치 데이터 · 상태 흐름 · 작업 목록 · 접근성 체크리스트
 
-2026-11-09. `docs/claude-code-prompt.md`의 "첫 작업" 1·2·3·5번. 4번(직접 짤 파일 2개 안내)은 `private/learning/00-roadmap.md`에 있다.
+2026-11-09. `docs/claude-code-prompt.md`의 "첫 작업" 1·2·3·5번. 4번(trackPath·useRunner 설계 안내)은 `private/learning/00-roadmap.md`에 있다. 11-10부터 두 파일도 Claude가 구현한다.
 Design과 기획서의 차이는 `docs/design-vs-plan.md`에 따로 정리했다.
 
 ## 0. 사용자가 정할 것 (추천안 포함)
@@ -174,9 +174,9 @@ reduced-motion: transition none
 
 - 작업 1 셋업·토큰·폰트: 완료
 - 작업 2 layout.ts + 테스트: 완료(소품은 시안 규칙상 11개)
-- 작업 3 trackPath: 시그니처·테스트 62개 준비 완료, **본문은 사용자 차례**
+- 작업 3 trackPath: 완료(11-10, 사용자 작성 규칙 폐지 후 Claude 구현). 터치용 문턱 없는 판정 추가
 - 작업 4 World·TrackScene·Runner·store·배율: 완료. 러너가 움직이려면 작업 3·5(사용자)가 필요
-- 작업 5 useRunner: 시그니처·테스트 20개 준비 완료, **본문은 사용자 차례**
+- 작업 5 useRunner: 완료(11-10). 방향 잠금(같은 키를 누르는 동안 방향 유지), 메뉴 버튼 포커스에서도 방향키 동작
 - 작업 6 타일 배경·관중석: 완료(트랙 고리 곡선은 design-vs-plan #15 결정 대기). 배율 계산은 작업 4에서 함께 끝냄
 - 작업 7 구조물 6개 버튼·이름·선택 외곽선·`!`·이정표·소품: 완료. Enter·Space로 열기와 클릭 후 달려가기는 useRunner(사용자) 연결 후 동작
 - 작업 6 보완: 트랙 고리를 투명 PNG(3KB)로 교체(11-10 결정)
@@ -186,7 +186,7 @@ reduced-motion: transition none
 - 작업 11 미니맵 SVG + 점 버튼 6개: 완료
 - 작업 12 러너 스프라이트: 완료(달릴 때 steps(4), 서 있으면 1번 칸)
 - 작업 13·14 인트로 1차·인사·키캡·REPLAY: 완료. 끝 위치 +80px, 전광판은 화면 가운데 큰 판(design-vs-plan #18·19)
-- 작업 15 ◀ ▶: **보류**(버튼 뜻을 정해야 함. 아래 질문). 모바일 배치는 원래 step2
+- 작업 15 ◀ ▶: 완료(11-10). 화면 기준 좌우, 커브 한가운데서도 달림. 폭 700 미만에서만 보임(모바일 하단 메뉴 바는 step2)
 - 작업 16 E2E 6개 + axe + GitHub Actions: 완료. **Vercel 배포는 원격 저장소·Vercel 연결 후**
 
 ## 3. step1 작업 목록 (각 1~2시간, "끝났을 때 보이는 것" 포함)

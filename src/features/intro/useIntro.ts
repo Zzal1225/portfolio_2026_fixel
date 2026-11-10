@@ -8,11 +8,11 @@
  *
  * 맡는 것: 단계 전환, 한 바퀴 동안 t, 절반 배율·정수 줌(scaleOverride), 인트로 카메라, 입력 잠금(inputEnabled),
  *          SKIP·아무 키로 건너뛰기, 첫 입력에 안내 지우기, introSeen 저장, REPLAY.
- * 맡지 않는 것: 평소 달리기·카메라(useRunner, 사용자 작성).
+ * 맡지 않는 것: 평소 달리기·카메라(useRunner).
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useGame } from '@/features/track/store';
-import { toWorld } from '@/features/track/trackPath';
+import { toWorld, wrapT } from '@/features/track/trackPath';
 import { INTRO_FINISH_T } from '@/features/track/layout';
 import { FOCUS_OFFSET_Y, TICK_MS } from '@/features/track/runner-config';
 import { introScale } from '@/features/track/scale';
@@ -98,8 +98,8 @@ export function useIntro(): IntroControls {
         const s = store.getState();
         const f = fullIntroAt(performance.now() - start, steps);
         if (f.phase === 'signal' || f.phase === 'lap') {
-          // 한 바퀴 + 80px: lapT 0→1을 t 0→1+INTRO_FINISH_T로 늘린다(감기는 직접: trackPath.wrapT는 사용자 작성 전일 수 있음)
-          const t = (f.lapT * (1 + INTRO_FINISH_T)) % 1;
+          // 한 바퀴 + 80px: lapT 0→1을 t 0→1+INTRO_FINISH_T로 늘린다(아치에 얼굴이 가리지 않는 자리에서 멈춤)
+          const t = wrapT(f.lapT * (1 + INTRO_FINISH_T));
           store.setState({ t, phase: f.phase === 'lap' ? 'running' : 'idle', dir: 'ccw' });
           s.setIntro({ phase: f.phase, signal: f.signal, band: f.band, boardLine: f.boardLine });
         } else if (f.phase === 'zoom') {

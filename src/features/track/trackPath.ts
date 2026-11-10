@@ -1,82 +1,128 @@
 /**
- * 트랙 경로: t(0 이상 1 미만) ↔ 월드 픽셀, 진행 방향 계산.
+ * 트랙 경로: t(0 이상 1 미만) ↔ 월드 픽셀, 진행 방향 계산. 순수 함수만(React·store·DOM 없음).
  *
- * ┌──────────────────────────────────────────────────────────────────┐
- * │ 이 파일의 본문은 사용자가 직접 작성한다(CLAUDE.md 5-1).           │
- * │ Claude는 시그니처·테스트(trackPath.test.ts)·힌트만 둔다.          │
- * │ 안내: private/learning/00-roadmap.md "직접 짤 파일 1"             │
- * └──────────────────────────────────────────────────────────────────┘
+ * 트랙은 스타디움형(직선 2 + 반원 2)이라 네 구간 모두 닫힌 식으로 풀린다. 점 근사(폴리라인)를 쓰지 않은 이유:
+ *  - 꼭짓점마다 접선이 꺾여 스프라이트 방향이 깜빡이고,
+ *  - 최단 거리·방향이 세그먼트 탐색이 되며,
+ *  - 미니맵 SVG(직선 + 호)와 좌표가 미세하게 어긋난다.
  *
- * 다 짰으면 아래 TRACK_PATH_READY를 true로 바꾼다.
- * 그 순간 trackPath.test.ts가 켜지고, 화면의 러너도 자리표시 대신 진짜 좌표로 움직인다.
+ * 좌표계: 화면 y는 아래로 +. s = t × 둘레(px). s=0은 아래 직선 x=320(출발선)이고, s가 커지면 화면상 반시계
+ * (아래 직선 → 오른쪽 반원 위로 → 위 직선 왼쪽으로 → 왼쪽 반원 아래로).
  *
- * 규칙(테스트가 확인하는 것):
- *  - 순수 함수만. React·store·DOM을 import하지 않는다.
- *  - 트랙 상수는 layout.ts의 TRACK에서 읽는다(숫자를 여기 다시 적지 않기).
- *  - t 단위와 s(px) 단위를 섞지 않는다. 바깥으로 나가는 값은 전부 t 단위(좌표 제외).
+ * 구간(s, px):  아래 직선 오른쪽 절반 [0, 140) → 오른쪽 반원 [140, 454.16) → 위 직선 [454.16, 734.16)
+ *               → 왼쪽 반원 [734.16, 1048.32) → 아래 직선 왼쪽 절반 [1048.32, 1188.32)
+ * 테스트: trackPath.test.ts(구간 경계·반원 한가운데·감기·수치 미분과 접선 비교).
  */
-import type { Point } from './layout';
-// import { TRACK } from './layout';   // ← 구현할 때 주석 해제
+import { TRACK, type Point } from './layout';
 
 export type Direction = 'ccw' | 'cw';
 export type Facing = 'left' | 'right' | 'up' | 'down';
 export type KeyAxis = -1 | 0 | 1;
 
-/** 구현을 마치면 true. 테스트와 화면이 이 값을 보고 자리표시를 끈다 */
-export const TRACK_PATH_READY = false;
+const R = TRACK.laneRadius;
+const HALF_CIRCLE = Math.PI * R;
+const A = TRACK.centerLeft;
+const B = TRACK.centerRight;
+/** 출발선에서 오른쪽 반원 시작까지 */
+const FIRST = B.x - TRACK.startX; // 140
+const S_RIGHT_END = FIRST + HALF_CIRCLE;
+const S_TOP_END = S_RIGHT_END + TRACK.straight;
+const S_LEFT_END = S_TOP_END + HALF_CIRCLE;
 
-/** 0 이상 1 미만으로 감는다. wrapT(1) = 0, wrapT(-0.25) = 0.75 */
-export function wrapT(t: number): number {
-  void t;
-  return 0; // TODO(사용자)
-}
+/** 키 벡터와 접선의 내적이 이보다 작으면 "수직"으로 보고 멈춘다(약 ±11.5°) */
+const PERPENDICULAR = 0.2;
 
 /**
- * t → 달리는 선 위의 점(x, y)과 발 위치 y(footY = y + 12).
- * t=0 은 (320, 280), 화면상 반시계(아래 직선에서 오른쪽)로 증가.
+ * 0 이상 1 미만으로 감는다. JS의 %는 음수에서 음수를 돌려주므로 한 번 더 더해 나눈다.
+ * 부동소수 때문에 1이 나오는 경우(아주 작은 음수)는 0으로.
  */
+export function wrapT(t: number): number {
+  const v = ((t % 1) + 1) % 1;
+  return v >= 1 ? 0 : v;
+}
+
+/** 한 지점의 좌표와 ccw 접선. toWorld·tangent가 같은 분기를 쓰도록 한 곳에 둔다 */
+function sample(t: number): { p: Point; v: Point } {
+  const s = wrapT(t) * TRACK.length;
+  if (s < FIRST) {
+    return { p: { x: TRACK.startX + s, y: A.y + R }, v: { x: 1, y: 0 } };
+  }
+  if (s < S_RIGHT_END) {
+    // 오른쪽 반원: 각도 π/2(아래)에서 시작해 화면상 위로 돈다 → 각도가 줄어든다
+    const th = Math.PI / 2 - (s - FIRST) / R;
+    return {
+      p: { x: B.x + R * Math.cos(th), y: B.y + R * Math.sin(th) },
+      v: { x: Math.sin(th), y: -Math.cos(th) },
+    };
+  }
+  if (s < S_TOP_END) {
+    return { p: { x: B.x - (s - S_RIGHT_END), y: A.y - R }, v: { x: -1, y: 0 } };
+  }
+  if (s < S_LEFT_END) {
+    // 왼쪽 반원: 각도 −π/2(위)에서 시작해 화면상 아래로
+    const th = -Math.PI / 2 - (s - S_TOP_END) / R;
+    return {
+      p: { x: A.x + R * Math.cos(th), y: A.y + R * Math.sin(th) },
+      v: { x: Math.sin(th), y: -Math.cos(th) },
+    };
+  }
+  return { p: { x: A.x + (s - S_LEFT_END), y: A.y + R }, v: { x: 1, y: 0 } };
+}
+
+/** t → 달리는 선 위의 점(x, y)과 발 위치 y(footY = y + 12) */
 export function toWorld(t: number): Point & { footY: number } {
-  void t;
-  return { x: 320, y: 280, footY: 292 }; // TODO(사용자): 지금은 항상 출발선(자리표시)
+  const { p } = sample(t);
+  return { x: p.x, y: p.y, footY: p.y + TRACK.footOffsetY };
 }
 
-/** t 지점에서 ccw 진행 방향의 단위 벡터(화면 좌표, y는 아래로 +) */
+/** t 지점에서 ccw 진행 방향의 단위 벡터 */
 export function tangent(t: number): Point {
-  void t;
-  return { x: 1, y: 0 }; // TODO(사용자)
+  return sample(t).v;
 }
 
-/** 스프라이트 행 고르기: 진행 방향 벡터의 x·y 중 큰 쪽 */
+/** 스프라이트 행: 진행 방향 벡터에서 x·y 중 큰 쪽(같으면 가로) */
 export function facing(t: number, dir: Direction): Facing {
-  void t;
-  return dir === 'ccw' ? 'right' : 'left'; // TODO(사용자)
+  const v = tangent(t);
+  const x = dir === 'ccw' ? v.x : -v.x;
+  const y = dir === 'ccw' ? v.y : -v.y;
+  if (Math.abs(x) >= Math.abs(y)) return x > 0 ? 'right' : 'left';
+  return y > 0 ? 'down' : 'up';
 }
 
 /**
- * from → to 로 가는 부호 있는 최단 거리(t 단위). 범위 (−0.5, 0.5].
- * 양수 = ccw로 가는 게 가깝다. 정반대(차이 0.5)는 +0.5(ccw)로 정한다.
+ * from → to 부호 있는 최단 거리(t 단위), 범위 (−0.5, 0.5].
+ * 정반대(0.5)는 +0.5(ccw)로 고정한다. 범위 한쪽을 닫아 두지 않으면 자동 이동이 정반대 지점에서
+ * 틱마다 방향을 바꿔 제자리에서 떨 수 있다.
  */
 export function signedDistance(from: number, to: number): number {
-  void from;
-  void to;
-  return 0; // TODO(사용자)
+  const d = wrapT(to - from);
+  return d > 0.5 ? d - 1 : d;
 }
 
-/** 메뉴·미니맵 자동 이동 방향. signedDistance의 부호(0이면 'ccw') */
 export function shortestDirection(from: number, to: number): Direction {
-  void from;
-  void to;
-  return 'ccw'; // TODO(사용자)
+  return signedDistance(from, to) >= 0 ? 'ccw' : 'cw';
 }
 
 /**
- * 네 방향 키 → 트랙 진행 방향(B안).
- * (dx, dy)와 tangent(t)의 내적이 +면 'ccw', −면 'cw', 거의 0(|내적| < 0.2)이면 null(멈춤).
- * 키를 두 개 누르면 합 벡터를 정규화한 뒤 내적한다.
+ * 네 방향 키 → 트랙 진행 방향(B안). 키 벡터(정규화)와 접선의 내적 부호.
+ * |내적| < 0.2면 수직으로 보고 null(직선에서 ↑↓, 커브 한가운데서 ←→).
+ * strict=false(터치 ◀ ▶)면 문턱 없이 부호만 보고, 정확히 0이면 키의 x 방향으로 정한다
+ * (▶는 ccw, ◀는 cw) — 손가락으로 누른 버튼이 "아무 일 없음"이 되지 않게.
  */
-export function keyToDirection(t: number, dx: KeyAxis, dy: KeyAxis): Direction | null {
-  void t;
-  void dx;
-  void dy;
-  return null; // TODO(사용자)
+export function keyToDirection(
+  t: number,
+  dx: KeyAxis,
+  dy: KeyAxis,
+  strict = true,
+): Direction | null {
+  const n = Math.hypot(dx, dy);
+  if (n === 0) return null;
+  const v = tangent(t);
+  const dot = (dx * v.x + dy * v.y) / n;
+  if (strict) {
+    if (Math.abs(dot) < PERPENDICULAR) return null;
+    return dot > 0 ? 'ccw' : 'cw';
+  }
+  if (Math.abs(dot) < 1e-9) return dx >= 0 ? 'ccw' : 'cw';
+  return dot > 0 ? 'ccw' : 'cw';
 }

@@ -1,6 +1,5 @@
 /**
- * trackPath.ts 명세 테스트. Claude가 먼저 쓰고, 본문은 사용자가 짠다(CLAUDE.md 5-1).
- * TRACK_PATH_READY가 false인 동안은 건너뛴다(CI가 빨갛게 되지 않도록).
+ * trackPath.ts 명세 테스트(구현보다 먼저 썼다).
  *
  * 기대값은 전부 손으로 계산 가능한 지점만 골랐다:
  *   구간 경계 s = 140 / 454.16 / 734.16 / 1048.32, 반원 한가운데, 그리고 감기(wrap).
@@ -9,7 +8,6 @@
 import { describe, expect, it } from 'vitest';
 import { LANDMARKS, TRACK, rectFromAnchor } from './layout';
 import {
-  TRACK_PATH_READY,
   facing,
   keyToDirection,
   shortestDirection,
@@ -32,7 +30,7 @@ const S = {
 };
 const t = (s: number) => s / L;
 
-describe.runIf(TRACK_PATH_READY)('trackPath', () => {
+describe('trackPath', () => {
   describe('wrapT', () => {
     it.each([
       [0, 0],
@@ -195,6 +193,14 @@ describe.runIf(TRACK_PATH_READY)('trackPath', () => {
       expect(keyToDirection(t(s), dx, dy)).toBe(expected);
     });
 
+    it('터치(strict=false)는 커브 한가운데서도 멈추지 않는다: ▶ = ccw, ◀ = cw', () => {
+      expect(keyToDirection(t(S.rightCurveMid), 1, 0, false)).toBe('ccw');
+      expect(keyToDirection(t(S.rightCurveMid), -1, 0, false)).toBe('cw');
+      // 문턱 안쪽이지만 0은 아닌 곳: 부호대로
+      expect(keyToDirection(t(S.rightCurveMid - 10), 1, 0, false)).toBe('ccw');
+      expect(keyToDirection(t(S.rightCurveMid + 10), 1, 0, false)).toBe('cw');
+    });
+
     it('오른쪽 커브 45° 지점(접선 ≈ (0.71, −0.71))에서 → 와 ↑ 는 둘 다 ccw', () => {
       const s45 = S.rightCurveStart + HALF_CIRCLE / 4;
       expect(keyToDirection(t(s45), 1, 0)).toBe('ccw');
@@ -214,8 +220,4 @@ describe.runIf(TRACK_PATH_READY)('trackPath', () => {
       }
     });
   });
-});
-
-it.skipIf(TRACK_PATH_READY)('trackPath는 아직 사용자 작성 전(TRACK_PATH_READY = false)', () => {
-  expect(TRACK_PATH_READY).toBe(false);
 });

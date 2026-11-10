@@ -1,15 +1,12 @@
 /**
- * useRunner.ts의 순수 함수 명세 테스트(Claude 작성, 본문은 사용자).
- * cameraTarget은 USE_RUNNER_READY만, 나머지는 trackPath도 필요해서 TRACK_PATH_READY까지 true일 때 돈다.
+ * useRunner.ts의 순수 함수 명세 테스트(구현보다 먼저 썼다).
  */
 import { describe, expect, it } from 'vitest';
 import { LANDMARKS, TRACK, WORLD } from './layout';
 import { AUTO_STEP_PX, STEP_PX } from './runner-config';
 import { INITIAL_SNAPSHOT, type RunnerSnapshot } from './store';
-import { TRACK_PATH_READY } from './trackPath';
-import { USE_RUNNER_READY, cameraTarget, stepRunner, zoneAt } from './useRunner';
+import { cameraTarget, combineKeys, stepRunner, zoneAt } from './useRunner';
 
-const READY = USE_RUNNER_READY && TRACK_PATH_READY;
 const L = TRACK.length;
 const VIEW = { w: 320, h: 180 }; // 1280×720 @4×
 const env = { viewport: VIEW };
@@ -24,7 +21,7 @@ const lm = (id: string) => {
 };
 const BOTTOM = 70 / L; // 아래 직선, 출발선에서 70px
 
-describe.runIf(USE_RUNNER_READY)('cameraTarget', () => {
+describe('cameraTarget', () => {
   const cam = { x: 100, y: 100 }; // 여유 상자(가운데 40%) = x 196~324, y 154~226
   it('여유 구간 안이면 그대로', () => {
     expect(cameraTarget({ x: 250, y: 190 }, cam, VIEW, false)).toEqual(cam);
@@ -57,7 +54,7 @@ describe.runIf(USE_RUNNER_READY)('cameraTarget', () => {
   });
 });
 
-describe.runIf(READY)('zoneAt', () => {
+describe('zoneAt', () => {
   it('구조물 t 위와 ±23px 안은 그 구조물', () => {
     for (const l of LANDMARKS) {
       expect(zoneAt(l.t)).toBe(l.id);
@@ -73,7 +70,7 @@ describe.runIf(READY)('zoneAt', () => {
   });
 });
 
-describe.runIf(READY)('stepRunner', () => {
+describe('stepRunner', () => {
   it('창이 열려 있으면 입력을 무시한다', () => {
     const s = snap({ t: BOTTOM, open: 'career' });
     expect(stepRunner(s, { dx: 1, dy: 0 }, env)).toEqual(s);
@@ -160,6 +157,52 @@ describe.runIf(READY)('stepRunner', () => {
   });
 });
 
-it.skipIf(USE_RUNNER_READY)('useRunner는 아직 사용자 작성 전(USE_RUNNER_READY = false)', () => {
-  expect(USE_RUNNER_READY).toBe(false);
+describe('stepRunner: 방향 잠금', () => {
+  it('→ 를 누른 채 오른쪽 커브를 지나도 멈추거나 되돌아가지 않는다', () => {
+    let s = snap({ t: 100 / L });
+    const right = { dx: 1, dy: 0 } as const;
+    const ts: number[] = [];
+    for (let i = 0; i < 80; i++) {
+      s = stepRunner(s, right, env);
+      ts.push(s.t);
+    }
+    // 80틱 × 6px = 480px: 출발 100px → 580px(위 직선)까지 계속 ccw로
+    expect(s.dir).toBe('ccw');
+    expect(s.t * L).toBeCloseTo(100 + 80 * STEP_PX, 6);
+    for (let i = 1; i < ts.length; i++) expect(ts[i]!).toBeGreaterThan(ts[i - 1]!);
+  });
+
+  it('키를 바꾸면 그 자리 접선으로 방향을 다시 정한다', () => {
+    let s = snap({ t: 100 / L });
+    s = stepRunner(s, { dx: 1, dy: 0 }, env); // ccw
+    s = stepRunner(s, { dx: -1, dy: 0 }, env); // 아래 직선에서 ← = cw
+    expect(s.dir).toBe('cw');
+  });
+
+  it('터치 ▶ 는 커브 한가운데서 눌러도 달린다(키보드 → 는 수직이라 멈춤)', () => {
+    const mid = (140 + (Math.PI * TRACK.laneRadius) / 2) / L;
+    expect(stepRunner(snap({ t: mid }), { dx: 1, dy: 0 }, env).phase).toBe('idle');
+    const touched = stepRunner(snap({ t: mid }), { dx: 1, dy: 0, touch: true }, env);
+    expect(touched.phase).toBe('running');
+    expect(touched.dir).toBe('ccw');
+  });
+
+  it('입력을 떼면 held가 비워진다', () => {
+    const n = stepRunner(snap({ t: BOTTOM }), { dx: 0, dy: 0 }, env);
+    expect(n.held).toEqual({ dx: 0, dy: 0 });
+  });
+});
+
+describe('combineKeys', () => {
+  it.each([
+    [[], 0, 0],
+    [['ArrowRight'], 1, 0],
+    [['KeyW'], 0, -1],
+    [['ArrowLeft', 'ArrowUp'], -1, -1],
+    [['ArrowLeft', 'ArrowRight'], 0, 0],
+    [['ArrowLeft', 'KeyA'], -1, 0],
+    [['Space', 'KeyQ'], 0, 0],
+  ])('%j → (%i, %i)', (codes, dx, dy) => {
+    expect(combineKeys(codes)).toEqual({ dx, dy });
+  });
 });

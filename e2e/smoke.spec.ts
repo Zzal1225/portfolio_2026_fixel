@@ -100,3 +100,24 @@ test.describe('reduced-motion', () => {
     await expect(page.getByText('WELCOME TO MY PORTFOLIO!')).toBeHidden();
   });
 });
+
+test('키보드로 달려가 반응 구역에서 Enter로 창을 연다', async ({ page }) => {
+  await skipIntro(page);
+  // 인트로가 끝난 자리(출발선 +80px)에서 ← 를 누르고 있으면 시계 방향으로 RESUME(접수 테이블)에 닿는다
+  await page.keyboard.down('ArrowLeft');
+  await expect(page.getByText('Press Enter to open RESUME')).toBeAttached({ timeout: 6_000 });
+  await page.keyboard.up('ArrowLeft');
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('dialog').getByRole('heading', { level: 2 })).toHaveText('RESUME');
+});
+
+test('메뉴를 누르면 캐릭터가 달려간 뒤 창이 열린다(바로 열리지 않음)', async ({ page }) => {
+  await skipIntro(page);
+  await page
+    .getByRole('navigation', { name: 'Menu' })
+    .getByRole('button', { name: 'Open EDUCATION' })
+    .click();
+  // 달리는 동안에는 창이 없다
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.getByRole('dialog')).toBeVisible({ timeout: OPEN_TIMEOUT });
+});

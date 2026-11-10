@@ -1,7 +1,7 @@
 /**
  * 월드 배치 데이터(640×360 월드 픽셀, 배율 적용 전).
  *
- * 이 파일은 "데이터만" 둔다. 좌표 변환(t → x,y)·방향 계산은 trackPath.ts(사용자 작성) 한 곳에서 한다.
+ * 이 파일은 "데이터만" 둔다. 좌표 변환(t → x,y)·방향 계산은 trackPath.ts 한 곳에서 한다.
  * 반응 구역 판정·소품 거리 검사 같은 규칙은 이 데이터만 보고 하므로, 구조물을 옮길 때는 여기 숫자만 바꾸면 된다.
  *
  * 값의 출처: design/design_handoff_track_portfolio/README.md 표 + scripts/extract-design-layout.mjs 출력.

@@ -1,8 +1,8 @@
 /**
- * 인트로 카메라 배치(순수 함수). 평소 카메라(여유 구간·따라가기)는 useRunner.cameraTarget(사용자 작성)이고,
+ * 인트로 카메라 배치(순수 함수). 평소 카메라(여유 구간·따라가기)는 useRunner.cameraTarget이고,
  * 이건 인트로 연출용 두 가지뿐이다: "월드 전체를 가운데" / "러너를 가운데".
  * 평소 카메라와 섞지 않은 이유: 인트로가 끝나면 useRunner가 이 위치에서 이어받으면 되고,
- * 사용자 파일에 연출 분기를 넣지 않아도 된다.
+ * 평소 이동 코드에 연출 분기를 넣지 않아도 된다.
  */
 import { WORLD, type Point, type Size } from '@/features/track/layout';
 

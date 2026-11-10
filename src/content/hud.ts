@@ -17,3 +17,6 @@ export const HUD_LABELS = {
   menu: 'Menu',
   minimap: 'Track map',
 } as const;
+
+/** 모바일 ◀ ▶(누르고 있는 동안 달림). 화면 기준 왼쪽·오른쪽 */
+export const TOUCH_LABELS = { left: 'Run left', right: 'Run right' } as const;

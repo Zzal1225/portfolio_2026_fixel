@@ -2,7 +2,7 @@
 
 이 파일은 Claude Code가 이 저장소에서 작업할 때 따르는 규칙이다.
 이 프로젝트는 **픽셀 게임(육상 트랙) 컨셉의 포트폴리오 사이트**다. nanaki·dahda와 같은 방식으로 Claude가 구현하고 사용자는 "왜" 주석과
-`private/learning/`으로 공부하되, **핵심 파일 2개는 사용자가 직접 짠다**(5-1 참고). 상세 기획은 `docs/기획서.md`를 따른다.
+`private/learning/`으로 공부한다(11-10: 사용자 직접 작성 규칙 폐지, 전부 Claude가 구현). 상세 기획은 `docs/기획서.md`를 따른다.
 
 ---
 
@@ -29,8 +29,8 @@
 | 프레임워크 | Next.js (App Router) + TypeScript (strict) |
 | 게임 렌더링 | DOM + CSS. 월드 컨테이너 하나를 `transform: translate3d`로 움직여 카메라. 스프라이트 시트 `background-position` + `animation-timing-function: steps()` |
 | 게임 상태 | Zustand (`features/track/store.ts`: `t`(0~1)·방향·running·목표 지점·카메라 좌표·열린 창·인트로 상태) |
-| 트랙 경로 | `features/track/trackPath.ts` (사용자 작성): `t` → 월드 픽셀 좌표·바라보는 방향, 두 `t` 사이 최단 방향·거리 |
-| 이동·카메라 | `features/track/useRunner.ts` (사용자 작성): 입력 → 상태 머신(idle → running → arrived), 카메라 목표 계산(여유 구간·월드 경계) |
+| 트랙 경로 | `features/track/trackPath.ts`: `t` → 월드 픽셀 좌표·바라보는 방향, 두 `t` 사이 최단 방향·거리 |
+| 이동·카메라 | `features/track/useRunner.ts`: 입력 → 상태 머신(idle → running → arrived), 카메라 목표 계산(여유 구간·월드 경계) |
 | 미니맵·MAP 창 | 인라인 SVG (`features/hud/Minimap.tsx`): 타원 path + 구조물 점 `<button>` 6개 + 현재 화면 rect. PC는 오른쪽 아래 160×90, 모바일은 "MAP" 버튼 → 같은 SVG를 Dialog 안에 크게(`features/hud/MapDialog.tsx`) |
 | 창 | Radix Dialog + Framer Motion |
 | 스타일 | Tailwind + 디자인 토큰(nanaki 토큰 JSON 규칙, 라이트 값만) |
@@ -63,7 +63,7 @@ src/
     intro/               IntroScene(신호등·줌아웃 한 바퀴·흑백→컬러·줌인), Greeting(손 흔들기 + 말풍선), KeyHint(키캡 ← → / 모바일 ◀ ▶ 깜빡임),
                          useIntroGate(첫 방문·reduced-motion), preload.ts
     track/               World(카메라 컨테이너), TrackScene, Runner(캐릭터), Landmark(구조물 6 + 제목 판 HTML), Scoreboard(전광판 HTML 글자: 평소 "CAREER", 인트로 단계 띠 + 문구 4개), Signpost(장식 이정표 + HTML 글자 3줄), Props(소품, aria-hidden),
-                         store.ts, trackPath.ts(사용자 작성), useRunner.ts(사용자 작성), layout.ts(월드 배치·구조물 t·소품 좌표)
+                         store.ts, trackPath.ts, useRunner.ts, layout.ts(월드 배치·구조물 t·소품 좌표)
     panels/              창 내용 컴포넌트(About[PROFILE|SKILLS 탭], Career, Project1, Project2, Education, Resume)
     hud/                 번호표 이름 띠, 메뉴 아이콘 6개(PC 상단/모바일 하단), ◀ ▶ 버튼, Minimap(PC), MapDialog(모바일 MAP 창), ReplayButton (조작 안내는 intro/KeyHint)
   content/               글 데이터(TS 객체). 문구는 여기에만
@@ -96,7 +96,7 @@ private/                 learning/, interview-questions.md (gitignore)
 
 ### 접근성
 - 구조물·메뉴 아이콘·미니맵 점은 `<button>`에 `aria-label`("Open CAREER"). 캐릭터·타일·소품은 `aria-hidden`.
-- 키보드 사용자는 메뉴 아이콘으로 창을 연다. 방향키 달리기는 월드에 포커스가 있을 때만 동작하고, 창·MAP 창이 열려 있으면 ←→는 이전·다음 구조물로 넘긴다.
+- 키보드 사용자는 메뉴 아이콘으로 창을 연다. 방향키 달리기는 입력칸·탭 목록·창 안에 포커스가 있을 때는 동작하지 않고(그쪽 몫), Enter·Space로 구조물 창 열기는 포커스가 바탕이나 월드일 때만. 창·MAP 창이 열려 있으면 ←→는 이전·다음 구조물로 넘긴다. 같은 방향키를 누르고 있는 동안은 처음 정한 진행 방향을 유지한다(커브 한가운데서 멈추지 않게). ◀ ▶는 화면 기준 좌우, 커브 한가운데서도 멈추지 않는다(11-10).
 - 창은 Radix Dialog 기본(포커스 트랩·ESC·`aria-labelledby`). 창 안 제목은 `h2`. 이전·다음 구조물 버튼 포함. ABOUT 창의 PROFILE|SKILLS 탭은 Radix Tabs.
 - 색만으로 뜻을 전하지 않는다(신호등은 색 + 글자 "SET"/"GO", `!` 말풍선은 아이콘 + 시각적 숨김 텍스트).
 
@@ -112,12 +112,8 @@ private/                 learning/, interview-questions.md (gitignore)
 ## 5. 워크플로우
 
 ### 5-1. 구현 방식 (기본값, 가장 중요)
-Claude가 기능을 직접 구현한다. 단, 아래 2개 파일은 **사용자가 직접 작성**한다. Claude는 설계 설명, 입력·출력 정의, 힌트, 코드 리뷰, 테스트 작성만 한다.
-사용자가 요청하지 않는 한 이 파일의 본문을 써 주지 않는다.
-1. `features/track/trackPath.ts` — 배치 데이터와 `t`를 받아 월드 좌표·바라보는 방향을 돌려주고, 두 `t` 사이 최단 방향과 거리를 계산
-2. `features/track/useRunner.ts` — 키보드·◀ ▶·탭·메뉴·미니맵 입력을 받아 틱마다 `t`를 갱신하는 상태 머신(idle → running → arrived), 반응 구역 진입·이탈 판정, 카메라 목표 계산
-
-나머지 절차는 nanaki·dahda와 같다.
+Claude가 모든 기능을 직접 구현한다(11-10 결정: 사용자가 직접 짜던 trackPath.ts·useRunner.ts도 Claude가 구현). 사용자는 "왜" 주석과 학습 노트로 공부한다.
+절차는 nanaki·dahda와 같다.
 1. **시작 전 합의**: 입력·출력·파일 위치를 3~5줄로 정리하고, 사용자가 정해야 하는 결정만 추천안과 함께 묻는다.
 2. **구현**: 한 번에 한 기능. 로직은 테스트를 먼저 또는 함께.
 3. **주석**: 모든 파일에 "왜" 주석(설계 이유, 버린 대안, 함정). 코드를 다시 말하는 주석 금지.

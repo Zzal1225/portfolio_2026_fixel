@@ -9,9 +9,18 @@
  */
 import { create } from 'zustand';
 import type { LandmarkId, Point, Size } from './layout';
-import type { Direction } from './trackPath';
+import type { Direction, KeyAxis } from './trackPath';
 
 export type RunnerPhase = 'idle' | 'running' | 'arrived';
+
+/** 한 틱의 입력: 눌린 키(↑↓←→·WASD·◀ ▶)를 합친 벡터. touch는 ◀ ▶ 버튼에서 왔는지 */
+export interface RunnerInput {
+  dx: KeyAxis;
+  dy: KeyAxis;
+  touch?: boolean;
+}
+
+export const NO_INPUT: RunnerInput = { dx: 0, dy: 0 };
 
 /** 한 틱 계산에 필요한 상태 묶음. stepRunner(snapshot, input) → snapshot */
 export interface RunnerSnapshot {
@@ -27,6 +36,11 @@ export interface RunnerSnapshot {
   open: LandmarkId | null;
   /** 카메라 좌상단(월드 px, 정수) */
   camera: Point;
+  /**
+   * 지난 틱의 입력. 같은 키를 계속 누르고 있으면 처음 정한 방향을 유지한다(방향 잠금).
+   * 이게 없으면 → 를 누른 채 오른쪽 커브 한가운데를 지날 때 내적이 0 → 음수로 바뀌어 멈추거나 되돌아간다.
+   */
+  held: RunnerInput;
 }
 
 /** 인트로 단계. features/intro/timeline.ts 참고 */
@@ -53,7 +67,7 @@ export interface GameState extends RunnerSnapshot {
   scaleOverride: number | null;
   /**
    * 달리기 입력을 받는가. 인트로(신호등·한 바퀴·줌) 동안 false.
-   * useRunner(사용자 작성)는 이 값이 false면 틱에서 아무것도 하지 않는다(인트로가 t·카메라를 직접 움직이므로).
+   * useRunner는 이 값이 false면 틱에서 아무것도 하지 않는다(인트로가 t·카메라를 직접 움직이므로).
    */
   inputEnabled: boolean;
   intro: IntroState;
@@ -73,6 +87,7 @@ export const INITIAL_SNAPSHOT: RunnerSnapshot = {
   zone: 'about',
   open: null,
   camera: { x: 160, y: 178 },
+  held: NO_INPUT,
 };
 
 export const useGame = create<GameState>()((set) => ({
@@ -86,7 +101,7 @@ export const useGame = create<GameState>()((set) => ({
   setSnapshot: (next) => set(next),
   setViewport: (viewportPx, scale) => set({ viewportPx, scale }),
   openPanel: (id) => set({ open: id, auto: null }),
-  closePanel: () => set({ open: null, phase: 'idle' }),
+  closePanel: () => set({ open: null, phase: 'idle', held: NO_INPUT }),
 }));
 
 /** 지금 화면에 쓰는 배율: 인트로가 잠시 바꾼 값이 있으면 그것, 아니면 화면 크기로 정한 값 */
