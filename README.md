@@ -44,6 +44,7 @@ Next.js 16(App Router) · TypeScript(strict) · Tailwind CSS 4 · Zustand · Rad
 - `docs/기획서.md` — 기획(화면·기능 범위·측정 항목)
 - `docs/design-vs-plan.md` — 디자인 시안과 기획의 차이, 결정 기록
 - `docs/performance.md` — 성능 측정 전후
+- `docs/troubleshooting/` — 원인이 예상과 달랐던 문제 5건(문제 → 원인 → 해결 → 결과)
 - `docs/assets/credits.md` — 그림·폰트 출처와 라이선스
 
 ---
