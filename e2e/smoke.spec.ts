@@ -167,3 +167,37 @@ test('모바일: ▶ 를 누르면 다음 지점으로 달려가 창이 열린�
   await page.getByRole('button', { name: 'Go to next stop' }).click();
   await expect(page.getByRole('dialog')).toBeVisible({ timeout: OPEN_TIMEOUT });
 });
+
+test('창이 떠 있으면 메뉴·지도·REPLAY가 숨고, TOP 버튼으로 맨 위로 간다', async ({ page }) => {
+  await skipIntro(page);
+  const menu = page.getByRole('navigation', { name: 'Menu' });
+  await menu.getByRole('button', { name: 'Open ABOUT ME' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible({ timeout: OPEN_TIMEOUT });
+
+  // 창 뒤 HUD는 숨김(visibility) — ✕가 눈에 잘 띄게. Radix 모달이 창 밖을 접근성 트리에서 빼므로 role이 아닌 CSS로 찾는다
+  const behind = page.locator(
+    'nav[aria-label="Menu"], button[aria-label="Replay intro"], button[aria-label="Open track map"]',
+  );
+  await expect(behind).toHaveCount(4);
+  for (const el of await behind.all()) await expect(el).toBeHidden();
+
+  // 화면을 낮춰 창이 확실히 화면보다 길게 만든 뒤 맨 아래로
+  await page.setViewportSize({ width: page.viewportSize()!.width, height: 360 });
+  const top = page.getByRole('button', { name: 'Back to top' });
+  await expect(top).toBeHidden();
+  await page.evaluate(() => {
+    const o = document.querySelector('.dialog-overlay')!;
+    o.scrollTop = o.scrollHeight;
+  });
+  await expect(top).toBeVisible();
+  await top.click();
+  await expect
+    .poll(() => page.evaluate(() => document.querySelector('.dialog-overlay')!.scrollTop))
+    .toBe(0);
+  await expect(page.getByRole('button', { name: 'Close' })).toBeFocused();
+
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+  await expect(menu).toBeVisible();
+});

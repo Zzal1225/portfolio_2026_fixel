@@ -17,7 +17,7 @@ import { MAP_LABELS } from '@/content/hud';
 import { MENU_LABEL, openLabel } from '@/content/menu';
 import { LANDMARKS, TRACK, WORLD, rectFromAnchor, type LandmarkId } from '@/features/track/layout';
 import { selectScale, useGame } from '@/features/track/store';
-import { useHudVisible } from './Hud';
+import { useHideForDialog, useHudVisible } from './Hud';
 
 /** 스타디움(뼈대에서 r만큼) 윤곽 path, 지도 좌표(월드 / k) */
 function stadiumPath(r: number, k: number): string {
@@ -168,8 +168,11 @@ const MapDialog = dynamic(() => import('./MapDialog').then((m) => m.MapDialog), 
  * 닫히면 Radix가 포커스를 연 버튼으로 되돌린다.
  */
 export function MapLauncher({ onSelect }: { onSelect: (id: LandmarkId) => void }) {
-  const [open, setOpen] = useState(false);
+  const open = useGame((s) => s.mapOpen);
+  const setOpen = useGame((s) => s.setMapOpen);
   const [loaded, setLoaded] = useState(false);
+  // 버튼만 숨긴다(창이 떠 있는 동안). 지도 창 자체는 이 컴포넌트 아래에 있으므로 컴포넌트는 그대로 둔다
+  const hide = useHideForDialog();
   if (!useHudVisible()) return null;
   const show = () => {
     setLoaded(true);
@@ -182,7 +185,7 @@ export function MapLauncher({ onSelect }: { onSelect: (id: LandmarkId) => void }
         aria-label={MAP_LABELS.open}
         aria-haspopup="dialog"
         onClick={show}
-        className="hud-in-bottom nine-white fixed right-4 bottom-4 z-20 p-0.5 max-[699px]:hidden"
+        className={`${hide} hud-in-bottom nine-white fixed right-4 bottom-4 z-20 p-0.5 max-[699px]:hidden`}
       >
         <span className="relative block">
           <TrackMap width={WORLD.w / 4} />
@@ -199,7 +202,7 @@ export function MapLauncher({ onSelect }: { onSelect: (id: LandmarkId) => void }
         aria-label={MAP_LABELS.open}
         aria-haspopup="dialog"
         onClick={show}
-        className="nine-white font-pixel text-ink fixed top-2 right-2 z-20 h-11 px-2 text-[9px] min-[700px]:hidden"
+        className={`${hide} nine-white font-pixel text-ink fixed top-2 right-2 z-20 h-11 px-2 text-[9px] min-[700px]:hidden`}
       >
         {MAP_LABELS.button}
       </button>

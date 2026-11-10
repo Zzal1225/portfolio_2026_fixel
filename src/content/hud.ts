@@ -25,6 +25,12 @@ export const GUIDE = '↑ ↓ ← → 이동 · SPACE 또는 클릭으로 선택
 export const TOUCH_LABELS = { prev: 'Go to previous stop', next: 'Go to next stop' } as const;
 
 /** 미니맵(PC)·MAP 버튼(모바일) → 큰 지도 창 */
+/** 창 안 맨 위로 버튼(미니맵 자리, 창이 길어질 때). 지도 창도 같이 쓰므로 창 문구 파일(panels.ts)이 아닌 여기 */
+export const SCROLL_TOP = {
+  text: '▲ TOP',
+  label: 'Back to top',
+} as const;
+
 export const MAP_LABELS = {
   button: 'MAP',
   open: 'Open track map',

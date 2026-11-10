@@ -9,6 +9,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { MAP_LABELS } from '@/content/hud';
 import { WORLD, type LandmarkId } from '@/features/track/layout';
 import { useGame } from '@/features/track/store';
+import { ScrollTopButton } from '@/features/panels/ScrollTopButton';
 import { TrackMap } from './Minimap';
 
 export function MapDialog({
@@ -58,6 +59,7 @@ export function MapDialog({
                 }}
               />
             </div>
+            <ScrollTopButton />
           </Dialog.Content>
         </Dialog.Overlay>
       </Dialog.Portal>

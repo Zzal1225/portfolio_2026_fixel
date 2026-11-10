@@ -24,6 +24,7 @@
 | 큰 전광판 | 제자리에서 커지기 + 네온 깜빡임 |
 | 재방문 | 인사 없이 바로 인트로 끝 상태(키캡 안내)(11-10 2차 결정) |
 | 창 모양 | (11-10 4차) 딤 배경이 스크롤되고 창은 내용 길이만큼 늘어남. 닫기 ✕는 창 밖 화면 오른쪽 위(빨강). 제목 띠·아래쪽 이전·다음 띠는 하늘색(tee) 바탕. 지도 창도 같은 모양 |
+| 창이 떠 있을 때 | (11-10 5차) 메뉴·미니맵(모바일 MAP)·REPLAY는 visibility로 숨김(`Hud.useHideForDialog`, 닫힐 때 포커스 복귀 위해 언마운트 안 함). 미니맵 자리에 ▲ TOP(`panels/ScrollTopButton.tsx`, 80px 내려가면 보임). 이전·다음 창은 맨 위부터 |
 | 창 제목 | 프로젝트 창은 "이름(부제목)": nanaki(기록 PWA), dahda(문자 발송 콘솔). 부제목은 `content/panels.ts` subtitle |
 
 사용자가 "지금 유지"로 정한 것(11-10 2차): 카메라 여유 구간 40%, 자동 이동 2배(시안 1.6배), PROJECT 1·2 급수대 배치(11-09 D1), 평소 배율 상한 4.
@@ -90,7 +91,7 @@ src/
     intro/               timeline.ts(경과 ms → 화면, 순수), useIntro.ts(고정 틱 진행기·SKIP·REPLAY·introSeen), camera.ts(인트로 카메라·부채꼴 각도),
                          storage.ts(introSeen try/catch), preload.ts(fonts.ready·decode), IntroOverlay.tsx(신호 띠·SKIP·큰 전광판·진행 점·흑백 부채꼴),
                          WorldIntro.tsx(신호등·심판·인사 말풍선·키캡)
-    panels/              PanelDialog.tsx(Radix Dialog 하나에 6개 내용, 이전·다음, ABOUT 탭), Sections.tsx(섹션 타입 렌더러)
+    panels/              PanelDialog.tsx(Radix Dialog 하나에 6개 내용, 이전·다음), Sections.tsx(섹션 타입 렌더러), ScrollTopButton.tsx(창·지도 창 공통 맨 위로)
     hud/                 Hud.tsx(로고·메뉴 PC 상단/모바일 하단 3×2·하단 안내 판·REPLAY), Minimap.tsx(TrackMap: 시안 월드 그림 + 구조물 버튼, PC 미니맵 버튼·모바일 MAP 버튼),
                          MapDialog.tsx(큰 지도 창, PC·모바일 공통), TouchControls.tsx(모바일 ◀ ▶ = 이전·다음 지점)
   content/               intro.ts, menu.ts, hud.ts, panels.ts, world.ts — 문구는 여기에만

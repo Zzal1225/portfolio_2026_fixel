@@ -80,6 +80,12 @@ export interface GameState extends RunnerSnapshot {
    * 자동 이동 출발(route), 반응 구역 진입(zone), 창 열림(open) 중 하나라도 생기면 true, 이후 계속 true.
    */
   panelsNeeded: boolean;
+  /**
+   * 큰 지도 창이 열려 있나. 지도 창은 MapLauncher가 열지만, 창이 떠 있는 동안 메뉴·미니맵·REPLAY를 숨기려면
+   * (✕가 눈에 잘 띄게, 11-10 사용자 요청) HUD 여러 곳이 알아야 해서 스토어에 둔다.
+   */
+  mapOpen: boolean;
+  setMapOpen: (open: boolean) => void;
   setIntro: (next: Partial<IntroState>) => void;
   setViewport: (viewportPx: Size, scale: number) => void;
   openPanel: (id: LandmarkId) => void;
@@ -103,6 +109,8 @@ export const useGame = create<GameState>()((set) => ({
   viewportPx: { w: 1280, h: 720 },
   scaleOverride: null,
   panelsNeeded: false,
+  mapOpen: false,
+  setMapOpen: (mapOpen) => set({ mapOpen }),
   inputEnabled: false,
   intro: { phase: 'boot', elapsed: 0, signal: 0, band: null, reduced: false, sweep: 0 },
   setIntro: (next) => set((s) => ({ intro: { ...s.intro, ...next } })),
@@ -116,6 +124,9 @@ useGame.subscribe((s) => {
     useGame.setState({ panelsNeeded: true });
   }
 });
+
+/** 내용 창이나 지도 창이 떠 있나(HUD 숨김 기준) */
+export const selectDialogOpen = (s: GameState): boolean => s.open !== null || s.mapOpen;
 
 /** 지금 화면에 쓰는 배율: 인트로가 잠시 바꾼 값이 있으면 그것, 아니면 화면 크기로 정한 값 */
 export const selectScale = (s: GameState): number => s.scaleOverride ?? s.scale;

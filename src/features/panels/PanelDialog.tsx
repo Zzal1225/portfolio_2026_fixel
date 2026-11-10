@@ -10,6 +10,7 @@
  *
  * 생김새(11-10 사용자 결정):
  *  - 화면 전체(딤 배경)가 스크롤되고 창은 내용 길이만큼 늘어난다. 닫기 ✕는 창 밖 화면 오른쪽 위(11-10 사용자 요청).
+ *  - 창이 떠 있는 동안 메뉴·미니맵·REPLAY는 숨고(Hud.useHideForDialog), 미니맵 자리에 맨 위로 버튼(ScrollTopButton).
  *  - 제목 띠·이전·다음 띠는 하늘색(tee) 바탕. 창 이름(aria-labelledby)은 제목 h2에서 나온다.
  *  - 이전·다음은 창 아래쪽에 "◀ 이전 창 이름 · 다음 창 이름 ▶"로. 트랙 순서(layout.ts LANDMARKS)로 넘기며,
  *    창이 화면을 덮고 있으니 러너는 그 구조물 앞으로 바로 옮긴다(시안 stepOpen과 같음). 창 안 ←→도 같은 동작.
@@ -22,6 +23,7 @@ import { DIALOG_LABELS, PANELS } from '@/content/panels';
 import { LANDMARKS, type LandmarkId } from '@/features/track/layout';
 import { frontPoint } from '@/features/track/movement';
 import { useGame } from '@/features/track/store';
+import { ScrollTopButton } from './ScrollTopButton';
 import { SectionList } from './Sections';
 
 /** 트랙 순서로 delta(±1)만큼 옆 구조물 */
@@ -40,6 +42,7 @@ export function PanelDialog() {
   const open = useGame((s) => s.open);
   const closePanel = useGame((s) => s.closePanel);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
 
   const go = (delta: 1 | -1) => {
     if (!open) return;
@@ -52,6 +55,8 @@ export function PanelDialog() {
       route: null,
       phase: 'idle',
     });
+    // 다음 창은 맨 위부터(아래쪽 이전·다음 띠에서 눌러도 새 창 중간부터 보이지 않게)
+    overlayRef.current?.scrollTo({ top: 0 });
   };
 
   const onKeyDown = (e: KeyboardEvent) => {
@@ -77,7 +82,10 @@ export function PanelDialog() {
           창은 내용 길이만큼 늘어난다 → 문구가 얼마나 길어질지 몰라도 창 안에 스크롤바가 생기지 않는다(11-10 사용자 요청).
           딤 배경(창 밖)을 누르면 닫힌다(Radix onPointerDownOutside 기본 동작).
         */}
-        <Dialog.Overlay className="dialog-overlay fixed inset-0 z-40 overflow-y-auto bg-(--dim)">
+        <Dialog.Overlay
+          ref={overlayRef}
+          className="dialog-overlay fixed inset-0 z-40 overflow-y-auto bg-(--dim)"
+        >
           <Dialog.Content
             aria-describedby={undefined}
             onOpenAutoFocus={(e) => {
@@ -86,7 +94,7 @@ export function PanelDialog() {
               closeRef.current?.focus();
             }}
             onKeyDown={onKeyDown}
-            className="dialog-content nine-white font-body relative mx-auto mt-16 mb-8 w-[min(720px,calc(100%-16px))] outline-none min-[700px]:mt-14 min-[700px]:w-[min(720px,calc(100%-32px))]"
+            className="dialog-content nine-white font-body relative mx-auto mt-16 mb-16 w-[min(720px,calc(100%-16px))] outline-none min-[700px]:mt-14 min-[700px]:mb-8 min-[700px]:w-[min(720px,calc(100%-32px))]"
           >
             {panel && (
               <>
@@ -127,6 +135,7 @@ export function PanelDialog() {
                     {`${nextTitle} ▶`}
                   </NavButton>
                 </nav>
+                <ScrollTopButton />
               </>
             )}
           </Dialog.Content>
