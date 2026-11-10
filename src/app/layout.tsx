@@ -8,6 +8,7 @@
 //   버린 대안: Pretendard 가변 폰트 한 파일(2MB), Galmuri11 Regular(500KB) — 시안이 쓰지 않는 굵기라 제외.
 import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
+import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from '@/content/site';
 import '@/styles/globals.css';
 import '@/styles/sprites.css';
 
@@ -35,9 +36,21 @@ const pretendard = localFont({
   preload: false,
 });
 
+// 미리보기 그림·아이콘은 파일 규칙(app/opengraph-image.png·icon.png·apple-icon.png, scripts/build-og.mjs)으로 Next가 메타를 넣는다.
+// 여기서는 글과 카드 종류만 정한다. twitter 카드는 X뿐 아니라 슬랙·디스코드도 큰 그림 여부를 이 값으로 본다.
 export const metadata: Metadata = {
-  title: '박찬령 포트폴리오',
-  description: '400m 트랙을 달리며 보는 프론트엔드 개발자 박찬령의 포트폴리오',
+  metadataBase: new URL(SITE_URL),
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    type: 'website',
+    locale: 'ko_KR',
+    url: '/',
+    siteName: SITE_TITLE,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
+  twitter: { card: 'summary_large_image', title: SITE_TITLE, description: SITE_DESCRIPTION },
 };
 
 export const viewport: Viewport = {

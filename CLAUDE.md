@@ -81,7 +81,8 @@
 src/
   app/
     page.tsx             서버 컴포넌트. 숨은 h1 + <Game/>
-    layout.tsx           폰트 3종(next/font/local, fonts/ + licenses/)·메타
+    layout.tsx           폰트 3종(next/font/local, fonts/ + licenses/)·메타(링크 미리보기 카드)
+    opengraph-image.png·icon.png·apple-icon.png  링크 미리보기·아이콘(Next 파일 규칙, build-og.mjs가 구움)
   features/
     track/               Game.tsx(최상위: useScale·useIntro·useRunner를 한 번씩 부르고 goTo를 메뉴·지도·구조물에 나눔, 창 지연 로딩)
                          World.tsx(카메라 = 컨테이너 transform 하나), TrackScene.tsx(타일 + 트랙 고리 PNG), Runner.tsx(러너·`!`),
@@ -94,13 +95,13 @@ src/
     panels/              PanelDialog.tsx(Radix Dialog 하나에 6개 내용, 이전·다음), Sections.tsx(섹션 타입 렌더러), ScrollTopButton.tsx(창·지도 창 공통 맨 위로)
     hud/                 Hud.tsx(로고·메뉴 PC 상단/모바일 하단 3×2·REPLAY), Minimap.tsx(TrackMap: 시안 월드 그림 + 구조물 버튼, PC 미니맵 버튼·모바일 MAP 버튼),
                          MapDialog.tsx(큰 지도 창, PC·모바일 공통), TouchControls.tsx(모바일 ◀ ▶ = 이전·다음 지점)
-  content/               intro.ts, menu.ts, hud.ts, panels.ts, world.ts — 문구는 여기에만
+  content/               intro.ts, menu.ts, hud.ts, panels.ts, world.ts, site.ts(메타·사이트 주소) — 문구는 여기에만
   styles/                globals.css(16색 토큰·9-slice·창 애니메이션), sprites.css(그림 경로·시트 좌표·스프라이트 애니메이션)
 public/
   sprites/               tiles/ structures/ props/ ui/ character/ intro/ world/(track-ring) — Design 개별 PNG(시트 합치기는 step3 검토)
   img/                   창 사진(about-me-320·640.webp, 원본은 private/img/)
   resume.pdf             (예정) 이력서
-scripts/                 extract-design-layout.mjs·build-track-ring.mjs(시안 코드에서 숫자·그림 1회 추출), build-photos.mjs(창 사진 → WebP 2장), lh-summary.mjs, measure-run.mjs(측정)
+scripts/                 extract-design-layout.mjs·build-track-ring.mjs(시안 코드에서 숫자·그림 1회 추출), build-photos.mjs(창 사진 → WebP 2장), build-og.mjs(링크 미리보기·아이콘), lh-summary.mjs, measure-run.mjs(측정)
 e2e/                     smoke.spec.ts(Playwright: 크로미움 PC·모바일, WebKit PC + axe)
 docs/                    기획서.md, design-vs-plan.md, step1-plan.md, performance.md, milestones.md, assets/credits.md
 private/                 learning/, interview-questions.md (gitignore)
