@@ -33,10 +33,7 @@ jobs:
       # 이전 방식(timeout으로 npx만 끊기)은 sudo apt-get이 살아남아 잠금을 쥐고 있어 재시도가 전부 실패했다.
       - name: Install Playwright browsers (retry)
         run: |
-          printf 'Acquire::Retries "5";
-Acquire::http::Timeout "20";
-Acquire::https::Timeout "20";
-' | sudo tee /etc/apt/apt.conf.d/99ci-timeouts
+          echo 'Acquire::Retries "5"; Acquire::http::Timeout "20"; Acquire::https::Timeout "20";' | sudo tee /etc/apt/apt.conf.d/99ci-timeouts
           for i in 1 2 3; do
             timeout 240 npx playwright install --with-deps chromium webkit && exit 0
             echo "::warning::playwright install attempt $i stalled or failed, cleaning up apt and retrying"
