@@ -23,6 +23,14 @@ export const PRELOAD_IMAGES = [
   '/sprites/intro/referee-flag-down-32x48.png',
 ] as const;
 
+/** HTML 단계에서 <link rel=preload>로 먼저 받을 그림: 첫 화면에 크게 보이는 것만(나머지까지 걸면 서로 대역폭을 다툼) */
+export const CRITICAL_IMAGES = [
+  '/sprites/world/track-ring-512x232.png',
+  '/sprites/tiles/tile-grass-32x32.png',
+  '/sprites/tiles/tile-stand-32x32.png',
+  '/sprites/character/runner-sheet-128x240.png',
+] as const;
+
 function decodeImage(src: string): Promise<void> {
   const img = new Image();
   img.src = src;

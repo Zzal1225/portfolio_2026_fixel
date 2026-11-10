@@ -17,7 +17,7 @@ export function IntroActors() {
   const signal = useGame((s) => s.intro.signal);
   const phase = useGame((s) => s.intro.phase);
   // 초록(GO)과 함께 깃발을 내린다. 신호 전(대기)·빨강·노랑은 깃발을 든 상태
-  const flagUp = phase === 'preload' || (phase === 'signal' && signal < 3);
+  const flagUp = phase === 'boot' || phase === 'preload' || (phase === 'signal' && signal < 3);
   return (
     <div aria-hidden>
       {ACTORS.map((a) => {

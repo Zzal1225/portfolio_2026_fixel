@@ -46,7 +46,9 @@
   /* --- 폰트: 실제 font-family는 layout.tsx의 next/font가 만든 변수 --- */
   --font-pixel: var(--font-press-start), ui-monospace, monospace;
   --font-pixel-ko: var(--font-galmuri), var(--font-pretendard), sans-serif;
-  --font-sans: var(--font-pretendard), system-ui, sans-serif;
+  /* 첫 화면(body)은 시스템 글꼴. Pretendard(261KB)는 창 본문에서만 써서 첫 화면 다운로드에서 뺀다 */
+  --font-sans: system-ui, sans-serif;
+  --font-body: var(--font-pretendard), system-ui, sans-serif;
 }
 
 :root {

@@ -18,7 +18,7 @@ import { useGame } from '@/features/track/store';
  * 숨김은 렌더하지 않는 방식: 숨긴 메뉴에 Tab이 걸리지 않게.
  */
 export function useHudVisible(): boolean {
-  return useGame((s) => !['preload', 'signal', 'lap'].includes(s.intro.phase));
+  return useGame((s) => !['boot', 'preload', 'signal', 'lap'].includes(s.intro.phase));
 }
 
 /** ▶ REPLAY(왼쪽 아래): 인사 이후부터. 누르면 열린 창을 닫고 신호등부터 다시(useIntro.replay) */
@@ -42,7 +42,7 @@ export function NameBib() {
   // 번호표 모양 이름 띠. 정적인 글이라 버튼이 아니다
   return (
     <div className="nine-white text-ink fixed top-4 left-4 z-20 flex items-baseline gap-2 px-2 py-1 max-[699px]:top-2 max-[699px]:left-2">
-      <span className="text-base font-bold">{BIB.name}</span>
+      <span className="font-pixel-ko text-sm font-bold">{BIB.name}</span>
       <span className="font-pixel text-[10px]">{BIB.level}</span>
     </div>
   );

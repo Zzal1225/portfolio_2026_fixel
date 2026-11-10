@@ -53,7 +53,8 @@
 
 /*
  * 반응 구역 안: 1px accent 외곽선 그림(-selected, 사방 1px 큼).
- * ::after로 겹쳐 두고 data-selected일 때만 보인다 — 그림을 바꾸는 대신 겹치기라 깜빡임(새 이미지 로드)이 없다.
+ * ::after로 겹쳐 두고 data-selected일 때만 그림을 붙인다. 처음부터 붙여 두면(투명도 0이어도) 첫 화면에
+ * 6장을 더 받아 트랙 그림(LCP)과 대역폭을 다툰다. 처음 선택될 때 1KB짜리를 받는 지연은 체감되지 않는다.
  */
 .spr-selected::after {
   content: '';
@@ -65,22 +66,22 @@
 [data-selected='true'].spr-selected::after {
   opacity: 1;
 }
-.spr-arch-96x64::after {
+[data-selected='true'].spr-arch-96x64::after {
   background-image: url('/sprites/structures/arch-96x64-selected.png');
 }
-.spr-scoreboard-96x32::after {
+[data-selected='true'].spr-scoreboard-96x32::after {
   background-image: url('/sprites/structures/scoreboard-96x32-selected.png');
 }
-.spr-water-a-64x32::after {
+[data-selected='true'].spr-water-a-64x32::after {
   background-image: url('/sprites/structures/water-a-64x32-selected.png');
 }
-.spr-water-b-64x32::after {
+[data-selected='true'].spr-water-b-64x32::after {
   background-image: url('/sprites/structures/water-b-64x32-selected.png');
 }
-.spr-tent-64x64::after {
+[data-selected='true'].spr-tent-64x64::after {
   background-image: url('/sprites/structures/tent-64x64-selected.png');
 }
-.spr-reception-table-64x32::after {
+[data-selected='true'].spr-reception-table-64x32::after {
   background-image: url('/sprites/structures/reception-table-64x32-selected.png');
 }
 

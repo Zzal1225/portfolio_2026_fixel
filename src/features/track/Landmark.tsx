@@ -99,7 +99,9 @@ export function Landmarks({ onSelect }: { onSelect: (id: LandmarkId) => void }) 
   // zone만 구독: t가 바뀌어도 zone이 같으면 구조물 6개는 다시 그려지지 않는다
   const zone = useGame((s) => s.zone);
   const open = useGame((s) => s.open);
-  const intro = useGame((s) => ['preload', 'signal', 'lap', 'zoom'].includes(s.intro.phase));
+  const intro = useGame((s) =>
+    ['boot', 'preload', 'signal', 'lap', 'zoom'].includes(s.intro.phase),
+  );
   return (
     <>
       {LANDMARKS.map((l) => (

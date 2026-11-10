@@ -159,7 +159,13 @@ export function useIntro(): IntroControls {
     const onInput = (e: Event) => {
       if (e instanceof KeyboardEvent && IGNORED_KEYS.has(e.key)) return;
       const phase = store.getState().intro.phase;
-      if (phase === 'preload' || phase === 'signal' || phase === 'lap' || phase === 'zoom') {
+      if (
+        phase === 'boot' ||
+        phase === 'preload' ||
+        phase === 'signal' ||
+        phase === 'lap' ||
+        phase === 'zoom'
+      ) {
         skipRef.current();
       } else if (phase === 'greet' || phase === 'hint') {
         clearTimeout(shortTimer);
@@ -185,4 +191,4 @@ export function useIntro(): IntroControls {
 
 /** 인트로 연출 중(HUD 숨김·입력 잠금 구간)인가 */
 export const isIntroPlaying = (phase: string) =>
-  phase === 'preload' || phase === 'signal' || phase === 'lap';
+  phase === 'boot' || phase === 'preload' || phase === 'signal' || phase === 'lap';

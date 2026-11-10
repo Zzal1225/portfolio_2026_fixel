@@ -6,10 +6,9 @@
  * 왜 점은 SVG 안이 아니라 HTML <button>: SVG 안에는 진짜 button을 둘 수 없다. 진짜 button이 키보드·스크린리더 동작을 그대로 준다.
  * 점 버튼 순서 = 트랙 순서(반시계) → Tab 순서가 트랙을 한 바퀴 도는 순서와 같다.
  *
- * 현재 화면 네모: 카메라 좌상단·화면 크기를 지도 비율로 줄여 그린다. 카메라가 움직일 때 이 rect의 x·y 속성만 바뀐다
- * (SVG 속성 변경은 레이아웃이 아니라 다시 칠하기만 일으킨다).
+ * 현재 화면 네모·러너 점: 카메라·러너 위치를 지도 비율로 줄여 transform으로 움직인다(아래 RunnerDot 주석).
  */
-import * as Dialog from '@radix-ui/react-dialog';
+import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { HUD_LABELS, MAP_LABELS } from '@/content/hud';
 import { MENU_LABEL, openLabel } from '@/content/menu';
@@ -27,16 +26,23 @@ function stadiumPath(r: number, k: number): string {
   return `M${a.x / k},${top} H${b.x / k} A${R},${R} 0 0 1 ${b.x / k},${bottom} H${a.x / k} A${R},${R} 0 0 1 ${a.x / k},${top} Z`;
 }
 
+/*
+ * 러너 점·현재 화면 네모는 SVG 속성(x·y)이 아니라 HTML 요소의 transform으로 움직인다.
+ * SVG rect의 x·y를 틱마다 바꾸면 SVG 레이아웃이 다시 계산된다(측정: PC 3초 달리기 중 Layout 52회 → 이 변경으로 0회 목표).
+ * transform은 레이아웃 없이 합성만 한다. 크기(width·height)는 화면 크기가 바뀔 때만 바뀐다.
+ */
 function RunnerDot({ k, size }: { k: number; size: number }) {
   const t = useGame((s) => s.t);
   const p = toWorld(t);
   return (
-    <rect
-      x={p.x / k - size / 2}
-      y={(p.footY - 24) / k - size / 2}
-      width={size}
-      height={size}
-      fill="var(--color-ink)"
+    <div
+      aria-hidden
+      className="bg-ink pointer-events-none absolute top-0 left-0"
+      style={{
+        width: size,
+        height: size,
+        transform: `translate3d(${p.x / k - size / 2}px, ${(p.footY - 24) / k - size / 2}px, 0)`,
+      }}
     />
   );
 }
@@ -46,14 +52,14 @@ function ViewRect({ k }: { k: number }) {
   const scale = useGame(selectScale);
   const vp = useGame((s) => s.viewportPx);
   return (
-    <rect
-      x={cam.x / k + 1}
-      y={cam.y / k + 1}
-      width={Math.max(0, vp.w / scale / k - 2)}
-      height={Math.max(0, vp.h / scale / k - 2)}
-      fill="none"
-      stroke="var(--color-accent)"
-      strokeWidth={2}
+    <div
+      aria-hidden
+      className="border-accent pointer-events-none absolute top-0 left-0 border-2"
+      style={{
+        width: Math.max(0, vp.w / scale / k),
+        height: Math.max(0, vp.h / scale / k),
+        transform: `translate3d(${cam.x / k}px, ${cam.y / k}px, 0)`,
+      }}
     />
   );
 }
@@ -62,7 +68,7 @@ function ViewRect({ k }: { k: number }) {
  * 지도 본체. width(px)에 맞춰 축소 비율 k = 640 / width.
  * labels=true면 점 옆에 구조물 이름(큰 지도용).
  */
-function TrackMap({
+export function TrackMap({
   width,
   onSelect,
   labels = false,
@@ -87,9 +93,9 @@ function TrackMap({
           fill="var(--color-track)"
           fillRule="evenodd"
         />
-        <ViewRect k={k} />
-        <RunnerDot k={k} size={labels ? 10 : 6} />
       </svg>
+      <ViewRect k={k} />
+      <RunnerDot k={k} size={labels ? 10 : 6} />
       <ul>
         {LANDMARKS.map((l) => {
           const r = rectFromAnchor(l.anchor, l.size);
@@ -147,57 +153,32 @@ export function Minimap({ onSelect }: { onSelect: (id: LandmarkId) => void }) {
 }
 
 /**
- * 모바일 MAP 버튼(오른쪽 위) → 큰 지도 창. 지도 위 구조물을 누르면 창을 닫고 그곳으로 달려간다(도착하면 그 창이 열림).
- * 작은 화면에서 미니맵 점은 너무 작아 누르기 어려워서 시안대로 창으로 크게 보여 준다.
+ * 모바일 MAP 버튼(오른쪽 위, 폭 700 미만). 누르면 큰 지도 창(MapDialog)을 연다.
+ * 버튼 자체는 Radix를 쓰지 않는다: 창 코드(Radix Dialog)는 처음 누를 때 받는다(첫 화면 JS 줄이기).
  */
+const MapDialog = dynamic(() => import('./MapDialog').then((m) => m.MapDialog), { ssr: false });
+
 export function MapButton({ onSelect }: { onSelect: (id: LandmarkId) => void }) {
   const [open, setOpen] = useState(false);
-  const vp = useGame((s) => s.viewportPx);
+  const [loaded, setLoaded] = useState(false);
   const visible = useHudVisible();
   if (!visible) return null;
-  // 창 테두리·여백을 뺀 폭, 세로는 머리 띠·안내 문구 몫을 뺀 높이에 맞춤
-  const width = Math.floor(Math.min(vp.w - 56, ((vp.h - 160) * WORLD.w) / WORLD.h));
-
   return (
-    <Dialog.Root open={open} onOpenChange={setOpen}>
-      <Dialog.Trigger
+    <>
+      <button
+        type="button"
         aria-label={MAP_LABELS.open}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        onClick={() => {
+          setLoaded(true);
+          setOpen(true);
+        }}
         className="nine-white font-pixel text-ink fixed top-2 right-2 z-20 h-11 px-2 text-[10px] min-[700px]:hidden"
       >
         {MAP_LABELS.button}
-      </Dialog.Trigger>
-      <Dialog.Portal>
-        <Dialog.Overlay className="dialog-overlay fixed inset-0 z-40 bg-(--dim)" />
-        <Dialog.Content
-          aria-describedby="map-hint"
-          className="dialog-content nine-white fixed top-1/2 left-1/2 z-50 -translate-x-1/2 -translate-y-1/2 outline-none"
-        >
-          <header className="bg-tee border-ink flex items-center gap-2 border-b-2 py-2 pr-2 pl-3">
-            <Dialog.Title className="font-pixel text-ink flex-1 text-base">
-              {MAP_LABELS.title}
-            </Dialog.Title>
-            <Dialog.Close
-              aria-label={MAP_LABELS.close}
-              className="nine-white text-ink grid size-10 place-items-center text-sm"
-            >
-              <span aria-hidden>✕</span>
-            </Dialog.Close>
-          </header>
-          <p id="map-hint" className="font-pixel-ko px-3 pt-3 text-[13px] font-bold">
-            {MAP_LABELS.hint}
-          </p>
-          <div className="p-3">
-            <TrackMap
-              width={Math.max(160, width)}
-              labels
-              onSelect={(id) => {
-                setOpen(false);
-                onSelect(id);
-              }}
-            />
-          </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+      </button>
+      {loaded && <MapDialog open={open} onOpenChange={setOpen} onSelect={onSelect} />}
+    </>
   );
 }

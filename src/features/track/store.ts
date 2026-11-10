@@ -43,8 +43,11 @@ export interface RunnerSnapshot {
   held: RunnerInput;
 }
 
-/** 인트로 단계. features/intro/timeline.ts 참고 */
-export type IntroPhase = 'preload' | 'signal' | 'lap' | 'zoom' | 'greet' | 'hint' | 'done';
+/**
+ * 인트로 단계. features/intro/timeline.ts 참고.
+ * boot = 서버 HTML·하이드레이션 전. 이때 그린 SKIP은 눌러도 아무 일이 없으므로(이벤트 연결 전) 그리지 않는다.
+ */
+export type IntroPhase = 'boot' | 'preload' | 'signal' | 'lap' | 'zoom' | 'greet' | 'hint' | 'done';
 
 export interface IntroState {
   phase: IntroPhase;
@@ -76,6 +79,11 @@ export interface GameState extends RunnerSnapshot {
    */
   inputEnabled: boolean;
   intro: IntroState;
+  /**
+   * 창 코드(Radix·창 문구)를 받을 때가 됐나. 첫 화면 JS를 줄이려고 창은 처음 필요해질 때 받는다:
+   * 메뉴·미니맵으로 출발(auto), 반응 구역 진입(zone), 창 열림(open) 중 하나라도 생기면 true, 이후 계속 true.
+   */
+  panelsNeeded: boolean;
   setIntro: (next: Partial<IntroState>) => void;
   setSnapshot: (next: Partial<RunnerSnapshot>) => void;
   setViewport: (viewportPx: Size, scale: number) => void;
@@ -89,7 +97,7 @@ export const INITIAL_SNAPSHOT: RunnerSnapshot = {
   dir: 'ccw',
   phase: 'idle',
   auto: null,
-  zone: 'about',
+  zone: null,
   open: null,
   camera: { x: 160, y: 178 },
   held: NO_INPUT,
@@ -100,14 +108,21 @@ export const useGame = create<GameState>()((set) => ({
   scale: 2,
   viewportPx: { w: 1280, h: 720 },
   scaleOverride: null,
+  panelsNeeded: false,
   inputEnabled: false,
-  intro: { phase: 'preload', signal: 0, band: null, boardLine: -1, reduced: false, sweep: 0 },
+  intro: { phase: 'boot', signal: 0, band: null, boardLine: -1, reduced: false, sweep: 0 },
   setIntro: (next) => set((s) => ({ intro: { ...s.intro, ...next } })),
   setSnapshot: (next) => set(next),
   setViewport: (viewportPx, scale) => set({ viewportPx, scale }),
   openPanel: (id) => set({ open: id, auto: null }),
   closePanel: () => set({ open: null, phase: 'idle', held: NO_INPUT }),
 }));
+
+useGame.subscribe((s) => {
+  if (!s.panelsNeeded && (s.open !== null || s.auto !== null || s.zone !== null)) {
+    useGame.setState({ panelsNeeded: true });
+  }
+});
 
 /** 지금 화면에 쓰는 배율: 인트로가 잠시 바꾼 값이 있으면 그것, 아니면 화면 크기로 정한 값 */
 export const selectScale = (s: GameState): number => s.scaleOverride ?? s.scale;

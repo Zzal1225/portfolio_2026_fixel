@@ -75,7 +75,7 @@ export function PanelDialog() {
             closeRef.current?.focus();
           }}
           onKeyDown={onKeyDown}
-          className="dialog-content nine-white fixed inset-x-2 bottom-2 z-50 flex max-h-[78%] flex-col outline-none min-[700px]:inset-x-auto min-[700px]:top-14 min-[700px]:bottom-auto min-[700px]:left-1/2 min-[700px]:max-h-[calc(100%-112px)] min-[700px]:w-[min(720px,calc(100%-32px))] min-[700px]:-translate-x-1/2"
+          className="dialog-content nine-white font-body fixed inset-x-2 bottom-2 z-50 flex max-h-[78%] flex-col outline-none min-[700px]:inset-x-auto min-[700px]:top-14 min-[700px]:bottom-auto min-[700px]:left-1/2 min-[700px]:max-h-[calc(100%-112px)] min-[700px]:w-[min(720px,calc(100%-32px))] min-[700px]:-translate-x-1/2"
         >
           {panel && (
             <>

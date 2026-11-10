@@ -7,28 +7,39 @@
  * DOM 순서 = Tab 순서: 이름 띠 → 메뉴 → 월드 → 미니맵 → ◀ ▶(모바일) → REPLAY. 창은 Portal로 body 끝. 인트로 SKIP은 맨 끝이지만
  * 인트로 중에는 HUD가 없어 첫 Tab 정지점이 월드 다음 SKIP이 된다(아무 키로도 건너뛸 수 있음).
  */
+import dynamic from 'next/dynamic';
 import { useRef } from 'react';
 import { preload } from 'react-dom';
 import { IntroOverlay } from '@/features/intro/IntroOverlay';
-import { PRELOAD_IMAGES } from '@/features/intro/preload';
+import { CRITICAL_IMAGES } from '@/features/intro/preload';
 import { useIntro } from '@/features/intro/useIntro';
-import { PanelDialog } from '@/features/panels/PanelDialog';
 import { Menu, NameBib, ReplayButton } from '@/features/hud/Hud';
 import { MapButton, Minimap } from '@/features/hud/Minimap';
 import { TouchControls } from '@/features/hud/TouchControls';
 import { useRunner } from './useRunner';
+import { useGame } from './store';
 import { useScale } from './useScale';
 import { World } from './World';
 
+/*
+ * 창(Radix Dialog·Tabs + 창 문구 전체, 약 24KB)은 첫 화면에 필요 없다 → 처음 필요해질 때 받는다(store.panelsNeeded).
+ * 메뉴를 누르면 캐릭터가 달려가는 동안 받아지므로 도착 때 기다림이 거의 없다. 전후 수치: docs/performance.md
+ */
+const PanelDialog = dynamic(
+  () => import('@/features/panels/PanelDialog').then((m) => m.PanelDialog),
+  { ssr: false },
+);
+
 export function Game() {
   // <link rel=preload>: 인트로가 decode()로 기다리는 그림을 HTML 단계에서 먼저 받기 시작
-  PRELOAD_IMAGES.forEach((src) => preload(src, { as: 'image' }));
+  CRITICAL_IMAGES.forEach((src) => preload(src, { as: 'image', fetchPriority: 'high' }));
   // 순서 중요: useScale의 effect가 먼저 돌아야 useIntro가 실제 배율로 절반 배율을 정한다
   useScale();
   const intro = useIntro();
   const worldRef = useRef<HTMLDivElement>(null);
   const controls = useRunner(worldRef);
   const { goTo } = controls;
+  const panelsNeeded = useGame((s) => s.panelsNeeded);
 
   return (
     <>
@@ -39,7 +50,7 @@ export function Game() {
       <MapButton onSelect={goTo} />
       <TouchControls press={controls.press} release={controls.release} />
       <ReplayButton onReplay={intro.replay} />
-      <PanelDialog />
+      {panelsNeeded && <PanelDialog />}
       <IntroOverlay onSkip={intro.skip} />
     </>
   );
