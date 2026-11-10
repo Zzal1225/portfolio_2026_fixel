@@ -87,8 +87,14 @@ export function PanelDialog() {
           {panel && (
             <>
               <header className="bg-tee border-ink flex items-center gap-2 border-b-2 py-2 pr-2 pl-3">
-                <Dialog.Title className="font-pixel min-w-0 flex-1 truncate text-ink text-base leading-tight">
-                  {panel.title}
+                <Dialog.Title className="text-ink flex min-w-0 flex-1 items-baseline gap-2 leading-tight">
+                  <span className="font-pixel truncate text-base">{panel.title}</span>
+                  {panel.subtitle && (
+                    // 부제목: 제목(영어 픽셀)보다 작은 한글 픽셀 글자. 스크린리더는 "nanaki 기록 PWA"로 읽는다
+                    <span className="font-pixel-ko shrink-0 text-[13px] font-bold">
+                      ({panel.subtitle})
+                    </span>
+                  )}
                 </Dialog.Title>
                 <HeadButton label={DIALOG_LABELS.prev(prevTitle)} onClick={() => go(-1)}>
                   ◀

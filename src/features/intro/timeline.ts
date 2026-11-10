@@ -30,8 +30,6 @@ export const T = {
 export const BOARD_OUT = T.BOARD_IN + T.ENTRY * BOARD_LINES.length;
 /** 한 바퀴 + 80px(아치에 얼굴이 가리지 않는 자리에서 멈춤) */
 export const LAP_TOTAL = TRACK.length + 80;
-/** 재방문 짧은 인사(기획서, 시안 결정 목록 밖이라 유지) */
-export const SHORT_GREET_S = 1.5;
 
 /** 네온 켜짐 깜빡임(0.04초 칸 7개) */
 const FLICKER = [1, 0, 1, 0, 0, 1, 1] as const;

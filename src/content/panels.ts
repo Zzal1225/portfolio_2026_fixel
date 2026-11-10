@@ -36,6 +36,8 @@ export interface Panel {
   id: LandmarkId;
   /** 창 머리 띠 제목(영어 픽셀 폰트) */
   title: string;
+  /** 제목 옆 부제목(한 줄 설명, 11-10 사용자 결정: "nanaki(부제목)" 형태). 없으면 제목만 */
+  subtitle?: string;
   sections: readonly Section[];
 }
 
@@ -135,7 +137,8 @@ export const PANELS: Record<LandmarkId, Panel> = {
 
   project1: {
     id: 'project1',
-    title: 'PROJECT 1 · nanaki',
+    title: 'nanaki',
+    subtitle: '기록 PWA',
     sections: [
       {
         type: 'stats',
@@ -175,7 +178,8 @@ export const PANELS: Record<LandmarkId, Panel> = {
 
   project2: {
     id: 'project2',
-    title: 'PROJECT 2 · dahda',
+    title: 'dahda',
+    subtitle: '문자 발송 콘솔',
     sections: [
       {
         type: 'stats',

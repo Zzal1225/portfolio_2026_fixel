@@ -19,15 +19,7 @@ import { facing as laneFacing } from '@/features/track/trackPath';
 import { centerOn, sweepAngle, viewInWorld } from './camera';
 import { preloadAssets } from './preload';
 import { browserStorage, readSeen, writeSeen } from './storage';
-import {
-  SHORT_GREET_S,
-  T,
-  introAt,
-  introCamera,
-  introMode,
-  lapDistance,
-  type ScaleSet,
-} from './timeline';
+import { T, introAt, introCamera, introMode, lapDistance, type ScaleSet } from './timeline';
 
 /** 건너뛰기 키로 치지 않는 키: Tab 이동·보조 키는 "입력"이 아니라 탐색이다 */
 const IGNORED_KEYS = new Set(['Tab', 'Shift', 'Alt', 'Control', 'Meta', 'CapsLock']);
@@ -47,7 +39,6 @@ export function useIntro(): IntroControls {
     const store = useGame;
     let cancelled = false;
     let timer: ReturnType<typeof setInterval> | undefined;
-    let shortTimer: ReturnType<typeof setTimeout> | undefined;
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const storage = browserStorage();
@@ -138,21 +129,11 @@ export function useIntro(): IntroControls {
       timer = setInterval(tick, TICK_MS);
     };
 
-    /** 재방문: 평소 배율에서 짧은 인사(1.5초, 입력 가능) → 키캡 */
-    const startShort = () => {
-      const s = store.getState();
-      store.setState({
-        inputEnabled: true,
-        camera: centerOn(
-          { x: FINISH.x, y: FINISH.y - FOCUS_OFFSET_Y },
-          viewInWorld(s.viewportPx, s.scale),
-        ),
-      });
-      s.setIntro({ phase: 'greet', sweep: 360 });
-      shortTimer = setTimeout(() => {
-        if (store.getState().intro.phase === 'greet') store.getState().setIntro({ phase: 'ready' });
-      }, SHORT_GREET_S * 1000);
-    };
+    /**
+     * 재방문(11-10 시안 채택): 인사 없이 바로 인트로 끝 상태(키캡 안내).
+     * 버린 대안: 짧은 인사 1.5초 — 두 번째로 온 담당자에게는 기다림일 뿐이라 시안처럼 뺐다.
+     */
+    const startShort = () => enterReady();
 
     /** reduced-motion: 인사 말풍선을 첫 입력까지 고정(손 흔들기·줌 없음) */
     const startReduced = () => {
@@ -187,7 +168,6 @@ export function useIntro(): IntroControls {
       if (!s.inputEnabled && phase !== 'ready' && phase !== 'done') {
         skipRef.current();
       } else if (phase === 'greet' || phase === 'ready') {
-        clearTimeout(shortTimer);
         s.setIntro({ phase: 'done' });
       }
     };
@@ -197,7 +177,6 @@ export function useIntro(): IntroControls {
     return () => {
       cancelled = true;
       clearInterval(timer);
-      clearTimeout(shortTimer);
       window.removeEventListener('keydown', onInput, true);
       window.removeEventListener('pointerdown', onInput, true);
     };

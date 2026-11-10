@@ -82,12 +82,25 @@ test('axe: 트랙 화면과 창에 위반이 없다', async ({ page }) => {
   expect(dialog.violations).toEqual([]);
 });
 
-test('재방문은 신호등 없이 인사부터, introSeen 저장', async ({ page }) => {
+test('재방문은 인트로·인사 없이 바로 플레이(시안), introSeen 저장', async ({ page }) => {
   await skipIntro(page);
   expect(await page.evaluate(() => localStorage.getItem('introSeen'))).toBe('1');
   await page.reload();
-  await expect(page.getByText('WELCOME TO MY PORTFOLIO!')).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Menu' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Skip intro' })).toHaveCount(0);
+  await expect(page.getByText('WELCOME TO MY PORTFOLIO!')).toHaveCount(0);
+});
+
+test('프로젝트 창 제목은 "이름(부제목)"', async ({ page }) => {
+  await skipIntro(page);
+  await page
+    .getByRole('navigation', { name: 'Menu' })
+    .getByRole('button', { name: 'Open PROJECT1' })
+    .click();
+  await expect(page.getByRole('dialog').getByRole('heading', { level: 2 })).toHaveText(
+    'nanaki(기록 PWA)',
+    { timeout: OPEN_TIMEOUT },
+  );
 });
 
 test.describe('reduced-motion', () => {
