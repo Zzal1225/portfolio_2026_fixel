@@ -11,6 +11,8 @@ const REMOTE = process.env.E2E_BASE_URL;
 
 export default defineConfig({
   testDir: 'e2e',
+  // 화면 비교 기준은 리눅스 CI에서만 만들므로 경로에 OS를 넣지 않는다(e2e/visual.spec.ts 주석)
+  snapshotPathTemplate: '{testDir}/__screenshots__/{projectName}/{arg}{ext}',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

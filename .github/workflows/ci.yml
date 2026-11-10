@@ -27,7 +27,10 @@ jobs:
       - run: npm run test
       - run: npm run build
       - run: npx playwright install --with-deps chromium webkit
+      # 화면 비교 기준(e2e/__screenshots__)이 커밋돼 있으면 함께 비교한다
       - run: npm run test:e2e
+        env:
+          VISUAL: ${{ hashFiles('e2e/__screenshots__/**') != '' && '1' || '' }}
       - uses: actions/upload-artifact@v5
         if: failure()
         with:
@@ -48,7 +51,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      - run: npx lhci autorun
+      # 인트로가 14초라 3회 측정은 10분 가까이 걸린다. CI는 1회(추세 확인용), 정식 기록은 로컬 3회 중앙값(docs/performance.md)
+      - run: npx lhci autorun --collect.numberOfRuns=1
       - uses: actions/upload-artifact@v5
         if: always()
         with:

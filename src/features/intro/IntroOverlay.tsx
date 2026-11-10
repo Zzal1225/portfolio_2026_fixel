@@ -49,11 +49,16 @@ function BigBoard() {
   };
   const to = { x: vp.w / 2 - big.w / 2, y: vp.h / 2 - big.h / 2, ...big };
   const g = board.grow;
+  // 크기·위치를 left/top/width/height로 바꾸면 매 프레임 레이아웃이 다시 돈다(측정: 인트로 중 Layout 약 100회).
+  // 큰 판 크기로 고정하고 transform(translate + scale)으로만 움직인다 → 레이아웃 없음, 합성만.
+  const sc = lerp(from.w, to.w, g) / to.w;
   const box = {
-    left: lerp(from.x, to.x, g),
-    top: lerp(from.y, to.y, g),
-    width: lerp(from.w, to.w, g),
-    height: lerp(from.h, to.h, g),
+    left: 0,
+    top: 0,
+    width: to.w,
+    height: to.h,
+    transformOrigin: '0 0',
+    transform: `translate3d(${lerp(from.x, to.x, g)}px, ${lerp(from.y, to.y, g)}px, 0) scale(${sc})`,
   };
   const current = board.line >= 0 ? BOARD_LINES[board.line] : undefined;
   const H = big.h; // 글자 크기는 큰 판 기준(커지는 동안 글자는 아직 없음)
@@ -66,8 +71,8 @@ function BigBoard() {
           ...box,
           backgroundImage: 'url(/sprites/structures/scoreboard-blank-96x32.png)',
           backgroundSize: '100% 100%',
-          transition:
-            'left var(--tick) linear, top var(--tick) linear, width var(--tick) linear, height var(--tick) linear',
+          transition: 'transform var(--tick) linear',
+          willChange: 'transform',
         }}
       >
         {/* 전광판 그림 안 검은 화면 영역(시안: left 5.2%, top 9.4%, 폭 89.6%, 높이 50%) */}

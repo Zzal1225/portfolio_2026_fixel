@@ -45,7 +45,7 @@ const sToT = (s: number): number => s / TRACK.length;
 
 export type LandmarkId = 'about' | 'career' | 'project1' | 'project2' | 'skill' | 'resume';
 
-/** public/sprites/structures/{sprite}.png 파일 이름과 같다 */
+/** 스프라이트 이름(sprites.css 클래스 spr-{sprite}, 물건 시트 안 좌표 --pos-{sprite}) */
 export type LandmarkSprite =
   | 'arch-96x64'
   | 'scoreboard-96x32'

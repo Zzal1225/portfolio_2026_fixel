@@ -1,3 +1,34 @@
+/* @generated sheets start — scripts/build-sheets.mjs가 쓴다. 직접 고치지 않는다 */
+:root {
+  --sheet-objects: url('/sprites/sheets/objects-227x195.png');
+  --pos-arch-96x64: 0px 0px;
+  --pos-scoreboard-96x32: 0px -130px;
+  --pos-water-a-64x32: -97px -130px;
+  --pos-water-b-64x32: -162px -130px;
+  --pos-tent-64x64: -97px 0px;
+  --pos-reception-table-64x32: 0px -163px;
+  --pos-signpost-48x50: -66px -65px;
+  --pos-signal-off: -162px 0px;
+  --pos-signal-red: -195px 0px;
+  --pos-signal-yellow: 0px -65px;
+  --pos-signal-green: -33px -65px;
+  --pos-referee-up: -115px -65px;
+  --pos-referee-down: -148px -65px;
+  --sheet-selected: url('/sprites/sheets/selected-232x136.png');
+  --pos-arch-96x64-selected: 0px 0px;
+  --pos-scoreboard-96x32-selected: 0px -67px;
+  --pos-water-a-64x32-selected: -99px -67px;
+  --pos-water-b-64x32-selected: -166px -67px;
+  --pos-tent-64x64-selected: -99px 0px;
+  --pos-reception-table-64x32-selected: 0px -102px;
+  --sheet-ui: url('/sprites/sheets/ui-67x16.png');
+  --pos-alert-1: 0px 0px;
+  --pos-alert-2: -17px 0px;
+  --pos-keycap-up: -34px 0px;
+  --pos-keycap-down: -51px 0px;
+}
+/* @generated sheets end */
+
 /*
  * 스프라이트 좌표·크기. 그림 파일 경로와 시트 안 위치는 이 파일에만 둔다(CLAUDE.md 5-2).
  *
@@ -30,25 +61,59 @@
 
 /* ---------- 구조물 ---------- */
 .spr-arch-96x64 {
-  background-image: url('/sprites/structures/arch-96x64.png');
+  background-image: var(--sheet-objects);
+  background-position: var(--pos-arch-96x64);
 }
 .spr-scoreboard-96x32 {
-  background-image: url('/sprites/structures/scoreboard-blank-96x32.png');
+  background-image: var(--sheet-objects);
+  background-position: var(--pos-scoreboard-96x32);
 }
 .spr-water-a-64x32 {
-  background-image: url('/sprites/structures/water-a-64x32.png');
+  background-image: var(--sheet-objects);
+  background-position: var(--pos-water-a-64x32);
 }
 .spr-water-b-64x32 {
-  background-image: url('/sprites/structures/water-b-64x32.png');
+  background-image: var(--sheet-objects);
+  background-position: var(--pos-water-b-64x32);
 }
 .spr-tent-64x64 {
-  background-image: url('/sprites/structures/tent-64x64.png');
+  background-image: var(--sheet-objects);
+  background-position: var(--pos-tent-64x64);
 }
 .spr-reception-table-64x32 {
-  background-image: url('/sprites/structures/reception-table-64x32.png');
+  background-image: var(--sheet-objects);
+  background-position: var(--pos-reception-table-64x32);
 }
 .spr-signpost-48x50 {
-  background-image: url('/sprites/structures/signpost-48x50.png');
+  background-image: var(--sheet-objects);
+  background-position: var(--pos-signpost-48x50);
+}
+/* 신호등 4상태·심판 2프레임(인트로) */
+.spr-signal-off,
+.spr-signal-red,
+.spr-signal-yellow,
+.spr-signal-green,
+.spr-referee-up,
+.spr-referee-down {
+  background-image: var(--sheet-objects);
+}
+.spr-signal-off {
+  background-position: var(--pos-signal-off);
+}
+.spr-signal-red {
+  background-position: var(--pos-signal-red);
+}
+.spr-signal-yellow {
+  background-position: var(--pos-signal-yellow);
+}
+.spr-signal-green {
+  background-position: var(--pos-signal-green);
+}
+.spr-referee-up {
+  background-position: var(--pos-referee-up);
+}
+.spr-referee-down {
+  background-position: var(--pos-referee-down);
 }
 
 /*
@@ -67,22 +132,28 @@
   opacity: 1;
 }
 [data-selected='true'].spr-arch-96x64::after {
-  background-image: url('/sprites/structures/arch-96x64-selected.png');
+  background-image: var(--sheet-selected);
+  background-position: var(--pos-arch-96x64-selected);
 }
 [data-selected='true'].spr-scoreboard-96x32::after {
-  background-image: url('/sprites/structures/scoreboard-96x32-selected.png');
+  background-image: var(--sheet-selected);
+  background-position: var(--pos-scoreboard-96x32-selected);
 }
 [data-selected='true'].spr-water-a-64x32::after {
-  background-image: url('/sprites/structures/water-a-64x32-selected.png');
+  background-image: var(--sheet-selected);
+  background-position: var(--pos-water-a-64x32-selected);
 }
 [data-selected='true'].spr-water-b-64x32::after {
-  background-image: url('/sprites/structures/water-b-64x32-selected.png');
+  background-image: var(--sheet-selected);
+  background-position: var(--pos-water-b-64x32-selected);
 }
 [data-selected='true'].spr-tent-64x64::after {
-  background-image: url('/sprites/structures/tent-64x64-selected.png');
+  background-image: var(--sheet-selected);
+  background-position: var(--pos-tent-64x64-selected);
 }
 [data-selected='true'].spr-reception-table-64x32::after {
-  background-image: url('/sprites/structures/reception-table-64x32-selected.png');
+  background-image: var(--sheet-selected);
+  background-position: var(--pos-reception-table-64x32-selected);
 }
 
 /* ---------- 소품 시트 128×64 (4열 × 2행, 32×32) ----------
@@ -124,12 +195,13 @@
 .spr-alert {
   width: 16px;
   height: 16px;
-  background-image: url('/sprites/ui/alert-bubble-1-16x16.png');
+  background-image: var(--sheet-ui);
+  background-position: var(--pos-alert-1);
   animation: alert-bob 0.84s steps(1) infinite;
 }
 @keyframes alert-bob {
   50% {
-    background-image: url('/sprites/ui/alert-bubble-2-16x16.png');
+    background-position: var(--pos-alert-2);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -216,7 +288,8 @@
 /* 키캡 4개: 뗌/눌림 두 그림. 1.8초 한 바퀴 중 자기 차례 0.45초만 눌림(animation-delay로 엇갈림, 시안).
    눌리면 글자도 아래로(얼굴 위치 6% → 18%). */
 .keycap {
-  background-image: url('/sprites/ui/keycap-up-16x16.png');
+  background-image: var(--sheet-ui);
+  background-position: var(--pos-keycap-up);
   animation: keycap-press 1.8s steps(1) infinite backwards;
 }
 .keycap-face {
@@ -229,10 +302,10 @@
 }
 @keyframes keycap-press {
   0% {
-    background-image: url('/sprites/ui/keycap-down-16x16.png');
+    background-position: var(--pos-keycap-down);
   }
   25% {
-    background-image: url('/sprites/ui/keycap-up-16x16.png');
+    background-position: var(--pos-keycap-up);
   }
 }
 @keyframes keycap-face {

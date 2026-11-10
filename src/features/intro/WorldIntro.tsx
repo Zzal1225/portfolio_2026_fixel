@@ -22,20 +22,20 @@ export function IntroActors() {
     <div aria-hidden>
       {ACTORS.map((a) => {
         const r = rectFromAnchor(a.anchor, a.size);
-        const src =
+        // 그림은 물건 시트(sprites.css) 안 한 칸: 상태가 바뀌면 클래스(좌표)만 바뀐다
+        const sprite =
           a.id === 'signal'
-            ? `/sprites/intro/signal-${SIGNAL_SRC[signal]}-32x64.png`
-            : `/sprites/intro/referee-flag-${flagUp ? 'up' : 'down'}-32x48.png`;
+            ? `spr-signal-${SIGNAL_SRC[signal]}`
+            : `spr-referee-${flagUp ? 'up' : 'down'}`;
         return (
           <div
             key={a.id}
-            className="absolute"
+            className={`spr absolute ${sprite}`}
             style={{
               left: r.x0,
               top: r.y0,
               width: a.size.w,
               height: a.size.h,
-              backgroundImage: `url(${src})`,
               zIndex: a.anchor.y,
             }}
           />
