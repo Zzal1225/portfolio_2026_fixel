@@ -36,6 +36,9 @@ const IGNORED_KEYS = new Set(['Tab', 'Shift', 'Alt', 'Control', 'Meta', 'CapsLoc
 /** 인트로가 끝나 서는 자리: 출발선 + 80px(아치에 얼굴이 가리지 않게) */
 const FINISH = lanePoint(INTRO_FINISH_T * TRACK.length);
 
+/** 첫 로딩 화면의 최대 시간. 이보다 오래 걸리면 덜 받은 그림은 포기하고 시작한다 */
+const COVER_LIMIT_MS = 8000;
+
 export interface IntroControls {
   skip: () => void;
   replay: () => void;
@@ -175,15 +178,25 @@ export function useIntro(worldRef: RefObject<HTMLDivElement | null>): IntroContr
       s.setIntro({ phase: 'greet', sweep: 360 });
     };
 
-    skipRef.current = () => {
-      skipRequested = true;
-    };
-
-    preloadAssets().then(() => {
-      if (cancelled) return;
+    let begun = false;
+    /** 로딩 화면을 걷고 시작. 준비 완료·시간 초과·SKIP 중 먼저 온 쪽이 한 번만 부른다 */
+    const begin = () => {
+      if (cancelled || begun) return;
+      begun = true;
+      store.getState().setIntro({ covering: false });
       if (mode === 'full') startFull();
       else startReduced();
-    });
+    };
+
+    // 로딩 중 SKIP: 그림을 기다리지 않고 바로 끝 상태로(덮개가 있어 안 누르면 아무것도 안 보이므로 기다리게 하면 안 된다)
+    skipRef.current = () => {
+      skipRequested = true;
+      begin();
+    };
+
+    preloadAssets().then(begin);
+    // 그림 하나가 응답 없이 멈추면 Promise가 끝나지 않아 덮개가 영원히 남는다. 꾸민 대기가 아니라 안전장치라 평소에는 먼저 끝난다
+    const coverLimit = setTimeout(begin, COVER_LIMIT_MS);
 
     /**
      * 조작이 가능해진 뒤 첫 입력이면 인사·키캡 안내를 지운다(다시 나오지 않음).
@@ -204,6 +217,7 @@ export function useIntro(worldRef: RefObject<HTMLDivElement | null>): IntroContr
     return () => {
       cancelled = true;
       clearInterval(timer);
+      clearTimeout(coverLimit);
       zoom?.cancel();
       window.removeEventListener('keydown', onInput, true);
       window.removeEventListener('pointerdown', onInput, true);

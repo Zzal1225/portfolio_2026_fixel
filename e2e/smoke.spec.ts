@@ -111,6 +111,17 @@ test('인트로는 SKIP 버튼으로만 건너뛴다: 화면 클릭·키 입력�
   await expect(page.getByRole('dialog')).toHaveCount(0);
 });
 
+test('첫 화면은 서버 HTML부터 로딩 덮개로 가리고, 준비되면 걷힌다(11-11)', async ({
+  page,
+  request,
+}) => {
+  const html = await (await request.get('/')).text();
+  expect(html).toContain('loading-cover');
+  await page.goto('/');
+  await expect(page.locator('.loading-cover')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Skip intro' })).toBeVisible();
+});
+
 test('프로젝트 창 제목은 "이름(부제목)"', async ({ page }) => {
   await skipIntro(page);
   await page

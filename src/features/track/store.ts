@@ -60,6 +60,8 @@ export interface IntroState {
   reduced: boolean;
   /** 흑백 → 컬러 부채꼴 각도(도, 0~360). 360이면 전부 컬러 */
   sweep: number;
+  /** 첫 로딩 화면을 덮고 있나. 처음 준비가 끝나면 false가 되고 다시 true가 되지 않는다(REPLAY는 이미 받은 그림이라 덮지 않음) */
+  covering: boolean;
 }
 
 export interface GameState extends RunnerSnapshot {
@@ -112,7 +114,15 @@ export const useGame = create<GameState>()((set) => ({
   mapOpen: false,
   setMapOpen: (mapOpen) => set({ mapOpen }),
   inputEnabled: false,
-  intro: { phase: 'boot', elapsed: 0, signal: 0, band: null, reduced: false, sweep: 0 },
+  intro: {
+    phase: 'boot',
+    elapsed: 0,
+    signal: 0,
+    band: null,
+    reduced: false,
+    sweep: 0,
+    covering: true,
+  },
   setIntro: (next) => set((s) => ({ intro: { ...s.intro, ...next } })),
   setViewport: (viewportPx, scale) => set({ viewportPx, scale }),
   openPanel: (id) => set({ open: id, route: null }),

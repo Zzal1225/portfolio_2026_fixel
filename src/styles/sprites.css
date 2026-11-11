@@ -330,6 +330,11 @@
   }
 }
 
+/* 첫 로딩 덮개. #9c9c9c = 잔디 #6fb24b의 grayscale(1): 걷힐 때 흑백 월드의 잔디와 같은 색이라 경계가 튀지 않는다 */
+.loading-cover {
+  background: #9c9c9c;
+}
+
 /* LOADING: 프리로드가 0.3초 안에 끝나면 아예 안 보인다(깜빡임 방지). 실제 완료와 무관한 대기는 없다 */
 .intro-loading {
   opacity: 0;

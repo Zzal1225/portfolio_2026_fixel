@@ -10,7 +10,7 @@
 import dynamic from 'next/dynamic';
 import { useRef } from 'react';
 import { preload } from 'react-dom';
-import { IntroOverlay } from '@/features/intro/IntroOverlay';
+import { IntroOverlay, LoadingCover } from '@/features/intro/IntroOverlay';
 import { CRITICAL_IMAGES } from '@/features/intro/preload';
 import { useIntro } from '@/features/intro/useIntro';
 import { Logo, Menu, ReplayButton } from '@/features/hud/Hud';
@@ -49,6 +49,7 @@ export function Game() {
       <TouchControls stepStation={stepStation} />
       <ReplayButton onReplay={intro.replay} />
       {panelsNeeded && <PanelDialog />}
+      <LoadingCover />
       <IntroOverlay onSkip={intro.skip} />
     </>
   );

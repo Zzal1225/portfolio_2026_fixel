@@ -169,10 +169,34 @@ function BigBoard() {
   );
 }
 
+/**
+ * 첫 로딩 화면(11-11 사용자 결정). 없을 때는 서버 HTML의 평소 배율 컬러 월드에 그림이 하나씩 채워지다가,
+ * 코드가 실행되는 순간 전체 배율 흑백으로 튀었다(느린 망에서 약 1.2초).
+ *
+ * 왜 서버 HTML에 들어가야 하나: JS가 실행되기 전 화면을 가리는 것이 목적이다. store의 첫 값(covering: true)으로 서버에서도 그려진다.
+ * 바탕색은 잔디를 grayscale(1)로 바꾼 색이라, 걷히는 순간 다음 화면(흑백 월드)과 이어진다.
+ * SKIP(z 40)은 덮개 위에 남는다. 버린 대안: 처음부터 흑백으로 그리기 — 그림이 채워지는 모습이 남고 배율을 맞출 인라인 스크립트가 필요.
+ * LOADING 글자는 0.3초 지나야 보인다(CSS 지연, 빠른 환경에서 깜빡이지 않게). 실제 준비가 끝나면 바로 사라진다(가짜 대기 없음).
+ * noscript: JS가 없으면 걷을 코드도 없으니 덮지 않는다.
+ */
+export function LoadingCover() {
+  const covering = useGame((s) => s.intro.covering);
+  if (!covering) return null;
+  return (
+    <>
+      <noscript>
+        <style>{'.loading-cover{display:none}'}</style>
+      </noscript>
+      <div className="loading-cover fixed inset-0 z-[35] grid place-items-center">
+        <p className="font-pixel intro-loading text-ink text-sm">{INTRO_LABELS.loading}</p>
+      </div>
+    </>
+  );
+}
+
 const SKIPPABLE = ['preload', 'signal', 'lap', 'zoomin', 'greet', 'zoomout'];
 
 export function IntroOverlay({ onSkip }: { onSkip: () => void }) {
-  const phase = useGame((s) => s.intro.phase);
   const band = useGame((s) => s.intro.band);
   // 재방문·reduced의 인사(입력 가능)는 건너뛸 연출이 아니다
   const playing = useGame((s) => SKIPPABLE.includes(s.intro.phase) && !s.inputEnabled);
@@ -181,12 +205,6 @@ export function IntroOverlay({ onSkip }: { onSkip: () => void }) {
   return (
     <>
       <GraySweep />
-      {phase === 'preload' && (
-        // 0.3초 넘게 걸릴 때만 보이도록 CSS 지연(타이머로 꾸민 대기가 아님: 실제 로딩이 끝나면 바로 사라짐)
-        <p className="font-pixel intro-loading fixed inset-x-0 bottom-6 z-30 text-center text-xs text-white">
-          {INTRO_LABELS.loading}
-        </p>
-      )}
       <p aria-live="assertive" className="sr-only">
         {band !== null ? SIGNAL_BANDS[band] : ''}
       </p>
