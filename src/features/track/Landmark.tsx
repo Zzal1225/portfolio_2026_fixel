@@ -51,6 +51,8 @@ function LandmarkButton({
   onSelect: (id: LandmarkId) => void;
 }) {
   const r = rectFromAnchor(data.anchor, data.size);
+  // 인트로 중에는 눌러도 아무 일이 없으므로 손가락 커서를 보이지 않는다
+  const enabled = useGame((s) => s.inputEnabled);
   // 전광판은 평소 "CAREER"를 화면에 띄운다(인트로 문구는 작업 13에서 Scoreboard가 맡음)
   const text =
     data.id === 'career'
@@ -68,7 +70,7 @@ function LandmarkButton({
       aria-label={openLabel(data.id)}
       data-selected={selected}
       onClick={() => onSelect(data.id)}
-      className={`spr spr-selected spr-${data.sprite} absolute cursor-pointer border-0 p-0`}
+      className={`spr spr-selected spr-${data.sprite} absolute border-0 p-0 ${enabled ? 'cursor-pointer' : 'cursor-default'}`}
       style={{
         left: r.x0,
         top: r.y0,

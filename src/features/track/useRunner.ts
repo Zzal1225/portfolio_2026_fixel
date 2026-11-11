@@ -250,8 +250,10 @@ export function useRunner(worldEl: RefObject<HTMLElement | null>): RunnerControl
 
   const goTo = useCallback(
     (id: LandmarkId) => {
-      clearInput();
       const s = useGame.getState();
+      // 인트로 중 구조물 클릭: 틱이 멈춰 있어 route만 남았다가, 인트로가 끝나는 순간 러너가 혼자 달려가 버린다
+      if (!s.inputEnabled) return;
+      clearInput();
       useGame.setState({ route: { landmark: id, legs: planRoute(s.pos, id) }, open: null });
     },
     [clearInput],

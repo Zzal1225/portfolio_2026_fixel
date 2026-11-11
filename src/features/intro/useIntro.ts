@@ -9,7 +9,7 @@
  * 경과 시간은 performance.now()로 잰다 → 탭이 잠깐 느려져도 "지금 몇 초"가 정확하고, 밀린 틱을 몰아 돌지 않는다.
  *
  * 맡는 것: 단계 전환, 한 바퀴 위치, 배율(scaleOverride: 월드 전체 → 줌인 → 줌아웃, 소수 가능), 인트로 카메라,
- *          입력 잠금(inputEnabled), SKIP·아무 키로 건너뛰기(→ 인트로 끝 상태로), 첫 입력에 안내 지우기, REPLAY.
+ *          입력 잠금(inputEnabled), SKIP 버튼으로 건너뛰기(→ 인트로 끝 상태로), 첫 입력에 안내 지우기, REPLAY.
  * 방문할 때마다 전체 인트로(11-10 6차 결정). REPLAY도 같은 길.
  * 맡지 않는 것: 평소 달리기·카메라(useRunner).
  */
@@ -31,7 +31,7 @@ import {
   type ScaleSet,
 } from './timeline';
 
-/** 건너뛰기 키로 치지 않는 키: Tab 이동·보조 키는 "입력"이 아니라 탐색이다 */
+/** 안내를 지우는 입력으로 치지 않는 키: Tab 이동·보조 키는 "입력"이 아니라 탐색이다 */
 const IGNORED_KEYS = new Set(['Tab', 'Shift', 'Alt', 'Control', 'Meta', 'CapsLock']);
 /** 인트로가 끝나 서는 자리: 출발선 + 80px(아치에 얼굴이 가리지 않게) */
 const FINISH = lanePoint(INTRO_FINISH_T * TRACK.length);
@@ -185,14 +185,16 @@ export function useIntro(worldRef: RefObject<HTMLDivElement | null>): IntroContr
       else startReduced();
     });
 
-    /** 아무 키·탭: 연출 중이면 끝 상태로 건너뛰고, 인사·안내 중이면 안내를 지운다(다시 나오지 않음) */
+    /**
+     * 조작이 가능해진 뒤 첫 입력이면 인사·키캡 안내를 지운다(다시 나오지 않음).
+     * 연출은 SKIP 버튼으로만 건너뛴다(11-11 사용자 결정: 화면을 잘못 눌러 인트로가 끝나면 안 된다, 시안도 버튼뿐).
+     * inputEnabled 검사가 필요한 이유: 전체 인트로의 인사 단계도 phase가 'greet'이다. 그때 'done'으로 바꾸면 다음 틱이 되돌려 말풍선이 깜빡인다.
+     */
     const onInput = (e: Event) => {
       if (e instanceof KeyboardEvent && IGNORED_KEYS.has(e.key)) return;
       const s = store.getState();
       const phase = s.intro.phase;
-      if (!s.inputEnabled && phase !== 'ready' && phase !== 'done') {
-        skipRef.current();
-      } else if (phase === 'greet' || phase === 'ready') {
+      if (s.inputEnabled && (phase === 'greet' || phase === 'ready')) {
         s.setIntro({ phase: 'done' });
       }
     };

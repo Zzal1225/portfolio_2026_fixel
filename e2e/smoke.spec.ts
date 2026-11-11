@@ -91,6 +91,26 @@ test('재방문에도 인트로가 처음부터 나오고 SKIP으로 건너뛴�
   await expect(page.getByRole('navigation', { name: 'Menu' })).toBeVisible();
 });
 
+test('인트로는 SKIP 버튼으로만 건너뛴다: 화면 클릭·키 입력·구조물 클릭은 무시(11-11)', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const skip = page.getByRole('button', { name: 'Skip intro' });
+  await expect(skip).toBeVisible();
+  await page.mouse.click(300, 300);
+  await page.keyboard.press('x');
+  // 인트로 중 구조물 클릭이 예약으로 남으면 인트로가 끝나자마자 달려가 창이 열린다
+  await page.locator('button[aria-label="Open RESUME"]').click({ force: true });
+  await page.waitForTimeout(300); // 틱(60ms) 몇 번: 잘못 건너뛰었다면 이 안에 끝 상태로 간다
+  await expect(skip).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Menu' })).toHaveCount(0);
+
+  await skip.click();
+  await expect(page.getByRole('navigation', { name: 'Menu' })).toBeVisible();
+  await page.waitForTimeout(1500); // 러너가 달려갔다면 창이 열렸을 시간
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+});
+
 test('프로젝트 창 제목은 "이름(부제목)"', async ({ page }) => {
   await skipIntro(page);
   await page

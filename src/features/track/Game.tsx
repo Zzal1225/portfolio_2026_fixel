@@ -5,7 +5,7 @@
  * → "조작 4가지(키보드·터치·메뉴·지도)는 항상 같은 결과"(CLAUDE.md)를 구조로 보장한다.
  *
  * DOM 순서 = Tab 순서: 로고(글) → 메뉴 → 월드 → 지도 버튼 → ◀ ▶(모바일) → REPLAY. 창은 Portal로 body 끝.
- * 인트로 중에는 HUD가 없어 첫 Tab 정지점이 월드 다음 SKIP이 된다(아무 키로도 건너뛸 수 있음).
+ * 인트로 중에는 HUD가 없어 첫 Tab 정지점이 월드 다음 SKIP이 된다(건너뛰기는 SKIP 버튼으로만, 11-11).
  */
 import dynamic from 'next/dynamic';
 import { useRef } from 'react';
