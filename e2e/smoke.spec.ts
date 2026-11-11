@@ -136,6 +136,44 @@ test('ABOUT ME 창: 사진이 실제로 불러와지고, 누를 수 있는 곳�
   await expect.poll(() => img.evaluate((i: HTMLImageElement) => i.naturalWidth)).toBeGreaterThan(0);
 });
 
+test('창 윗변·로고·✕의 시작 높이가 같고, 제목은 머리 띠 가운데, 이전·다음은 좌우(11-11)', async ({
+  page,
+}) => {
+  await skipIntro(page);
+  await page
+    .getByRole('navigation', { name: 'Menu' })
+    .getByRole('button', { name: 'Open PROJECT1' })
+    .click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible({ timeout: 8000 });
+  await page.waitForTimeout(300); // 열림 애니메이션(150ms)이 끝난 자리에서 잰다
+  const box = await page.evaluate(() => {
+    const d = document.querySelector('[role=dialog]')!;
+    const close = d.querySelector('button')!.getBoundingClientRect();
+    const title = d.querySelector('h2')!;
+    const t = title.getBoundingClientRect();
+    const band = title.parentElement!.getBoundingClientRect();
+    const logo = document.querySelector('p.hud-in-left')!.getBoundingClientRect();
+    return {
+      win: d.getBoundingClientRect().top,
+      close: close.top,
+      logo: logo.top,
+      titleCenter: t.left + t.width / 2,
+      bandCenter: band.left + band.width / 2,
+    };
+  });
+  expect(box.win).toBe(box.logo);
+  expect(box.close).toBe(box.logo);
+  expect(Math.abs(box.titleCenter - box.bandCenter)).toBeLessThanOrEqual(1);
+  // 머리 띠 안에 이전·다음이 있어야 한다(창 아래쪽 띠로 돌아가지 않게)
+  const prev = await dialog.getByRole('button', { name: /previous/i }).boundingBox();
+  const next = await dialog.getByRole('button', { name: /next/i }).boundingBox();
+  expect(prev!.x).toBeLessThan(box.bandCenter);
+  expect(next!.x).toBeGreaterThan(box.bandCenter);
+  expect(prev!.y).toBeLessThan(box.win + 80);
+  expect(next!.y).toBeLessThan(box.win + 80);
+});
+
 test('프로젝트 창 제목은 "이름(부제목)"', async ({ page }) => {
   await skipIntro(page);
   await page

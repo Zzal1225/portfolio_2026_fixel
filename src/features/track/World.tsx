@@ -26,7 +26,7 @@ import { GrassDetails, Props, Signpost, Spectators } from './Decor';
 import { Landmarks } from './Landmark';
 import { WORLD, type LandmarkId } from './layout';
 import { Runner, ZoneAlert } from './Runner';
-import { selectScale, useGame } from './store';
+import { selectScale, selectSettling, useGame } from './store';
 import { TrackScene } from './TrackScene';
 
 /** 반응 구역에 들어가면 스크린리더에 "Press Enter to open CAREER"를 한 번 읽어 준다(`!` 그림의 글 버전) */
@@ -48,6 +48,7 @@ export function World({
 }) {
   const scale = useGame(selectScale);
   const cam = useGame((s) => s.camera);
+  const settling = useGame(selectSettling);
 
   return (
     <div className="world-frame fixed inset-0 overflow-clip">
@@ -69,7 +70,7 @@ export function World({
           width: WORLD.w,
           height: WORLD.h,
           transform: worldTransform(cam, scale),
-          transition: 'transform var(--tick) linear',
+          transition: settling ? 'none' : 'transform var(--tick) linear',
           willChange: 'transform',
         }}
       >

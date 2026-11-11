@@ -11,8 +11,8 @@
  * 생김새(11-10 사용자 결정):
  *  - 화면 전체(딤 배경)가 스크롤되고 창은 내용 길이만큼 늘어난다. 닫기 ✕는 창 밖 화면 오른쪽 위(11-10 사용자 요청).
  *  - 창이 떠 있는 동안 메뉴·미니맵·REPLAY는 숨고(Hud.useHideForDialog), 미니맵 자리에 맨 위로 버튼(ScrollTopButton).
- *  - 제목 띠·이전·다음 띠는 하늘색(tee) 바탕. 창 이름(aria-labelledby)은 제목 h2에서 나온다.
- *  - 이전·다음은 창 아래쪽에 "◀ 이전 창 이름 · 다음 창 이름 ▶"로. 트랙 순서(layout.ts LANDMARKS)로 넘기며,
+ *  - 머리 띠는 하늘색(tee) 바탕. 제목은 가운데, 이전·다음은 좌우(11-11). 창 이름(aria-labelledby)은 제목 h2에서 나온다.
+ *  - 이전·다음 순서는 트랙 순서(layout.ts LANDMARKS)로 넘기며,
  *    창이 화면을 덮고 있으니 러너는 그 구조물 앞으로 바로 옮긴다(시안 stepOpen과 같음). 창 안 ←→도 같은 동작.
  *
  * 열림·닫힘 애니메이션은 CSS(globals.css .dialog-content, Radix data-state). Framer Motion은 쓰지 않음(JS 크기).
@@ -94,24 +94,32 @@ export function PanelDialog() {
               closeRef.current?.focus();
             }}
             onKeyDown={onKeyDown}
-            className="dialog-content nine-white font-body relative mx-auto mt-16 mb-16 w-[min(720px,calc(100%-16px))] outline-none min-[700px]:mt-14 min-[700px]:mb-8 min-[700px]:w-[min(720px,calc(100%-32px))]"
+            className="dialog-content nine-white font-body relative mx-auto mt-2 mb-16 w-[min(720px,calc(100%-16px))] outline-none min-[700px]:mt-4 min-[700px]:mb-8 min-[700px]:w-[min(720px,calc(100%-32px))]"
           >
             {panel && (
               <>
                 {/*
                   닫기 ✕: 창 밖, 화면 오른쪽 위에 고정(사용자 요청). 포커스 트랩 안에 있어야 해서 Content 안에 두고 position: fixed.
+                  창 윗변·로고·✕의 시작 높이를 맞춘다(11-11: PC 16px, 모바일 8px).
+                  화면 폭이 872px보다 좁으면 창 옆에 ✕ 자리가 없어 창 오른쪽 위 모서리 안으로 들어온다(그래서 머리 띠에 ✕ 자리를 비운다).
                   빨강(track) 바탕 + 흰 ✕: 대비 약 4.5:1. 오른쪽 여백 24px은 오버레이 스크롤바를 피하려고.
                 */}
                 <Dialog.Close
                   ref={closeRef}
                   aria-label={DIALOG_LABELS.close}
-                  className="bg-track border-ink fixed top-4 right-6 z-50 grid size-11 place-items-center border-2 text-lg font-bold text-white shadow-[0_3px_0_var(--color-track-dark)] max-[699px]:top-3 max-[699px]:right-3"
+                  className="bg-track border-ink fixed top-4 right-6 z-50 grid size-11 place-items-center border-2 text-lg font-bold text-white shadow-[0_3px_0_var(--color-track-dark)] max-[871px]:right-[calc(max(8px,(100vw-720px)/2)+12px)] max-[699px]:top-2"
                 >
                   <span aria-hidden>✕</span>
                 </Dialog.Close>
-                {/* 제목 띠: 하늘색(tee) 바탕(사용자 요청으로 복원). 글자는 ink(흰 글자는 대비 부족, design-vs-plan #20) */}
-                <div className="bg-tee border-ink border-b-2 px-4 py-3">
-                  <Dialog.Title className="text-ink flex flex-wrap items-baseline gap-x-2 gap-y-1 leading-tight">
+                {/*
+                  머리 띠: 하늘색(tee) 바탕, 제목은 가운데, 이전·다음은 좌우(11-11 사용자 결정).
+                  글자는 ink(흰 글자는 대비 부족, design-vs-plan #20).
+                  DOM은 제목 → 이전 → 다음(스크린리더가 제목부터 읽음), 화면 배치는 grid 위치로.
+                  양옆 칸을 같은 최소 폭 + 1fr로: 버튼 글자 길이가 달라도, 좁아서 제목이 줄바꿈될 때도 제목이 정확히 가운데.
+                  좁은 화면: 양쪽 안쪽 여백을 똑같이 비워 ✕ 자리를 만들고(제목이 치우치지 않게), 이전 버튼만 왼쪽 여백으로 다시 당긴다. 버튼 글자는 화살표만.
+                */}
+                <div className="bg-tee border-ink grid grid-cols-[minmax(40px,1fr)_auto_minmax(40px,1fr)] items-center gap-2 border-b-2 px-3 py-2 max-[871px]:px-[54px]">
+                  <Dialog.Title className="text-ink col-start-2 row-start-1 flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1 text-center leading-tight">
                     <span className="font-pixel text-base">{panel.title}</span>
                     {panel.subtitle && (
                       // 부제목: 제목(영어 픽셀)보다 작은 한글 픽셀 글자. 스크린리더는 "nanaki (기록 PWA)"로 읽는다
@@ -120,21 +128,27 @@ export function PanelDialog() {
                       </span>
                     )}
                   </Dialog.Title>
+                  <nav aria-label={DIALOG_LABELS.nav} className="contents">
+                    <NavButton
+                      label={DIALOG_LABELS.prev(prevTitle)}
+                      onClick={() => go(-1)}
+                      arrow="◀"
+                      text={prevTitle}
+                      className="col-start-1 row-start-1 justify-self-start max-[871px]:-ml-[42px]"
+                    />
+                    <NavButton
+                      label={DIALOG_LABELS.next(nextTitle)}
+                      onClick={() => go(1)}
+                      arrow="▶"
+                      text={nextTitle}
+                      className="col-start-3 row-start-1 justify-self-end"
+                      arrowLast
+                    />
+                  </nav>
                 </div>
                 <div className="px-7 pt-6 pb-7 text-base leading-[1.6]">
                   <SectionList sections={panel.sections} />
                 </div>
-                <nav
-                  aria-label={DIALOG_LABELS.nav}
-                  className="bg-tee border-ink flex justify-between gap-2 border-t-2 px-3 py-2"
-                >
-                  <NavButton label={DIALOG_LABELS.prev(prevTitle)} onClick={() => go(-1)}>
-                    {`◀ ${prevTitle}`}
-                  </NavButton>
-                  <NavButton label={DIALOG_LABELS.next(nextTitle)} onClick={() => go(1)}>
-                    {`${nextTitle} ▶`}
-                  </NavButton>
-                </nav>
                 <ScrollTopButton />
               </>
             )}
@@ -147,21 +161,32 @@ export function PanelDialog() {
 
 function NavButton({
   label,
-  children,
+  arrow,
+  text,
+  arrowLast,
+  className,
   onClick,
 }: {
   label: string;
-  children: string;
+  arrow: string;
+  text: string;
+  arrowLast?: boolean;
+  className: string;
   onClick: () => void;
 }) {
+  const name = <span className="max-[871px]:hidden">{text}</span>;
   return (
     <button
       type="button"
       aria-label={label}
       onClick={onClick}
-      className="nine-white font-pixel text-ink min-h-10 px-1.5 text-[10px] whitespace-nowrap"
+      className={`nine-white font-pixel text-ink flex min-h-10 min-w-10 items-center justify-center gap-[1ch] px-1.5 text-[10px] whitespace-nowrap ${className}`}
     >
-      <span aria-hidden>{children}</span>
+      <span aria-hidden className="contents">
+        {arrowLast && name}
+        <span>{arrow}</span>
+        {!arrowLast && name}
+      </span>
     </button>
   );
 }

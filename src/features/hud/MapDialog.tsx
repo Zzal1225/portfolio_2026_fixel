@@ -31,18 +31,18 @@ export function MapDialog({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         {/* 창과 같은 모양(11-10): 딤 배경이 스크롤, 닫기 ✕는 창 밖 화면 오른쪽 위, 제목 띠는 하늘색 */}
-        <Dialog.Overlay className="dialog-overlay fixed inset-0 z-40 grid place-items-center overflow-y-auto bg-(--dim) py-16">
+        <Dialog.Overlay className="dialog-overlay fixed inset-0 z-40 grid justify-items-center overflow-y-auto bg-(--dim) pt-2 pb-16 min-[700px]:pt-4 min-[700px]:pb-8">
           <Dialog.Content
             aria-describedby="map-hint"
-            className="dialog-content nine-white font-body relative outline-none"
+            className="dialog-content nine-white font-body relative self-start outline-none"
           >
             <Dialog.Close
               aria-label={MAP_LABELS.close}
-              className="bg-track border-ink fixed top-4 right-6 z-50 grid size-11 place-items-center border-2 text-lg font-bold text-white shadow-[0_3px_0_var(--color-track-dark)] max-[699px]:top-3 max-[699px]:right-3"
+              className="bg-track border-ink fixed top-4 right-6 z-50 grid size-11 place-items-center border-2 text-lg font-bold text-white shadow-[0_3px_0_var(--color-track-dark)] max-[699px]:top-2 max-[699px]:right-3"
             >
               <span aria-hidden>✕</span>
             </Dialog.Close>
-            <div className="bg-tee border-ink flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b-2 px-4 py-3">
+            <div className="bg-tee border-ink flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1 border-b-2 px-4 py-3 text-center max-[871px]:px-[54px]">
               <Dialog.Title className="font-pixel text-ink text-base leading-tight">
                 {MAP_LABELS.title}
               </Dialog.Title>

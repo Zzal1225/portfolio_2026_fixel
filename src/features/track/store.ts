@@ -64,6 +64,15 @@ export interface IntroState {
   covering: boolean;
 }
 
+/**
+ * 인트로 시작 자리를 잡는 중인가. 이때는 월드·러너의 transition을 끈다.
+ * 서버 HTML(평소 배율)에서 인트로 첫 화면(월드 전체 배율)으로 바뀌는 건 "움직임"이 아니라 "초기 배치"인데,
+ * 틱용 transition(60ms)이 걸려 있으면 덮개가 걷힌 직후 화면이 커지며 튀어 보인다(측정: 배율 2 → 3이 60ms 동안 보임).
+ * 다음 단계로 넘어가면 값이 이미 같아서 transition이 다시 켜져도 아무것도 움직이지 않는다.
+ */
+export const selectSettling = (s: { intro: IntroState }): boolean =>
+  s.intro.phase === 'boot' || s.intro.phase === 'preload';
+
 export interface GameState extends RunnerSnapshot {
   /** 평소 정수 배율 2·3·4 */
   scale: number;

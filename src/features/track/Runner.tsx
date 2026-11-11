@@ -13,7 +13,7 @@
  */
 import type { CSSProperties } from 'react';
 import { ALERT_MARK, SPACE_TAG } from '@/content/menu';
-import { useGame } from './store';
+import { useGame, selectSettling } from './store';
 
 const W = 32;
 const H = 48;
@@ -22,11 +22,12 @@ export const Z_TOP = 1000;
 
 function useRunnerTransform(): CSSProperties {
   const pos = useGame((s) => s.pos);
+  const settling = useGame(selectSettling);
   return {
     width: W,
     height: H,
     transform: `translate3d(${pos.x - W / 2}px, ${pos.y - H}px, 0)`,
-    transition: 'transform var(--tick) linear',
+    transition: settling ? 'none' : 'transform var(--tick) linear',
     willChange: 'transform',
   };
 }
