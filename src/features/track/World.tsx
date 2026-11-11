@@ -20,6 +20,7 @@
 import type { RefObject } from 'react';
 import { zoneHint } from '@/content/menu';
 import { WORLD_DESCRIPTION, WORLD_LABEL } from '@/content/world';
+import { worldTransform } from '@/features/intro/camera';
 import { Greeting, IntroActors, KeyHint } from '@/features/intro/WorldIntro';
 import { GrassDetails, Props, Signpost, Spectators } from './Decor';
 import { Landmarks } from './Landmark';
@@ -67,7 +68,7 @@ export function World({
           ['--scale' as string]: scale,
           width: WORLD.w,
           height: WORLD.h,
-          transform: `translate3d(${-cam.x * scale}px, ${-cam.y * scale}px, 0) scale(${scale})`,
+          transform: worldTransform(cam, scale),
           transition: 'transform var(--tick) linear',
           willChange: 'transform',
         }}

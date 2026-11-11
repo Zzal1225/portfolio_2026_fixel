@@ -35,8 +35,8 @@ export function Game() {
   CRITICAL_IMAGES.forEach((src) => preload(src, { as: 'image', fetchPriority: 'high' }));
   // 순서 중요: useScale의 effect가 먼저 돌아야 useIntro가 실제 배율로 인트로 배율을 정한다
   useScale();
-  const intro = useIntro();
   const worldRef = useRef<HTMLDivElement>(null);
+  const intro = useIntro(worldRef);
   const { goTo, stepStation } = useRunner(worldRef);
   const panelsNeeded = useGame((s) => s.panelsNeeded);
 

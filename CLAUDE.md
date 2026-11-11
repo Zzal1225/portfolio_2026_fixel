@@ -101,7 +101,7 @@ public/
   sprites/               tiles/ structures/ props/ ui/ character/ intro/ world/(track-ring) — Design 개별 PNG(시트 합치기는 step3 검토)
   img/                   창 사진(about-me-320·640.webp, 원본은 private/img/)
   resume.pdf             (예정) 이력서
-scripts/                 extract-design-layout.mjs·build-track-ring.mjs(시안 코드에서 숫자·그림 1회 추출), build-photos.mjs(창 사진 → WebP 2장), build-og.mjs(링크 미리보기·아이콘), lh-summary.mjs, measure-run.mjs(측정)
+scripts/                 extract-design-layout.mjs·build-track-ring.mjs(시안 코드에서 숫자·그림 1회 추출), build-photos.mjs(창 사진 → WebP 2장), build-og.mjs(링크 미리보기·아이콘), lh-summary.mjs, measure-run.mjs·measure-intro.mjs·measure-intro-smooth.mjs(측정)
 e2e/                     smoke.spec.ts(Playwright: 크로미움 PC·모바일, WebKit PC + axe)
 docs/                    기획서.md, design-vs-plan.md, step1-plan.md, performance.md, milestones.md, assets/credits.md
 private/                 learning/, interview-questions.md (gitignore)
@@ -117,7 +117,7 @@ private/                 learning/, interview-questions.md (gitignore)
 - 메뉴·구조물 id는 `'about' | 'career' | 'project1' | 'project2' | 'skill' | 'resume'`(11-10: 천막 = SKILL, EDUCATION 내용은 ABOUT ME 창으로). 화면 라벨은 `content/menu.ts`(ABOUT ME · PROJECT1 등 시안 표기). 인트로 전광판 글은 `content/intro.ts`의 `BOARD_STEPS`·`BOARD_LINES`, 이정표 3줄은 같은 파일의 `SIGN_LINES`.
 
 ### 게임 상태와 렌더
-- 이동은 고정 틱(60ms)마다 위치를 갱신하고 CSS transition이 보간한다. 카메라 목표도 같은 틱에서 계산한다. `requestAnimationFrame` 루프 금지.
+- 이동은 고정 틱(60ms)마다 위치를 갱신하고 CSS transition이 보간한다. 카메라 목표도 같은 틱에서 계산한다. `requestAnimationFrame` 루프 금지. 예외: 경로를 미리 아는 인트로 연출(줌 2번·큰 전광판 커지기/작아지기·흑백 부채꼴)은 틱과 같은 수식을 60Hz 키프레임으로 구워 Web Animations API로 재생한다(`timeline.zoomKeyframes`·`sweepKeyframes`, 11-11).
 - 카메라: 캐릭터가 화면 가운데 여유 구간(가로·세로 각 40%) 안에 있으면 움직이지 않고, 벗어나면 따라간다. 월드 경계에서 멈춘다. 메뉴 자동 이동 중에는 캐릭터를 가운데에 둔다.
 - 배치 데이터(`layout.ts`)는 트랙 상수, 구조물 6개의 `s`·`t`·스프라이트 위치·앞 지점, 이정표, 소품 좌표를 정의한다(관중·잔디 디테일은 생성 파일 `layout-stands.ts`). 반응 구역은 구조물 사각형 사방 20px(아래 22px) ∪ 앞 지점 ±14px(`movement.zoneAt`). 메뉴·지도 자동 이동은 앞 지점까지 90px 이내면 직선, 아니면 가까운 레인 지점 → 레인 따라 → (천막만) 앞 지점.
 - 메뉴·미니맵·탭으로 가는 자동 이동은 `trackPath.shortestDirection(from, to)`로 방향을 정하고 2배 속도. 도착 시 창을 바로 연다. 키보드·버튼으로 달려 도착하면 `!`만 띄우고 Enter·Space·탭을 기다린다.

@@ -51,6 +51,17 @@
   --font-body: var(--font-pretendard), system-ui, sans-serif;
 }
 
+/*
+ * 흑백 → 컬러 부채꼴 각도(IntroOverlay GraySweep). 등록해야 브라우저가 이 변수를 "각도"로 알고 키프레임 사이를 보간한다.
+ * 등록 안 된 변수는 글자로 취급돼 틱(60ms)마다 한 번에 뛴다(측정: 한 번에 약 7도, 시안은 매 프레임).
+ * 지원 안 하는 브라우저는 움직임이 덜 부드러울 뿐 기능은 같다.
+ */
+@property --sweep {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
 :root {
   /*
    * 월드 배율. 정수(2·3·4)만 들어온다. 소수·zoom 금지(CLAUDE.md 2장).

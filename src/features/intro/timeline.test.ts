@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { BOARD_LINES } from '@/content/intro';
 import {
+  KEYFRAME_HOLD_MS,
   BOARD_OUT,
   LAP_TOTAL,
   T,
@@ -9,6 +10,9 @@ import {
   introCamera,
   introMode,
   lapDistance,
+  sweepAt,
+  sweepKeyframes,
+  zoomKeyframes,
 } from './timeline';
 
 const SCALES = { whole: 2, zoom: 6, normal: 4 }; // PC 1280×720
@@ -99,5 +103,53 @@ describe('배율·카메라 구간', () => {
   it('introCamera: 소수 배율이면 반올림하지 않는다', () => {
     const c = introCamera({ x: 300.3, y: 200 }, 2.5, { w: 1280, h: 720 });
     expect(Number.isInteger(c.x)).toBe(false);
+  });
+});
+
+describe('zoomKeyframes', () => {
+  const scales = { whole: 2, zoom: 6, normal: 4 };
+  const focus = { x: 400, y: 250 };
+  const vp = { w: 1280, h: 720 };
+  const scaleOf = (tr: string) => Number(tr.match(/scale\(([\d.]+)\)/)?.[1]);
+
+  it('줌인: 월드 전체 배율에서 시작해 줌 배율로 끝나고, 끝난 뒤 유지 구간이 있다', () => {
+    const { frames, duration } = zoomKeyframes(T.RUN_END, T.ZOOM_IN_END, scales, focus, vp);
+    expect(scaleOf(frames[0]!.transform)).toBe(2);
+    expect(scaleOf(frames.at(-1)!.transform)).toBe(6);
+    expect(duration).toBeCloseTo(800 + KEYFRAME_HOLD_MS, 6);
+    expect(frames.at(-2)!.transform).toBe(frames.at(-1)!.transform);
+    expect(frames.at(-2)!.offset).toBeLessThan(1);
+  });
+  it('60Hz 간격으로 촘촘하고 offset은 늘어나기만 한다', () => {
+    const { frames } = zoomKeyframes(T.RUN_END, T.ZOOM_IN_END, scales, focus, vp);
+    expect(frames.length).toBeGreaterThanOrEqual(48);
+    frames.slice(1).forEach((f, i) => expect(f.offset).toBeGreaterThan(frames[i]!.offset));
+  });
+  it('중간 프레임은 틱이 계산한 값과 같다(같은 수식)', () => {
+    const { frames } = zoomKeyframes(T.RUN_END, T.ZOOM_IN_END, scales, focus, vp);
+    const t = T.RUN_END + (T.ZOOM_IN_END - T.RUN_END) * (24 / (frames.length - 2));
+    expect(scaleOf(frames[24]!.transform)).toBeCloseTo(introAt(t, scales, focus).scale, 6);
+  });
+  it('줌아웃의 끝은 평소 배율', () => {
+    const { frames } = zoomKeyframes(T.GREET_END, T.END, scales, focus, vp);
+    expect(scaleOf(frames.at(-1)!.transform)).toBe(4);
+  });
+});
+
+describe('sweepKeyframes', () => {
+  const deg = (f: Record<string, string | number>) => parseFloat(String(f['--sweep']));
+  it('각도는 줄곧 커지고(거꾸로 도는 칸 없음) 0에서 360까지 간다', () => {
+    const { frames } = sweepKeyframes();
+    expect(deg(frames[0]!)).toBe(0);
+    expect(deg(frames.at(-1)!)).toBe(360);
+    frames.slice(1).forEach((f, i) => expect(deg(f)).toBeGreaterThanOrEqual(deg(frames[i]!)));
+  });
+  it('이웃 칸의 각도 차이가 작다(프레임당 3도 미만: 튀는 곳 없음)', () => {
+    const { frames } = sweepKeyframes();
+    const jumps = frames.slice(1).map((f, i) => deg(f) - deg(frames[i]!));
+    expect(Math.max(...jumps)).toBeLessThan(3);
+  });
+  it('출발 전은 0', () => {
+    expect(sweepAt(T.RED)).toBe(0);
   });
 });

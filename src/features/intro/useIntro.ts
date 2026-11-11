@@ -4,6 +4,8 @@
  *
  * 왜 setInterval 고정 틱(60ms)인가: 러너 이동과 같은 방식이다. 틱마다 목표(위치·카메라·배율)만 쓰고,
  * 사이 구간은 CSS transition(--tick)이 메운다. rAF 루프를 쓰지 않는다(CLAUDE.md).
+ * 예외는 줌 두 번: 곡선이 60ms 조각으로 깨져 보여서 틱과 같은 수식을 키프레임으로 구워 브라우저에 넘긴다(timeline.zoomKeyframes).
+ * 틱은 줌 중에도 store를 계속 쓴다(상태는 언제나 정답). 키프레임은 그 위를 덮어 "보이는 움직임"만 맡는다.
  * 경과 시간은 performance.now()로 잰다 → 탭이 잠깐 느려져도 "지금 몇 초"가 정확하고, 밀린 틱을 몰아 돌지 않는다.
  *
  * 맡는 것: 단계 전환, 한 바퀴 위치, 배율(scaleOverride: 월드 전체 → 줌인 → 줌아웃, 소수 가능), 인트로 카메라,
@@ -11,15 +13,23 @@
  * 방문할 때마다 전체 인트로(11-10 6차 결정). REPLAY도 같은 길.
  * 맡지 않는 것: 평소 달리기·카메라(useRunner).
  */
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import { INTRO_FINISH_T, TRACK } from '@/features/track/layout';
 import { lanePoint } from '@/features/track/movement';
 import { FOCUS_OFFSET_Y, TICK_MS } from '@/features/track/runner-config';
 import { useGame } from '@/features/track/store';
 import { facing as laneFacing } from '@/features/track/trackPath';
-import { centerOn, sweepAngle, viewInWorld } from './camera';
+import { centerOn, lapSweep, viewInWorld } from './camera';
 import { preloadAssets } from './preload';
-import { T, introAt, introCamera, introMode, lapDistance, type ScaleSet } from './timeline';
+import {
+  T,
+  introAt,
+  introCamera,
+  introMode,
+  lapDistance,
+  zoomKeyframes,
+  type ScaleSet,
+} from './timeline';
 
 /** 건너뛰기 키로 치지 않는 키: Tab 이동·보조 키는 "입력"이 아니라 탐색이다 */
 const IGNORED_KEYS = new Set(['Tab', 'Shift', 'Alt', 'Control', 'Meta', 'CapsLock']);
@@ -31,7 +41,7 @@ export interface IntroControls {
   replay: () => void;
 }
 
-export function useIntro(): IntroControls {
+export function useIntro(worldRef: RefObject<HTMLDivElement | null>): IntroControls {
   // REPLAY = 이 값을 올려 effect를 다시 돌린다(처음 방문과 같은 길)
   const [run, setRun] = useState(0);
   const skipRef = useRef<() => void>(() => {});
@@ -40,6 +50,7 @@ export function useIntro(): IntroControls {
     const store = useGame;
     let cancelled = false;
     let timer: ReturnType<typeof setInterval> | undefined;
+    let zoom: Animation | undefined;
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const mode = introMode(reduced);
@@ -87,7 +98,27 @@ export function useIntro(): IntroControls {
       if (skipRequested) start -= T.END * 1000;
       skipRef.current = () => {
         start = performance.now() - T.END * 1000;
+        zoom?.cancel();
       };
+
+      /** 줌 한 구간 재생. 틱이 구간 시작보다 늦게 왔을 수 있어 그만큼 앞으로 맞춘다 */
+      const playZoom = (a: number, b: number, t: number) => {
+        const el = worldRef.current;
+        if (!el) return;
+        const focus = { x: FINISH.x, y: FINISH.y - FOCUS_OFFSET_Y };
+        const { frames, duration } = zoomKeyframes(
+          a,
+          b,
+          scales,
+          focus,
+          store.getState().viewportPx,
+        );
+        zoom?.cancel();
+        zoom = el.animate(frames, { duration });
+        zoom.currentTime = (t - a) * 1000;
+      };
+      let zoomedIn = false;
+      let zoomedOut = false;
 
       const tick = () => {
         const t = (performance.now() - start) / 1000;
@@ -95,6 +126,14 @@ export function useIntro(): IntroControls {
           clearInterval(timer);
           enterReady();
           return;
+        }
+        if (!zoomedIn && t >= T.RUN_END && t < T.ZOOM_IN_END) {
+          zoomedIn = true;
+          playZoom(T.RUN_END, T.ZOOM_IN_END, t);
+        }
+        if (!zoomedOut && t >= T.GREET_END) {
+          zoomedOut = true;
+          playZoom(T.GREET_END, T.END, t);
         }
         const s = store.getState();
         const pos = lanePoint(lapDistance(t));
@@ -116,8 +155,7 @@ export function useIntro(): IntroControls {
           elapsed: t,
           signal: f.signal,
           band: f.band,
-          // 한 바퀴를 다 돌면(둘레 이상) 전부 컬러. 그 뒤 +80px 구간에서 각도가 0 근처로 돌아가도 흑백으로 되돌리지 않는다
-          sweep: f.s >= TRACK.length ? 360 : sweepAngle(pos),
+          sweep: lapSweep(pos, f.s),
         });
       };
       tick();
@@ -164,10 +202,11 @@ export function useIntro(): IntroControls {
     return () => {
       cancelled = true;
       clearInterval(timer);
+      zoom?.cancel();
       window.removeEventListener('keydown', onInput, true);
       window.removeEventListener('pointerdown', onInput, true);
     };
-  }, [run]);
+  }, [run, worldRef]);
 
   const skip = useCallback(() => skipRef.current(), []);
   const replay = useCallback(() => setRun((r) => r + 1), []);

@@ -13,6 +13,8 @@
 import { BOARD_LINES } from '@/content/intro';
 import { TRACK, WORLD, type Point } from '@/features/track/layout';
 import type { IntroPhase } from '@/features/track/store';
+import { lanePoint } from '@/features/track/movement';
+import { lapSweep, worldTransform } from './camera';
 
 export const T = {
   RED: 0.6,
@@ -153,4 +155,79 @@ export function introCamera(
   const x = axis(center.x, vw, WORLD.w);
   const y = axis(center.y, vh, WORLD.h);
   return Number.isInteger(scale) ? { x: Math.round(x), y: Math.round(y) } : { x, y };
+}
+
+/** 줌 키프레임 간격(ms): 60Hz 한 프레임. 이 사이는 직선 보간이라 눈에 곡선과 구분되지 않는다 */
+const KEYFRAME_MS = 1000 / 60;
+/**
+ * 줌이 끝난 뒤 마지막 모습을 유지하는 시간(ms). 애니메이션이 끝나면 인라인 transform(틱이 쓴 값)이 드러나는데,
+ * 그 값은 다음 틱(최대 60ms 뒤) + transition(60ms)이 지나야 목표에 닿는다. 그 사이 뒤로 튀지 않게 덮어 둔다.
+ */
+export const KEYFRAME_HOLD_MS = 150;
+
+export interface KeyframeTrack {
+  frames: { transform: string; offset: number }[];
+  /** 유지 시간을 포함한 전체 길이(ms) */
+  duration: number;
+}
+
+/** 값 함수를 a~b초 구간에서 60Hz로 샘플링해 Web Animations 키프레임으로(유지 구간 포함) */
+export function sampleKeyframes(
+  a: number,
+  b: number,
+  transformAt: (t: number) => string,
+): KeyframeTrack {
+  const ms = (b - a) * 1000;
+  const n = Math.ceil(ms / KEYFRAME_MS);
+  const duration = ms + KEYFRAME_HOLD_MS;
+  const frames = Array.from({ length: n + 1 }, (_, i) => ({
+    transform: transformAt(a + ((b - a) * i) / n),
+    offset: (ms * i) / n / duration,
+  }));
+  frames.push({ transform: transformAt(b), offset: 1 });
+  return { frames, duration };
+}
+
+/**
+ * 줌 구간(a~b초)의 월드 transform 키프레임. 수식은 틱과 똑같이 introAt·introCamera(시안 값).
+ *
+ * 왜 키프레임으로 미리 굽나: 틱(60ms)마다 목표를 쓰고 CSS transition으로 메우면 곡선이 60ms 직선 조각이 되어 속도가 계단처럼 바뀐다
+ * (측정: 배율 변화량의 급변이 이론값의 약 5배). 줌 동안 러너는 멈춰 있어 경로를 미리 알 수 있으므로 통째로 넘기면 브라우저가
+ * 합성 스레드에서 프레임마다 보간한다. 메인 스레드가 바빠도 끊기지 않고, 최대 배율을 알아 처음부터 선명하게 그린다.
+ * 버린 대안: requestAnimationFrame 루프 — 메인 스레드에 묶이고 CLAUDE.md 금지 규칙.
+ *            시작·끝 두 값 + cubic-bezier — 줌과 중심 이동이 곱해진 시안의 곡선 경로와 달라진다.
+ */
+export function zoomKeyframes(
+  a: number,
+  b: number,
+  scales: ScaleSet,
+  focus: Point,
+  viewportPx: { w: number; h: number },
+): KeyframeTrack {
+  return sampleKeyframes(a, b, (t) => {
+    const f = introAt(t, scales, focus);
+    return worldTransform(introCamera(f.center, f.scale, viewportPx), f.scale);
+  });
+}
+
+/** t초의 부채꼴 각도(도). 위치가 시간만의 함수라 틱 없이도 계산된다 */
+export function sweepAt(t: number): number {
+  const s = lapDistance(t);
+  return lapSweep(lanePoint(s), s);
+}
+
+/**
+ * 한 바퀴 전체(GO ~ RUN_END)의 --sweep 키프레임.
+ *
+ * 왜 transition이 아니라 키프레임 한 개인가: 틱마다 transition을 다시 걸면 틱이 조금만 늦어도 transition이 먼저 끝나
+ * 경계선이 잠깐 멈췄다 뛴다(측정: 459프레임 중 297번만 변함, 한 번에 최대 4.6도). 각도는 시간만의 함수라 미리 다 알 수 있다.
+ */
+export function sweepKeyframes(): { frames: Record<string, string | number>[]; duration: number } {
+  const ms = (T.RUN_END - T.GO) * 1000;
+  const n = Math.ceil(ms / KEYFRAME_MS);
+  const frames = Array.from({ length: n + 1 }, (_, i) => ({
+    '--sweep': `${sweepAt(T.GO + ((T.RUN_END - T.GO) * i) / n)}deg`,
+    offset: i / n,
+  }));
+  return { frames, duration: ms };
 }

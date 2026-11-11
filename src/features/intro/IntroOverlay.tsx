@@ -5,15 +5,16 @@
  * 큰 전광판(11-10 시안 채택): 1.8–2.2초에 월드 안 전광판 자리에서 화면 가운데로 커지고, 9.4–10초에 제자리로 돌아간다.
  * 크기는 정수 배율 k(= floor(min(화면폭×0.56, 화면높이×1.86) / 96), 최소 3, 화면폭을 넘지 않게).
  * 문구는 켜질 때 네온 깜빡임(0.28초), 바뀌기 0.14초 전 꺼짐 — 계산은 timeline.boardAt, 여기는 그리기만.
- * 위치는 틱(60ms)마다 바뀌고 transition이 메운다.
+ * 커지고 작아지는 움직임은 키프레임으로 브라우저에 넘긴다(줌과 같은 이유: timeline.zoomKeyframes 주석). 나머지는 틱이 쓴 값.
  *
  * 글자는 전부 DOM(캔버스 아님). 신호 띠·전광판 문구는 aria-live로 스크린리더에도 전한다.
  */
+import { useLayoutEffect, useRef } from 'react';
 import { BOARD_LINES, BOARD_STEPS, INTRO_LABELS, SIGNAL_BANDS } from '@/content/intro';
-import { LANDMARKS, rectFromAnchor } from '@/features/track/layout';
+import { LANDMARKS, rectFromAnchor, type Point, type Size } from '@/features/track/layout';
 import { selectScale, useGame } from '@/features/track/store';
 import { SWEEP_CENTER } from './camera';
-import { boardAt } from './timeline';
+import { BOARD_OUT, T, boardAt, sampleKeyframes, sweepKeyframes } from './timeline';
 
 const BOARD_W = 96;
 const BOARD_H = 32;
@@ -30,14 +31,8 @@ function boardScale(w: number, h: number): number {
 
 const lerp = (a: number, b: number, k: number) => a + (b - a) * k;
 
-function BigBoard() {
-  const elapsed = useGame((s) => s.intro.elapsed);
-  const vp = useGame((s) => s.viewportPx);
-  const cam = useGame((s) => s.camera);
-  const scale = useGame(selectScale);
-  const board = boardAt(elapsed);
-  if (!board) return null;
-
+/** 큰 판의 크기와, 커진 정도 g(0 = 제자리, 1 = 화면 가운데)의 transform */
+function boardGeometry(vp: Size, cam: Point, scale: number) {
   // 제자리(월드 전광판이 지금 화면에 그려진 자리) ↔ 화면 가운데 큰 판
   const k = boardScale(vp.w, vp.h);
   const big = { w: BOARD_W * k, h: BOARD_H * k };
@@ -45,20 +40,51 @@ function BigBoard() {
     x: (BOARD_RECT.x0 - cam.x) * scale,
     y: (BOARD_RECT.y0 - cam.y) * scale,
     w: BOARD_W * scale,
-    h: BOARD_H * scale,
   };
-  const to = { x: vp.w / 2 - big.w / 2, y: vp.h / 2 - big.h / 2, ...big };
-  const g = board.grow;
-  // 크기·위치를 left/top/width/height로 바꾸면 매 프레임 레이아웃이 다시 돈다(측정: 인트로 중 Layout 약 100회).
-  // 큰 판 크기로 고정하고 transform(translate + scale)으로만 움직인다 → 레이아웃 없음, 합성만.
-  const sc = lerp(from.w, to.w, g) / to.w;
+  const to = { x: vp.w / 2 - big.w / 2, y: vp.h / 2 - big.h / 2, w: big.w };
+  return {
+    big,
+    // 크기·위치를 left/top/width/height로 바꾸면 매 프레임 레이아웃이 다시 돈다(측정: 인트로 중 Layout 약 100회).
+    // 큰 판 크기로 고정하고 transform(translate + scale)으로만 움직인다 → 레이아웃 없음, 합성만.
+    transformAt: (g: number) =>
+      `translate3d(${lerp(from.x, to.x, g)}px, ${lerp(from.y, to.y, g)}px, 0) scale(${lerp(from.w, to.w, g) / to.w})`,
+  };
+}
+
+function BigBoard() {
+  const elapsed = useGame((s) => s.intro.elapsed);
+  const vp = useGame((s) => s.viewportPx);
+  const cam = useGame((s) => s.camera);
+  const scale = useGame(selectScale);
+  const board = boardAt(elapsed);
+  const ref = useRef<HTMLDivElement>(null);
+  // 커지는 구간·작아지는 구간에 한 번씩 키프레임 재생. 값이 아니라 구간이 바뀔 때만 다시 돈다
+  const segment = !board ? null : elapsed < T.BOARD_IN ? 'in' : elapsed >= BOARD_OUT ? 'out' : null;
+
+  useLayoutEffect(() => {
+    if (!segment || !ref.current) return;
+    const s = useGame.getState();
+    const { transformAt } = boardGeometry(s.viewportPx, s.camera, selectScale(s));
+    const [a, b] = segment === 'in' ? [T.GO, T.BOARD_IN] : [BOARD_OUT, T.RUN_END];
+    // b 정각의 boardAt은 다음 구간 값(커짐 유지·null)이라 바로 앞 순간으로 잰다
+    const { frames, duration } = sampleKeyframes(a, b, (t) =>
+      transformAt(boardAt(Math.min(t, b - 1e-6))?.grow ?? 0),
+    );
+    const anim = ref.current.animate(frames, { duration });
+    anim.currentTime = (s.intro.elapsed - a) * 1000;
+    return () => anim.cancel();
+  }, [segment]);
+
+  if (!board) return null;
+
+  const { big, transformAt } = boardGeometry(vp, cam, scale);
   const box = {
     left: 0,
     top: 0,
-    width: to.w,
-    height: to.h,
+    width: big.w,
+    height: big.h,
     transformOrigin: '0 0',
-    transform: `translate3d(${lerp(from.x, to.x, g)}px, ${lerp(from.y, to.y, g)}px, 0) scale(${sc})`,
+    transform: transformAt(board.grow),
   };
   const current = board.line >= 0 ? BOARD_LINES[board.line] : undefined;
   const H = big.h; // 글자 크기는 큰 판 기준(커지는 동안 글자는 아직 없음)
@@ -66,6 +92,7 @@ function BigBoard() {
   return (
     <>
       <div
+        ref={ref}
         className="pixelated pointer-events-none fixed z-30"
         style={{
           ...box,
@@ -188,6 +215,8 @@ export function IntroOverlay({ onSkip }: { onSkip: () => void }) {
  * 흑백 → 컬러(부채꼴, 시안). 화면 전체를 덮는 투명 판에 backdrop-filter: grayscale(1)을 걸고,
  * 러너가 아직 안 지나간 각도만 남기는 conic-gradient 마스크를 씌운다(월드를 두 벌 그리지 않음).
  * 마스크 각도: CSS conic은 위에서 시계 방향. "from 180deg"(아래)에서 시계 방향 0~(360−θ)가 아직 흑백인 쪽.
+ * θ는 등록된 CSS 변수 --sweep(globals.css @property). 달리는 동안은 한 바퀴 전체 키프레임(timeline.sweepKeyframes)이 프레임마다 움직이고,
+ * 인라인 값(틱)은 애니메이션이 시작되기 전·못 도는 브라우저의 대비책이다.
  * 큰 전광판·신호 띠는 이 판보다 위(z)라 인트로 중에도 컬러.
  */
 export function GraySweep() {
@@ -196,18 +225,31 @@ export function GraySweep() {
   const reduced = useGame((s) => s.intro.reduced);
   const cam = useGame((s) => s.camera);
   const scale = useGame(selectScale);
+  const ref = useRef<HTMLDivElement>(null);
+  const lapping = !reduced && phase === 'lap' && sweep < 360;
+
+  useLayoutEffect(() => {
+    if (!lapping || !ref.current) return;
+    const { frames, duration } = sweepKeyframes();
+    const anim = ref.current.animate(frames, { duration });
+    anim.currentTime = (useGame.getState().intro.elapsed - T.GO) * 1000;
+    return () => anim.cancel();
+  }, [lapping]);
+
   if (reduced || !(phase === 'preload' || phase === 'signal' || phase === 'lap')) return null;
   if (sweep >= 360) return null;
 
   const cx = (SWEEP_CENTER.x - cam.x) * scale;
   const cy = (SWEEP_CENTER.y - cam.y) * scale;
-  const gray = 360 - sweep;
-  const mask = `conic-gradient(from 180deg at ${cx}px ${cy}px, #000 0deg ${gray}deg, transparent ${gray}deg 360deg)`;
+  const edge = 'calc(360deg - var(--sweep))';
+  const mask = `conic-gradient(from 180deg at ${cx}px ${cy}px, #000 0deg ${edge}, transparent ${edge} 360deg)`;
   return (
     <div
+      ref={ref}
       aria-hidden
       className="pointer-events-none fixed inset-0 z-[25]"
       style={{
+        ['--sweep' as string]: `${sweep}deg`,
         backdropFilter: 'grayscale(1)',
         WebkitBackdropFilter: 'grayscale(1)',
         maskImage: mask,
