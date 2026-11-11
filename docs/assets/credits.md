@@ -23,4 +23,5 @@
 | `public/sprites/world/track-ring-512x232.png` | 시안 생성 코드(track-kit)를 `scripts/build-track-ring.mjs`로 실행해 레인 띠만 추출 | 본인 제작물 |
 | `public/sprites/sheets/*.png` (물건·선택 외곽선·UI(키캡) 시트 3장) | 위 시안 PNG들을 `scripts/build-sheets.mjs`로 합침(11-10). 개별 PNG는 삭제 | 본인 제작물 |
 | `public/img/about-me-{320,640}.webp` | 본인 사진(원본 `private/img/`, gitignore)을 `scripts/build-photos.mjs`로 줄임(WebP, EXIF 제거, 11-10) | 본인 사진 |
+| `public/sprites/ui/cursor-hand-32x32.png` | 사이트 팔레트로 새로 그림(16×16 격자, `scripts/build-cursor.mjs`, 11-11) | 본인 제작물 |
 | `src/app/opengraph-image.png`, `icon.png`, `apple-icon.png` | 시안 월드 전경·러너 시트·흰 9-slice 판 + Press Start 2P로 `scripts/build-og.mjs`가 구움(11-10) | 본인 제작물 |

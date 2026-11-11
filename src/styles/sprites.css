@@ -391,3 +391,27 @@
   height: 3px;
   background-image: url('/sprites/ui/speech-tail-6x3.png');
 }
+
+/* ABOUT ME 출발선 점선. 칸(20px)의 세로 가운데를 지나도록 위치를 맞춘다 */
+.starts-line {
+  left: 0;
+  right: 0;
+  top: 9px;
+  height: 3px;
+  background-image: repeating-linear-gradient(90deg, var(--color-ink) 0 6px, transparent 6px 10px);
+}
+@media (max-width: 699px) {
+  .starts-line {
+    left: 9px;
+    right: auto;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    height: auto;
+    background-image: repeating-linear-gradient(
+      180deg,
+      var(--color-ink) 0 6px,
+      transparent 6px 10px
+    );
+  }
+}

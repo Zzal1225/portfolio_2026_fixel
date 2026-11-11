@@ -11,7 +11,14 @@ import sharp from 'sharp';
 
 const SRC = 'private/img';
 const OUT = 'public/img';
-const PHOTOS = [{ src: 'about_me_01.jpg', name: 'about-me' }];
+// crop: 원본 픽셀 기준. ABOUT ME 사진 자리가 세로형(4:5)이라 가로 사진에서 기록판과 인물이 함께 들어오는 부분만 쓴다
+const PHOTOS = [
+  {
+    src: 'about_me_01.jpg',
+    name: 'about-me',
+    crop: { left: 800, top: 0, width: 1476, height: 1845 },
+  },
+];
 const WIDTHS = [320, 640];
 
 fs.mkdirSync(OUT, { recursive: true });
@@ -20,6 +27,7 @@ for (const p of PHOTOS) {
     const out = `${OUT}/${p.name}-${w}.webp`;
     const info = await sharp(`${SRC}/${p.src}`)
       .rotate()
+      .extract(p.crop)
       .resize({ width: w })
       .webp({ quality: 80 })
       .toFile(out);

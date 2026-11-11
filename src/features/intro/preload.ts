@@ -17,6 +17,8 @@ export const PRELOAD_IMAGES = [
   // 반응 구역 말풍선 조각(border-image라 시트에 못 넣음). 처음 구역에 들어설 때 빈 판이 보이지 않게 미리 디코딩
   '/sprites/ui/alert-body-14x11.png',
   '/sprites/ui/alert-tail-5x3.png',
+  // 커서는 처음 올렸을 때 받기 시작하면 잠깐 기본 커서가 보인다
+  '/sprites/ui/cursor-hand-32x32.png',
   // 인트로 큰 전광판은 빈 전광판 그림을 늘려 쓴다(시트에 넣지 않음)
   '/sprites/structures/scoreboard-blank-96x32.png',
 ] as const;

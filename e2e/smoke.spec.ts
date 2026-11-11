@@ -122,6 +122,20 @@ test('첫 화면은 서버 HTML부터 로딩 덮개로 가리고, 준비되면 �
   await expect(page.getByRole('button', { name: 'Skip intro' })).toBeVisible();
 });
 
+test('ABOUT ME 창: 사진이 실제로 불러와지고, 누를 수 있는 곳은 러너의 손 커서', async ({
+  page,
+}) => {
+  await skipIntro(page);
+  const open = page
+    .getByRole('navigation', { name: 'Menu' })
+    .getByRole('button', { name: 'Open ABOUT ME' });
+  await expect(open).toHaveCSS('cursor', /cursor-hand/);
+  await open.click();
+  const img = page.getByRole('dialog').locator('img');
+  await expect(img).toBeVisible({ timeout: 8000 });
+  await expect.poll(() => img.evaluate((i: HTMLImageElement) => i.naturalWidth)).toBeGreaterThan(0);
+});
+
 test('프로젝트 창 제목은 "이름(부제목)"', async ({ page }) => {
   await skipIntro(page);
   await page

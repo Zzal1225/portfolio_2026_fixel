@@ -29,13 +29,28 @@ export type Section =
       heading?: string;
       items: readonly { label: string; href: string; primary?: boolean; download?: boolean }[];
     }
-  /** 캐릭터 확대 그림(픽셀 러너). 사진 대신 쓸 때 */
-  | { type: 'portrait' }
   /**
-   * 사진. src는 확장자·폭 없는 이름(public/img/{src}-320.webp·-640.webp, scripts/build-photos.mjs가 굽는다).
-   * alt는 사진에 보이는 것을 글로(스크린리더가 읽는다).
+   * ABOUT ME 맨 위: 사진 + 그 모서리에 선 러너 + 소개 글.
+   * photo.src는 확장자·폭 없는 이름(public/img/{src}-320.webp·-640.webp, scripts/build-photos.mjs가 굽는다).
+   * alt는 사진에 보이는 것을 글로(스크린리더가 읽는다). title의 \n은 줄바꿈 그대로.
    */
-  | { type: 'photo'; src: string; alt: string };
+  | {
+      type: 'hero';
+      photo: { src: string; alt: string };
+      eyebrow: string;
+      title: string;
+      body: string;
+    }
+  /** 가로 점선 위의 출발 지점들. current는 지금 달리는 구간(노란 칸) */
+  | {
+      type: 'starts';
+      heading: string;
+      items: readonly { period: string; title: string; desc: string; current?: boolean }[];
+    }
+  /** 강조 상자 한 칸 */
+  | { type: 'callout'; body: string }
+  /** 이름 | 설명 두 칸 표 */
+  | { type: 'traits'; heading: string; items: readonly { tag: string; desc: string }[] };
 
 export interface Panel {
   id: LandmarkId;
@@ -57,54 +72,54 @@ export const PANELS: Record<LandmarkId, Panel> = {
     title: 'ABOUT ME',
     sections: [
       {
-        type: 'photo',
-        src: 'about-me',
-        alt: '마라톤 완주 기록판(00:41:46) 앞에서 찍은 사진 두 장',
+        type: 'hero',
+        photo: {
+          src: 'about-me',
+          alt: '러닝대회 완주 기록판(00:41:46) 옆에서 트로피를 들고 선 사진',
+        },
+        eyebrow: 'WELCOME TO MY PORTFOLIO!',
+        title: '트랙 위 캐릭터,\n실제로는 이렇게 달립니다.',
+        body: '안녕하세요, 프론트엔드 개발자 박찬령입니다. 이 사이트의 캐릭터는 처음으로 러닝대회에 참가한 날의 저를 그대로 옮겼어요.',
       },
       {
-        type: 'text',
-        body: 'TODO: 한 줄 소개(예: 다른 길에서 와서, 기록을 재고 끝까지 닿게 하는 프론트엔드 개발자)',
-      },
-      {
-        type: 'stats',
+        type: 'starts',
+        heading: '세 번 출발선에 섰습니다',
         items: [
-          { label: 'LEVEL', value: 'LV.3 FRONTEND' },
-          { label: 'CAREER', value: '2Y 9M' },
-          { label: 'PROJECTS', value: '2' },
+          {
+            period: '2013~2018',
+            title: '브랜드의류 스토어매니저',
+            desc: '손님이 어디서 망설이는지 보는 눈',
+          },
+          {
+            period: '2018~2022',
+            title: '공인중개사사무소 대표',
+            desc: '복잡한 조건을 한 장으로 설명하는 힘',
+          },
+          {
+            period: '2023~2026',
+            title: '프론트엔드 개발자',
+            desc: '두 가지를 직접 화면으로 만드는 일',
+            current: true,
+          },
         ],
       },
       {
-        type: 'list',
-        heading: '일하는 방식',
-        numbered: true,
-        items: [
-          { tag: 'TODO', desc: 'TODO: 일하는 방식 1' },
-          { tag: 'TODO', desc: 'TODO: 일하는 방식 2' },
-          { tag: 'TODO', desc: 'TODO: 일하는 방식 3' },
-        ],
+        type: 'callout',
+        body: "TODO: 개발을 시작하게 된 계기 2~3문장. CAREER가 '무엇을 했나'라면 여기는 '왜 바꿨나'.",
       },
       {
-        type: 'text',
-        heading: 'AI와 일하는 법',
-        body: 'TODO: AI를 어디에 쓰고, 무엇은 직접 책임지는지',
-      },
-      { type: 'text', heading: '러닝', body: 'TODO: 꾸준함에 관한 한 줄' },
-      {
-        type: 'timeline',
-        heading: '교육',
+        type: 'traits',
+        heading: '저는 이런 사람이에요',
         items: [
-          { period: '2023.03 ~ 08', title: '국비 웹 퍼블리셔 과정', desc: 'TODO: 한 줄 요약' },
-          { period: '~ 2027.02', title: '학점은행제 컴퓨터공학', desc: '졸업 예정' },
-          { period: 'TODO', title: '검정고시', desc: 'TODO' },
-        ],
-      },
-      {
-        type: 'list',
-        heading: '자격증',
-        items: [
-          { tag: '공인중개사', desc: 'TODO: 취득 연도' },
-          { tag: '한국사 2급', desc: 'TODO: 취득 연도' },
-          { tag: '네트워크관리사 2급', desc: 'TODO: 취득 연도' },
+          {
+            tag: '커뮤니케이션이 원활한 사람',
+            desc: '매장 매니저, 공인중개사사무소 대표를 거치며 사람이 망설이는 순간을 봤습니다. 화면을 설계할 때도 그 지점부터 찾습니다.',
+          },
+          { tag: '성장을 즐기는 사람', desc: 'TODO: 빨리 만들어 보고 고친 경험 한 가지' },
+          {
+            tag: '최신 기술 트렌드에 적극적인 사람',
+            desc: 'TODO: 꾸준히 이어 온 습관 (러닝, 공부 기록 등)',
+          },
         ],
       },
     ],

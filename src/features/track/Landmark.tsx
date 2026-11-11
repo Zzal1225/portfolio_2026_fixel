@@ -70,7 +70,7 @@ function LandmarkButton({
       aria-label={openLabel(data.id)}
       data-selected={selected}
       onClick={() => onSelect(data.id)}
-      className={`spr spr-selected spr-${data.sprite} absolute border-0 p-0 ${enabled ? 'cursor-pointer' : 'cursor-default'}`}
+      className={`spr spr-selected spr-${data.sprite} absolute border-0 p-0 ${enabled ? '' : 'cursor-default'}`}
       style={{
         left: r.x0,
         top: r.y0,

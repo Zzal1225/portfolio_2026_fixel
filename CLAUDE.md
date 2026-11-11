@@ -14,7 +14,7 @@
 |---|---|
 | 이동 | 잔디·인필드 어디든 8방향 자유 이동 + 충돌(`movement.ts`). 트랙 위 두 방향(B안) 폐지 |
 | 왼쪽 위 HUD | 로고 "ChanRyeong / PORTFOLIO"(번호표 이름 띠 폐지) |
-| 메뉴명 | ABOUT ME · CAREER · PROJECT1 · PROJECT2 · SKILL · RESUME. EDUCATION 창 없음(내용은 ABOUT ME로), ABOUT 탭 없음 |
+| 메뉴명 | ABOUT ME · CAREER · PROJECT1 · PROJECT2 · SKILL · RESUME. EDUCATION 창 없음, ABOUT 탭 없음 |
 | 하단 안내 판(PC) | (11-10 6차) **없앰**. 인트로 끝 키캡 ↑←→↓와 반응 구역 SPACE 말풍선이 같은 역할 |
 | 키캡 | ↑ ← → ↓ 4개가 0.45초마다 차례로 |
 | 반응 구역 말풍선 | (11-10 6차) 시안 "!" 말풍선 모양 안에 PC는 "SPACE", 모바일은 "!". 따로 뜨던 SPACE 태그는 없앰(`scripts/build-alert-bubble.mjs` 몸통 9-slice + 꼬리) |
@@ -26,6 +26,8 @@
 | 창 모양 | (11-10 4차) 딤 배경이 스크롤되고 창은 내용 길이만큼 늘어남. 닫기 ✕는 창 밖 화면 오른쪽 위(빨강). 제목 띠·아래쪽 이전·다음 띠는 하늘색(tee) 바탕. 지도 창도 같은 모양 |
 | 인트로 건너뛰기 | (11-11) **SKIP 버튼으로만**. 화면 클릭·아무 키는 건너뛰지 않고, 인트로 중 구조물 클릭도 무시(`goTo`가 `inputEnabled` 검사). 조작 가능해진 뒤 첫 입력은 인사·키캡 안내만 지움 |
 | 첫 로딩 | (11-11) 서버 HTML에 덮개(`IntroOverlay.LoadingCover`, 흑백 잔디색 #9c9c9c + 0.3초 뒤 LOADING)를 넣어 컬러 월드가 먼저 보이지 않게 함. 준비 완료·8초 초과·SKIP 중 먼저 온 쪽에 걷힘. REPLAY는 덮지 않음 |
+| ABOUT ME 창 | (11-11) 사용자 시안대로: 사진 + 러너 + 소개, 출발선 3칸(가로 점선), 강조 상자, 이름·설명 표(`Sections.tsx` hero·starts·callout·traits). 수치·일하는 방식·교육·자격증 섹션은 뺌 |
+| 커서 | (11-11) 누를 수 있는 곳은 러너의 손(`globals.css` @layer base, `scripts/build-cursor.mjs`). 잠긴 동안은 기본 커서 |
 | 창이 떠 있을 때 | (11-10 5차) 메뉴·미니맵(모바일 MAP)·REPLAY는 visibility로 숨김(`Hud.useHideForDialog`, 닫힐 때 포커스 복귀 위해 언마운트 안 함). 미니맵 자리에 ▲ TOP(`panels/ScrollTopButton.tsx`, 80px 내려가면 보임). 이전·다음 창은 맨 위부터 |
 | 창 제목 | 프로젝트 창은 "이름(부제목)": nanaki(기록 PWA), dahda(문자 발송 콘솔). 부제목은 `content/panels.ts` subtitle |
 
@@ -103,7 +105,7 @@ public/
   sprites/               tiles/ structures/ props/ ui/ character/ intro/ world/(track-ring) — Design 개별 PNG(시트 합치기는 step3 검토)
   img/                   창 사진(about-me-320·640.webp, 원본은 private/img/)
   resume.pdf             (예정) 이력서
-scripts/                 extract-design-layout.mjs·build-track-ring.mjs(시안 코드에서 숫자·그림 1회 추출), build-photos.mjs(창 사진 → WebP 2장), build-og.mjs(링크 미리보기·아이콘), lh-summary.mjs, measure-run.mjs·measure-intro.mjs·measure-intro-smooth.mjs(측정)
+scripts/                 extract-design-layout.mjs·build-track-ring.mjs(시안 코드에서 숫자·그림 1회 추출), build-photos.mjs(창 사진 → WebP 2장), build-og.mjs(링크 미리보기·아이콘), build-cursor.mjs(커서), lh-summary.mjs, measure-run.mjs·measure-intro.mjs·measure-intro-smooth.mjs(측정)
 e2e/                     smoke.spec.ts(Playwright: 크로미움 PC·모바일, WebKit PC + axe)
 docs/                    기획서.md, design-vs-plan.md, step1-plan.md, performance.md, milestones.md, assets/credits.md
 private/                 learning/, interview-questions.md (gitignore)

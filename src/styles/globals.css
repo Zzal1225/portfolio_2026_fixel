@@ -106,6 +106,22 @@ body {
   image-rendering: pixelated;
 }
 
+/*
+ * 누를 수 있는 곳의 커서: 러너의 손(11-11 사용자 선택, scripts/build-cursor.mjs). 11 1은 검지 끝(클릭 지점).
+ * @layer base에 두는 이유: 잠긴 동안(인트로 중 구조물)은 유틸리티 cursor-default가 이겨야 한다.
+ * 그림을 못 받으면 뒤의 pointer(기본 손가락)로 돌아간다.
+ */
+@layer base {
+  a[href],
+  button:not(:disabled),
+  [role='tab'],
+  summary {
+    cursor:
+      url('/sprites/ui/cursor-hand-32x32.png') 11 1,
+      pointer;
+  }
+}
+
 :focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: 2px;
