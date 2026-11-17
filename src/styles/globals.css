@@ -320,6 +320,13 @@ body:has(.resume-print) {
   size: A4;
   margin: 12mm 0;
 }
+/*
+ * 첫 장은 위 여백 없이 남색 띠가 종이 맨 위에 붙는다(11-17 사용자 요청: 내려받은 PDF 위쪽 빈 공간이 보기 좋지 않다).
+ * 둘째 장부터는 12mm를 둔다: 내용이 종이 끝에서 바로 시작하면 잘린 것처럼 보인다.
+ */
+@page :first {
+  margin-top: 0;
+}
 @media print {
   .resume-print li,
   .resume-print header,
