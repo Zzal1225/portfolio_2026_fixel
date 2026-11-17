@@ -11,11 +11,9 @@
  *
  * 현재 화면 네모·러너 점은 transform으로 움직인다(SVG 속성 x·y를 바꾸면 SVG 레이아웃이 다시 계산됨, performance.md 2장).
  */
-import dynamic from 'next/dynamic';
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
 import { MAP_LABELS } from '@/content/hud';
-import { MENU_LABEL, openLabel } from '@/content/menu';
-import { LANDMARKS, TRACK, WORLD, rectFromAnchor, type LandmarkId } from '@/features/track/layout';
+import { TRACK, WORLD, type LandmarkId } from '@/features/track/layout';
 import { selectScale, useGame } from '@/features/track/store';
 import { useHideForDialog, useHudVisible } from './Hud';
 
@@ -86,19 +84,20 @@ function useIdleImage(): boolean {
 
 /**
  * 지도 본체. width(px)에 맞춰 축소 비율 k = 640 / width.
- * onSelect가 있으면(큰 지도 창) 구조물 사각형 버튼을 얹는다. 미니맵은 그림만.
+ * children이 있으면 큰 지도 창: 그 위에 얹을 것(구조물 버튼)을 축소 비율 k로 받아 그린다. 미니맵은 그림만.
+ * 왜 버튼을 여기서 그리지 않나: 큰 지도에서만 쓰는 코드라 MapDialog 조각(처음 열 때 받음)에 두려고(performance.md 0-2).
  */
 export function TrackMap({
   width,
-  onSelect,
+  children,
 }: {
   width: number;
-  onSelect?: (id: LandmarkId) => void;
+  children?: (k: number) => ReactNode;
 }) {
   const k = WORLD.w / width;
   const height = WORLD.h / k;
   const picture = useIdleImage();
-  const big = onSelect !== undefined;
+  const big = children !== undefined;
   return (
     // overflow clip: 화면 네모가 지도보다 클 때(큰 화면·작은 지도) 밖으로 삐져나오지 않게
     <div className="relative overflow-clip" style={{ width, height }}>
@@ -123,45 +122,18 @@ export function TrackMap({
         />
       )}
       {!big && <ViewRect k={k} />}
-      {big && (
-        <ul>
-          {LANDMARKS.map((l) => {
-            const r = rectFromAnchor(l.anchor, l.size);
-            return (
-              <li key={l.id}>
-                {/* 시안: 구조물 그림 위 사각형, 2px 노란 테두리, 가운데 이름. 누르는 영역이 구조물 크기라 작은 화면에서도 넉넉 */}
-                <button
-                  type="button"
-                  aria-label={openLabel(l.id)}
-                  onClick={() => onSelect(l.id)}
-                  className="border-accent hover:bg-accent/35 absolute border-2"
-                  style={{
-                    left: r.x0 / k,
-                    top: r.y0 / k,
-                    width: (r.x1 - r.x0 + 1) / k,
-                    height: (r.y1 - r.y0 + 1) / k,
-                  }}
-                >
-                  <span
-                    aria-hidden
-                    className="font-pixel bg-ink absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-1 py-0.5 leading-none whitespace-nowrap text-white"
-                    style={{ fontSize: k <= 1 ? 10 : 7, boxShadow: '0 0 0 2px var(--color-white)' }}
-                  >
-                    {MENU_LABEL[l.id]}
-                  </span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+      {children?.(k)}
       <RunnerDot k={k} size={big ? 10 : 6} />
     </div>
   );
 }
 
-/** 큰 지도 창(Radix Dialog)은 처음 열 때 받는다(첫 화면 JS 줄이기) */
-const MapDialog = dynamic(() => import('./MapDialog').then((m) => m.MapDialog), { ssr: false });
+/**
+ * 큰 지도 창(Radix Dialog)은 처음 열 때 받는다(첫 화면 JS 줄이기).
+ * 왜 next/dynamic이 아니라 React.lazy: 이 창은 버튼을 누른 뒤(loaded)에만 그려져 서버 렌더에 나오지 않는다.
+ * dynamic의 ssr: false·미리 받기 처리가 할 일이 없는데 그 런타임이 첫 화면 조각에 실린다(performance.md 0-2).
+ */
+const MapDialog = lazy(() => import('./MapDialog').then((m) => ({ default: m.MapDialog })));
 
 /**
  * PC 미니맵 버튼 + 모바일 MAP 버튼 + 둘이 함께 쓰는 큰 지도 창.
@@ -206,7 +178,12 @@ export function MapLauncher({ onSelect }: { onSelect: (id: LandmarkId) => void }
       >
         {MAP_LABELS.button}
       </button>
-      {loaded && <MapDialog open={open} onOpenChange={setOpen} onSelect={onSelect} />}
+      {loaded && (
+        // fallback 없음: 받는 동안 화면은 그대로(가짜 대기 표시를 두지 않는다)
+        <Suspense fallback={null}>
+          <MapDialog open={open} onOpenChange={setOpen} onSelect={onSelect} />
+        </Suspense>
+      )}
     </>
   );
 }

@@ -143,7 +143,7 @@ private/                 learning/, interview-questions.md (gitignore)
 - 색만으로 뜻을 전하지 않는다(신호등은 색 + 글자 "SET"/"GO", `!` 말풍선은 아이콘 + 시각적 숨김 텍스트).
 
 ### 성능
-- 이미지는 스프라이트 시트, 인트로에서 프리로드. 첫 화면 JS 150KB(gzip) 이하 목표.
+- 이미지는 스프라이트 시트, 인트로에서 프리로드. 첫 화면 JS 목표(11-17 변경): **게임 코드 14KB(gzip, 로컬 빌드) 이하**. React·Next 런타임(배포 기준 약 137KB)은 줄일 수 없는 고정 몫이라 따로 적는다. 예전 목표 "합계 150KB 이하"는 런타임 134KB 때 정한 값이다(`docs/performance.md` 0-2). 새 기능은 처음 필요할 때 받게(`React.lazy`) 만든다.
 - 카메라·캐릭터 이동은 `transform`만. 이동 중 Layout/Recalc Style 0회가 측정 기준.
 - 성능 작업은 **변경 전 수치를 먼저 측정**하고 전후를 `docs/performance.md`에 측정 조건과 함께 기록.
 

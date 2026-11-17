@@ -7,7 +7,8 @@
  */
 import * as Dialog from '@radix-ui/react-dialog';
 import { MAP_LABELS } from '@/content/hud';
-import { WORLD, type LandmarkId } from '@/features/track/layout';
+import { MENU_LABEL, openLabel } from '@/content/menu';
+import { LANDMARKS, WORLD, rectFromAnchor, type LandmarkId } from '@/features/track/layout';
 import { useGame } from '@/features/track/store';
 import { ScrollTopButton } from '@/features/panels/ScrollTopButton';
 import { TrackMap } from './Minimap';
@@ -51,13 +52,47 @@ export function MapDialog({
               </p>
             </div>
             <div className="p-3">
-              <TrackMap
-                width={Math.max(160, width)}
-                onSelect={(id) => {
-                  onOpenChange(false);
-                  onSelect(id);
-                }}
-              />
+              <TrackMap width={Math.max(160, width)}>
+                {(k) => (
+                  // 버튼 순서 = 트랙 순서(반시계). 진짜 <button>이라 키보드·스크린리더 동작을 그대로 준다
+                  <ul>
+                    {LANDMARKS.map((l) => {
+                      const r = rectFromAnchor(l.anchor, l.size);
+                      return (
+                        <li key={l.id}>
+                          {/* 시안: 구조물 그림 위 사각형, 2px 노란 테두리, 가운데 이름. 누르는 영역이 구조물 크기라 작은 화면에서도 넉넉 */}
+                          <button
+                            type="button"
+                            aria-label={openLabel(l.id)}
+                            onClick={() => {
+                              onOpenChange(false);
+                              onSelect(l.id);
+                            }}
+                            className="border-accent hover:bg-accent/35 absolute border-2"
+                            style={{
+                              left: r.x0 / k,
+                              top: r.y0 / k,
+                              width: (r.x1 - r.x0 + 1) / k,
+                              height: (r.y1 - r.y0 + 1) / k,
+                            }}
+                          >
+                            <span
+                              aria-hidden
+                              className="font-pixel bg-ink absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-1 py-0.5 leading-none whitespace-nowrap text-white"
+                              style={{
+                                fontSize: k <= 1 ? 10 : 7,
+                                boxShadow: '0 0 0 2px var(--color-white)',
+                              }}
+                            >
+                              {MENU_LABEL[l.id]}
+                            </span>
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </TrackMap>
             </div>
             <ScrollTopButton />
           </Dialog.Content>

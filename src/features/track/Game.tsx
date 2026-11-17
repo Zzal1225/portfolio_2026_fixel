@@ -7,8 +7,7 @@
  * DOM 순서 = Tab 순서: 로고(글) → 메뉴 → 월드 → 지도 버튼 → ◀ ▶(모바일) → REPLAY. 창은 Portal로 body 끝.
  * 인트로 중에는 HUD가 없어 첫 Tab 정지점이 월드 다음 SKIP이 된다(건너뛰기는 SKIP 버튼으로만, 11-11).
  */
-import dynamic from 'next/dynamic';
-import { useRef } from 'react';
+import { lazy, Suspense, useRef } from 'react';
 import { preload } from 'react-dom';
 import { IntroOverlay, LoadingCover } from '@/features/intro/IntroOverlay';
 import { CRITICAL_IMAGES } from '@/features/intro/preload';
@@ -24,10 +23,11 @@ import { World } from './World';
 /*
  * 창(Radix Dialog + 창 문구 전체)은 첫 화면에 필요 없다 → 처음 필요해질 때 받는다(store.panelsNeeded).
  * 메뉴를 누르면 캐릭터가 달려가는 동안 받아지므로 도착 때 기다림이 거의 없다. 전후 수치: docs/performance.md
+ * 왜 next/dynamic이 아니라 React.lazy(11-17): panelsNeeded는 브라우저에서만 true가 되므로 서버 렌더에 창이 없다.
+ * dynamic의 ssr: false 처리·미리 받기 코드가 할 일 없이 첫 화면 조각에 실려 있었다(performance.md 0-2).
  */
-const PanelDialog = dynamic(
-  () => import('@/features/panels/PanelDialog').then((m) => m.PanelDialog),
-  { ssr: false },
+const PanelDialog = lazy(() =>
+  import('@/features/panels/PanelDialog').then((m) => ({ default: m.PanelDialog })),
 );
 
 export function Game() {
@@ -48,7 +48,12 @@ export function Game() {
       <MapLauncher onSelect={goTo} />
       <TouchControls stepStation={stepStation} />
       <ReplayButton onReplay={intro.replay} />
-      {panelsNeeded && <PanelDialog onNavigate={goTo} />}
+      {panelsNeeded && (
+        // fallback 없음: 받는 동안 러너는 계속 달린다(가짜 대기 표시를 두지 않는다)
+        <Suspense fallback={null}>
+          <PanelDialog onNavigate={goTo} />
+        </Suspense>
+      )}
       <LoadingCover />
       <IntroOverlay onSkip={intro.skip} />
     </>
