@@ -57,10 +57,34 @@ export const viewport: Viewport = {
   themeColor: '#6fb24b',
 };
 
+/*
+ * 방문 집계(11-17 사용자 요청: 인사담당자가 포트폴리오를 열어 봤는지 알고 싶다): Vercel Web Analytics.
+ * 알 수 있는 것은 방문 수·시간·들어온 경로·나라·기기까지. 누구인지는 모른다. 쿠키를 쓰지 않아 동의 배너가 필요 없다.
+ *
+ * 왜 패키지(@vercel/analytics)가 아니라 스크립트 태그 두 줄인가: 패키지의 <Analytics />는 클라이언트 컴포넌트라
+ *   첫 화면 JS 조각에 실린다(로컬 측정 +1.9 KB, performance.md 0-4). Vercel이 문서로 안내하는 HTML 방식은
+ *   같은 집계 스크립트(/_vercel/insights/script.js)를 defer로 받을 뿐이라 번들에 더해지는 것이 없다.
+ *   패키지가 하는 일 중 여기 없는 것은 "화면 전환마다 다시 세기"인데, 이 사이트는 화면이 하나라 필요 없다.
+ * 왜 VERCEL 환경 변수로 가르나: 그 주소는 Vercel 배포에만 있다. 로컬·CI에서는 404가 콘솔 오류로 찍혀 테스트·Lighthouse를 흐린다.
+ * 첫 줄(va 대기열): 집계 스크립트가 오기 전에 생긴 호출을 쌓아 두는 Vercel의 정해진 머리말.
+ * 버린 대안: Google Analytics(쿠키 동의가 필요하고 스크립트가 무겁다).
+ * 대시보드(Project → Analytics)에서 켜야 집계된다. 꺼져 있으면 스크립트 주소가 404다.
+ */
+const ANALYTICS_ON = process.env.VERCEL === '1';
+const VA_QUEUE = 'window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};';
+
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="ko" className={`${pressStart.variable} ${galmuri.variable} ${pretendard.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        {ANALYTICS_ON && (
+          <>
+            <script dangerouslySetInnerHTML={{ __html: VA_QUEUE }} />
+            <script defer src="/_vercel/insights/script.js" />
+          </>
+        )}
+      </body>
     </html>
   );
 }

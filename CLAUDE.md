@@ -71,6 +71,7 @@
 | 폰트 | Press Start 2P(OFL) 영어 라벨·HUD·창 제목, Galmuri(OFL) 한국어 픽셀 글자(전광판 문구·이정표·창 섹션 제목), Pretendard 본문. 전부 `next/font/local` self-host |
 | 테스트 | Vitest, Testing Library, Playwright(+axe, 화면 비교 PC 1280·모바일 390) |
 | CI/CD | GitHub Actions, Lighthouse CI(첫 화면), Vercel |
+| 방문 집계 | (11-17) Vercel Web Analytics. 패키지 없이 `app/layout.tsx`의 스크립트 태그 두 줄, Vercel 배포에서만(`VERCEL=1`). 방문 수·시간·경로·나라·기기까지, 쿠키 없음 |
 
 - 위 목록에 없는 라이브러리는 먼저 **이유와 대안**을 제시하고 승인을 받는다. Phaser·PixiJS·react-three 등 렌더링 엔진은 금지.
 - `<canvas>`는 step2에서 달리기·카메라 이동 중 프레임 저하가 측정으로 확인될 때만, 월드 배경(트랙·잔디·관중석·소품) 한 장에 한해 검토한다. 글·버튼·캐릭터·구조물은 DOM 유지.

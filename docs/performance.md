@@ -63,6 +63,17 @@
 - 배포 주소에서는 모의 측정도 0.93: localhost에서 JS가 즉시 받아져 생기던 착시(1장)가 실제 네트워크에서는 없다.
 - E2E도 배포 주소에서 통과: `E2E_BASE_URL=https://portfolio2026fixel.vercel.app npx playwright test` → 26 통과(7 기기별 건너뜀).
 
+### 0-4. 방문 집계(Vercel Web Analytics)를 넣는 두 방법 (2026-11-17, 로컬 빌드, 0-2와 같은 측정)
+
+| 방법 | 첫 화면 JS 합 | 비고 |
+|---|---|---|
+| 넣기 전 | 147.1 KB | – |
+| 패키지 `@vercel/analytics`의 `<Analytics />` | 149.0 KB (+1.9) | 클라이언트 컴포넌트라 첫 화면 조각에 실린다 |
+| 스크립트 태그 두 줄(채택) | 147.1 KB (+0) | 번들에 더해지는 것 없음. 새 의존성도 없음 |
+
+- 두 방법 모두 집계 스크립트(`/_vercel/insights/script.js`)는 따로 받는다(Vercel 배포에서만). 그 크기는 배포 주소에서 재야 한다(아직 재지 않음).
+- 패키지가 더 해 주는 것은 화면 전환마다 다시 세기인데, 이 사이트는 화면이 하나라 필요 없다. 이유는 `src/app/layout.tsx` 주석.
+
 ## 1. 첫 화면 로딩 (Lighthouse 모바일, 2026-11-10)
 
 측정: `CHROME_PATH=<chrome> npx lhci collect --numberOfRuns=3 [--settings.throttlingMethod=devtools]` → `node scripts/lh-summary.mjs`
