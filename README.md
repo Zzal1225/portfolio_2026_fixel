@@ -20,7 +20,7 @@ ABOUT ME · CAREER · PROJECT · DEV LOG · SKILLS · RESUME 창이 열립니다
 | 루프 | `requestAnimationFrame` 없이 60 ms 고정 틱 + CSS transition 보간 | `runner-config.ts` |
 | 인트로 | "경과 시간 → 화면" 순수 함수 시간표 + 고정 틱 진행기. 월드 전체 배율 → 러너로 줌인 → 평소 배율로 줌아웃, 부채꼴 흑백→컬러 | `src/features/intro/` |
 | 접근성 | 글·버튼은 전부 DOM, 구조물·메뉴·지도 점은 `<button>`, Radix Dialog, 키보드만으로 6개 창, reduced-motion | E2E + axe 위반 0 |
-| 성능 | 배포 주소 Lighthouse 모바일 0.91 · PC 0.91 · 접근성 1.00, 첫 화면 JS 151.0 KB(런타임 137 · 게임 코드 14), 달리기 중 Layout 1회 | `docs/performance.md` |
+| 성능 | 배포 주소 Lighthouse 모바일 0.91 · PC 0.91 · 접근성 1.00, 첫 화면 JS 152.4 KB(런타임 137 · 게임 코드 15), 달리기 중 Layout 1회 | `docs/performance.md` |
 
 ## 실행
 
