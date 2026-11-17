@@ -2,7 +2,7 @@
 
 **https://portfolio2026fixel.vercel.app**
 
-> README 맨 위 15초 GIF(신호등 → 한 바퀴 → 메뉴 클릭 → 창)는 배포 후 추가한다.
+[![출발 신호등이 켜지고 러너가 트랙을 한 바퀴 돈 뒤 인사하고, CAREER 메뉴를 누르면 전광판까지 달려가 창이 열린다](docs/assets/readme-intro.gif)](https://portfolio2026fixel.vercel.app)
 
 도트 그림 육상 트랙 위를 캐릭터가 달리는 1인 포트폴리오입니다. 트랙 위 구조물 6개 앞에 서거나 메뉴·미니맵을 누르면
 ABOUT ME · CAREER · PROJECT · DEV LOG · SKILLS · RESUME 창이 열립니다. 들어오면 출발 신호등과 함께 약 14초짜리 인트로가 재생됩니다(SKIP 버튼으로 건너뛰기).
