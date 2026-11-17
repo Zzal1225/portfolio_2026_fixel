@@ -365,8 +365,11 @@ export const PANELS: Record<LandmarkId, Panel> = {
         note: '사이트는 데스크톱 전용이고 게시된 작업물은 반응형입니다.',
         link: { label: '당시 사이트', href: 'https://ryeong-portfolio.netlify.app/' },
         video: {
-          // MP4가 생기면 맨 앞에 { src: '/video/first-portfolio.mp4', type: 'video/mp4' }를 더한다(구형 사파리용)
-          sources: [{ src: '/video/first-portfolio.webm', type: 'video/webm' }],
+          // 브라우저는 앞에서부터 재생할 수 있는 첫 형식을 고른다. MP4(H.264)가 앞: 사파리도 재생하고 파일도 훨씬 작다(163KB, WebM 937KB)
+          sources: [
+            { src: '/video/first-portfolio.mp4', type: 'video/mp4' },
+            { src: '/video/first-portfolio.webm', type: 'video/webm' },
+          ],
           poster: '/img/first-portfolio-poster.webp',
           alt: '첫 포트폴리오 사이트의 첫 화면. 물결치는 바다 위로 홍학 튜브와 홍학이 흔들리고 가운데에 "RYEONG\'S PORTFOLIO" 글자가 나타난다',
         },

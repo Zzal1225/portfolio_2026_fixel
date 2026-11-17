@@ -29,4 +29,4 @@
 | `public/icons/tech/zustand.png` | Devicon 2.18.0 zustand 그림을 36×36 PNG로 구움(벡터 124KB가 작은 칸에 과해서) | MIT |
 | `public/img/resume-{480,750}.webp` | 본인 증명사진(원본 `private/img/resume_01.png`, gitignore)을 `scripts/build-photos.mjs`로 3:4 자르고 줄임(WebP 품질 90, 11-12) | 본인 사진 |
 | `public/img/nanaki-{offline-sync,naki-ai,schema-form,dark-mode}.webp`·`-still.webp` | 본인이 만든 nanaki 앱을 본인 폰에서 녹화한 GIF(원본 `private/img/demos/`, gitignore)를 `scripts/build-demos.mjs`로 animated WebP + 멈춘 한 장으로 구움(11-13) | 본인 제작 화면 |
-| `public/video/first-portfolio.webm`·`public/img/first-portfolio-poster.webp` | 본인이 만든 첫 포트폴리오 사이트(ryeong-portfolio.netlify.app) 첫 화면을 `scripts/build-first-portfolio.mjs`로 8초 녹화(소리 없음) + 첫 장면 그림(11-13). 화면 속 그림은 그 사이트가 쓰던 것 그대로 | 본인 제작 사이트 화면 |
+| `public/video/first-portfolio.mp4`·`.webm`·`public/img/first-portfolio-poster.webp` | 본인이 만든 첫 포트폴리오 사이트(ryeong-portfolio.netlify.app) 첫 화면을 `scripts/build-first-portfolio.mjs`로 8초 녹화(소리 없음) + 첫 장면 그림(11-13). MP4는 그 WebM을 ffmpeg(H.264)로 바꾼 것(11-17). 화면 속 그림은 그 사이트가 쓰던 것 그대로 | 본인 제작 사이트 화면 |

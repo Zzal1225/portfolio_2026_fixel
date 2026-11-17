@@ -7,7 +7,9 @@
 // 만드는 것:
 //   public/video/first-portfolio.webm   소리 없는 영상(Playwright 녹화기 = VP8 WebM. 오디오 트랙 자체가 없다)
 //   public/img/first-portfolio-poster.webp  영상이 뜨기 전·움직임 줄이기 설정에서 보이는 첫 장면(960w)
-// MP4(H.264)는 여기서 만들지 못한다: Playwright에 든 ffmpeg는 VP8만 굽는다. PATH에 ffmpeg가 있으면 마지막 단계가 MP4도 만든다.
+//   public/video/first-portfolio.mp4    같은 영상의 H.264 판(사파리용, 창은 이것을 먼저 고른다). PATH에 ffmpeg가 있을 때만 만든다
+// 왜 따로 굽나: Playwright에 든 ffmpeg는 WebM만 굽는다. 이미 있는 WebM만 MP4로 바꾸려면(다시 녹화하지 않고):
+//   ffmpeg -y -i public/video/first-portfolio.webm -an -c:v libx264 -crf 27 -pix_fmt yuv420p -movflags +faststart public/video/first-portfolio.mp4
 //
 // 함정 1: 들어가면 안내 팝업(뒤집히는 카드)이 화면을 덮는다. 녹화는 페이지가 만들어질 때부터 시작되므로 눌러서 닫으면 그 장면이 영상에 들어간다
 //         → 팝업을 CSS로 숨긴 채 연다.
@@ -70,7 +72,7 @@ const poster = await sharp(`${TMP}/poster.png`)
 console.log(`${VIDEO}: ${(fs.statSync(VIDEO).size / 1024).toFixed(0)}KB`);
 console.log(`${POSTER}: ${poster.width}×${poster.height}, ${(poster.size / 1024).toFixed(1)}KB`);
 
-// ffmpeg가 있으면 MP4도: 960×540, 소리 없음(-an), 웹에서 바로 재생되게 moov를 앞으로(+faststart)
+// ffmpeg가 있으면 MP4도: 녹화 크기 그대로(키우면 용량만 는다), 소리 없음(-an), 웹에서 바로 재생되게 moov를 앞으로(+faststart)
 if (spawnSync('ffmpeg', ['-version']).status === 0) {
   const mp4 = VIDEO.replace(/\.webm$/, '.mp4');
   execFileSync('ffmpeg', [
@@ -78,8 +80,6 @@ if (spawnSync('ffmpeg', ['-version']).status === 0) {
     '-i',
     VIDEO,
     '-an',
-    '-vf',
-    'scale=960:-2',
     '-c:v',
     'libx264',
     '-crf',
