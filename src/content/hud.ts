@@ -19,7 +19,12 @@ export const HUD_LABELS = {
 } as const;
 
 /** 모바일 ◀ ▶: 메뉴 순서로 이전·다음 지점까지 달려가 창을 연다(11-12) */
-export const TOUCH_LABELS = { prev: 'Go to previous stop', next: 'Go to next stop' } as const;
+export const TOUCH_LABELS = {
+  prev: 'Go to previous stop',
+  next: 'Go to next stop',
+  /** 인트로 직후 한 번(첫 입력까지): 화면을 끌면 직접 달릴 수 있다는 안내(11-17 터치 스틱) */
+  dragHint: '화면을 끌면 달려요',
+} as const;
 
 /** 미니맵(PC)·MAP 버튼(모바일) → 큰 지도 창 */
 /** 창 안 맨 위로 버튼(미니맵 자리, 창이 길어질 때). 지도 창도 같이 쓰므로 창 문구 파일(panels.ts)이 아닌 여기 */

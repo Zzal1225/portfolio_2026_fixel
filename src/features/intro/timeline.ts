@@ -11,6 +11,7 @@
  * 왜 순수 함수: 단계 경계(1.8s, 10.0s …)·감속 곡선·깜빡임 패턴을 단위 테스트로 고정하려고.
  */
 import { BOARD_LINES } from '@/content/intro';
+import { hudBottomPx } from '@/features/track/scale';
 import { TRACK, WORLD, type Point } from '@/features/track/layout';
 import type { IntroPhase } from '@/features/track/store';
 import { lanePoint } from '@/features/track/movement';
@@ -104,6 +105,11 @@ export interface IntroFrame {
   scale: number;
   /** 카메라가 화면 가운데에 둘 월드 점(경계 클램프 전) */
   center: Point;
+  /**
+   * 하단 HUD가 가리는 높이를 카메라 계산에서 얼마나 뺄지(0~1). HUD가 없는 구간은 0, 줌아웃 동안 0 → 1(HUD가 들어오는 것과 같이),
+   * 끝 상태는 1 = 평소 카메라(scale.playView)와 같다. 이게 없으면 줌아웃이 끝나는 순간 화면이 바 높이의 절반만큼 튄다.
+   */
+  inset: number;
   board: BoardFrame | null;
 }
 
@@ -114,7 +120,7 @@ export interface IntroFrame {
 export function introAt(t: number, scales: ScaleSet, focus: Point): IntroFrame {
   const signal: 0 | 1 | 2 | 3 = t < T.RED ? 1 : t < T.YEL ? 2 : 3;
   const band = t < T.RED ? 0 : t < T.YEL ? 1 : t < T.BAND_END ? 2 : null;
-  const base = { signal, band, flagUp: t < T.GO, s: lapDistance(t), board: boardAt(t) };
+  const base = { signal, band, flagUp: t < T.GO, s: lapDistance(t), board: boardAt(t), inset: 0 };
   const worldCenter = { x: WORLD.w / 2, y: WORLD.h / 2 };
   const zoomFocus = { x: focus.x, y: focus.y - 8 };
 
@@ -137,19 +143,24 @@ export function introAt(t: number, scales: ScaleSet, focus: Point): IntroFrame {
       phase: 'zoomout',
       scale: lerp(scales.zoom, scales.normal, e),
       center: { x: focus.x, y: lerp(zoomFocus.y, focus.y, e) },
+      inset: e,
     };
   }
-  return { ...base, phase: 'ready', signal: 0, scale: scales.normal, center: focus };
+  return { ...base, phase: 'ready', signal: 0, scale: scales.normal, center: focus, inset: 1 };
 }
 
-/** 카메라 좌상단: 화면이 월드보다 크면 가운데 정렬, 아니면 경계 안. 정수 배율일 때만 반올림(시안) */
+/**
+ * 카메라 좌상단: 화면이 월드보다 크면 가운데 정렬, 아니면 경계 안. 정수 배율일 때만 반올림(시안).
+ * @param bottomPx 화면 아래에서 HUD가 가리는 높이(CSS px). 그만큼 뺀 높이를 "보이는 화면"으로 본다
+ */
 export function introCamera(
   center: Point,
   scale: number,
   viewportPx: { w: number; h: number },
+  bottomPx = 0,
 ): Point {
   const vw = viewportPx.w / scale;
-  const vh = viewportPx.h / scale;
+  const vh = (viewportPx.h - bottomPx) / scale;
   const axis = (c: number, v: number, M: number) =>
     v >= M ? (M - v) / 2 : Math.max(0, Math.min(M - v, c - v / 2));
   const x = axis(center.x, vw, WORLD.w);
@@ -206,7 +217,10 @@ export function zoomKeyframes(
 ): KeyframeTrack {
   return sampleKeyframes(a, b, (t) => {
     const f = introAt(t, scales, focus);
-    return worldTransform(introCamera(f.center, f.scale, viewportPx), f.scale);
+    return worldTransform(
+      introCamera(f.center, f.scale, viewportPx, f.inset * hudBottomPx(viewportPx)),
+      f.scale,
+    );
   });
 }
 

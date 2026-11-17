@@ -43,8 +43,8 @@ export function Signpost() {
             left: pos.x,
             top: pos.y,
             transform: 'translate(-50%, -50%)',
-            // 시안: max(10px, 4.4 × 배율) CSS px. 여기선 월드 px이므로 4.4, 바닥은 12px ÷ 배율
-            fontSize: 'max(4.4px, calc(12px / var(--scale)))',
+            // 시안: max(10px, 4.4 × 배율) CSS px. 여기선 월드 px이므로 4.4, 바닥은 12px ÷ 평소 배율(World.tsx --play-scale)
+            fontSize: 'max(4.4px, calc(12px / var(--play-scale)))',
           }}
         >
           {SIGN_LINES[i]}

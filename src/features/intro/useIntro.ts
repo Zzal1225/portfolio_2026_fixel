@@ -17,9 +17,10 @@ import { useCallback, useEffect, useRef, useState, type RefObject } from 'react'
 import { INTRO_FINISH_T, TRACK } from '@/features/track/layout';
 import { lanePoint } from '@/features/track/movement';
 import { FOCUS_OFFSET_Y, TICK_MS } from '@/features/track/runner-config';
+import { hudBottomPx, playView } from '@/features/track/scale';
 import { useGame } from '@/features/track/store';
 import { facing as laneFacing } from '@/features/track/trackPath';
-import { centerOn, lapSweep, viewInWorld } from './camera';
+import { centerOn, lapSweep } from './camera';
 import { preloadAssets } from './preload';
 import {
   T,
@@ -88,9 +89,10 @@ export function useIntro(worldRef: RefObject<HTMLDivElement | null>): IntroContr
         phase: 'idle',
         scaleOverride: null,
         inputEnabled: true,
+        // playView: 평소 카메라와 같은 기준(모바일 하단 바를 뺀 화면). 다르면 첫 틱에 화면이 튄다
         camera: centerOn(
           { x: FINISH.x, y: FINISH.y - FOCUS_OFFSET_Y },
-          viewInWorld(s.viewportPx, s.scale),
+          playView(s.viewportPx, s.scale),
         ),
       });
       s.setIntro({ phase: 'ready', signal: 0, band: null, sweep: 360, elapsed: T.END });
@@ -151,7 +153,7 @@ export function useIntro(worldRef: RefObject<HTMLDivElement | null>): IntroContr
               : 'right',
           phase: lapping ? 'running' : 'idle',
           scaleOverride: f.scale,
-          camera: introCamera(f.center, f.scale, s.viewportPx),
+          camera: introCamera(f.center, f.scale, s.viewportPx, f.inset * hudBottomPx(s.viewportPx)),
         });
         s.setIntro({
           phase: f.phase,
@@ -172,7 +174,7 @@ export function useIntro(worldRef: RefObject<HTMLDivElement | null>): IntroContr
         inputEnabled: true,
         camera: centerOn(
           { x: FINISH.x, y: FINISH.y - FOCUS_OFFSET_Y },
-          viewInWorld(s.viewportPx, s.scale),
+          playView(s.viewportPx, s.scale),
         ),
       });
       s.setIntro({ phase: 'greet', sweep: 360 });

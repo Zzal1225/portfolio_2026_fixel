@@ -140,6 +140,16 @@ body {
  * 월드 포커스 표시: 월드 div는 화면보다 훨씬 크고 확대돼 있어서, 그 자체 outline은 화면 밖에 그려진다.
  * 대신 화면 크기 바깥 틀(.world-frame) 안쪽 가장자리에 그린다(:has로 "안에 포커스가 있으면").
  */
+/*
+ * 터치 스틱(hud/TouchStick.tsx): 월드를 끄는 손가락을 브라우저가 스크롤·당겨서 새로 고침으로 가져가지 않게 한다.
+ * pinch-zoom은 남긴다: 두 손가락 확대는 저시력 사용자의 기본 도구다. 길게 눌러 뜨는 선택·메뉴는 끈다(달리는 중 뜨면 입력이 끊긴다).
+ */
+[data-world] {
+  touch-action: pinch-zoom;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
 [data-world]:focus-visible {
   outline: none;
   box-shadow: none;

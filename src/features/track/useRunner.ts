@@ -13,6 +13,7 @@
  *  - Enter·Space(창 열기)는 포커스가 바탕이나 월드일 때만: 버튼에 포커스가 있으면 그 버튼을 누르는 키다.
  *  - 짧게 톡 누른 키도 한 틱은 반영(tapped).
  *  - 방향키를 누르면 자동 이동은 취소된다. 창이 열리면 눌린 키를 비운다.
+ *  - 터치: 화면을 끌면 그 방향(8방향)이 같은 입력으로 들어온다(setStick, hud/TouchStick.tsx). 키와 더해 한 벡터가 된다.
  *  - 인트로 연출 중(store.inputEnabled = false)에는 틱이 아무것도 하지 않는다.
  */
 import { useCallback, useEffect, useRef, type RefObject } from 'react';
@@ -27,6 +28,7 @@ import {
   zoneAt,
 } from './movement';
 import { AUTO_SPEED_RATIO, DEAD_ZONE_RATIO, FOCUS_OFFSET_Y, TICK_MS } from './runner-config';
+import { playView } from './scale';
 import { NO_INPUT, selectScale, useGame, type RunnerInput, type RunnerSnapshot } from './store';
 import type { KeyAxis } from './trackPath';
 
@@ -161,6 +163,8 @@ export interface RunnerControls {
   stepStation: (delta: 1 | -1) => void;
   /** Enter·Space: 반응 구역 안이면 그 창을 연다 */
   confirm: () => void;
+  /** 터치 스틱(화면 끌기)의 지금 방향. 손을 떼면 NO_INPUT */
+  setStick: (input: RunnerInput) => void;
 }
 
 const sameSnapshot = (a: RunnerSnapshot, b: RunnerSnapshot) =>
@@ -182,10 +186,13 @@ export function useRunner(worldEl: RefObject<HTMLElement | null>): RunnerControl
   const keys = useRef(new Set<string>());
   /** 짧게 톡 누른 키: keydown·keyup이 한 틱 안에 끝나도 다음 틱까지 남겨 최소 한 걸음 */
   const tapped = useRef(new Set<string>());
+  /** 터치 스틱 방향. 키처럼 "지금 눌려 있는 값"이라 ref에 두고 틱이 읽는다(상태로 두면 손가락이 움직일 때마다 다시 그린다) */
+  const stick = useRef<RunnerInput>(NO_INPUT);
 
   const clearInput = useCallback(() => {
     keys.current.clear();
     tapped.current.clear();
+    stick.current = NO_INPUT;
   }, []);
 
   useEffect(() => {
@@ -226,12 +233,14 @@ export function useRunner(worldEl: RefObject<HTMLElement | null>): RunnerControl
     const tick = () => {
       const s = useGame.getState();
       if (!s.inputEnabled) return;
-      const input = combineKeys(new Set([...keys.current, ...tapped.current]));
+      const k = combineKeys(new Set([...keys.current, ...tapped.current]));
       tapped.current.clear();
-      const scale = selectScale(s);
-      const next = stepRunner(s, input, {
-        viewport: { w: s.viewportPx.w / scale, h: s.viewportPx.h / scale },
-      });
+      const input: RunnerInput = {
+        dx: toAxis(k.dx + stick.current.dx),
+        dy: toAxis(k.dy + stick.current.dy),
+      };
+      // 보이는 화면 = 하단 메뉴 바(모바일)를 뺀 부분. 인트로 끝 상태(useIntro)와 같은 함수를 써야 첫 틱에 튀지 않는다
+      const next = stepRunner(s, input, { viewport: playView(s.viewportPx, selectScale(s)) });
       if (!sameSnapshot(s, next)) useGame.setState(next);
     };
 
@@ -276,5 +285,9 @@ export function useRunner(worldEl: RefObject<HTMLElement | null>): RunnerControl
     if (s.zone && !s.open) s.openPanel(s.zone);
   }, []);
 
-  return { goTo, stepStation, confirm };
+  const setStick = useCallback((input: RunnerInput) => {
+    stick.current = input;
+  }, []);
+
+  return { goTo, stepStation, confirm, setStick };
 }

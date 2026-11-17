@@ -7,7 +7,7 @@
  *   화면 밖 버튼으로 포커스가 튀어 카메라와 어긋난다. 월드 자체가 Tab 정지점 하나다.
  * - 반응 구역 안이면 data-selected → sprites.css가 1px 노란 외곽선 그림을 겹친다.
  * - 이름 글자 크기: 시안은 월드 5~8px(배율을 곱해 10~32 CSS px). 모바일 2배에서 5px은 10px이라
- *   "12px 이상" 기준에 못 미쳐 max(시안 크기, 12px ÷ 배율)로 바닥을 깐다.
+ *   "12px 이상" 기준에 못 미쳐 max(시안 크기, 12px ÷ 평소 배율)로 바닥을 깐다. 인트로 배율이 아니라 평소 배율(--play-scale)인 이유는 World.tsx.
  *
  * 좌표는 전부 layout.ts. 이 파일엔 "어떻게 보이나"(글자 색)만 있다.
  */
@@ -35,8 +35,8 @@ const LABEL_STYLE: Record<LandmarkData['sprite'], CSSProperties> = {
   'reception-table-64x32': { color: 'var(--color-ink)' },
 };
 
-/** 월드 px 글자 크기, 단 화면에서 12px 미만으로 작아지지 않게 */
-export const worldFont = (worldPx: number) => `max(${worldPx}px, calc(12px / var(--scale)))`;
+/** 월드 px 글자 크기, 단 평소 배율의 화면에서 12px 미만으로 작아지지 않게 */
+export const worldFont = (worldPx: number) => `max(${worldPx}px, calc(12px / var(--play-scale)))`;
 
 function LandmarkButton({
   data,

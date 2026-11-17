@@ -47,6 +47,7 @@ export function World({
   onSelect: (id: LandmarkId) => void;
 }) {
   const scale = useGame(selectScale);
+  const playScale = useGame((s) => s.scale);
   const cam = useGame((s) => s.camera);
   const settling = useGame(selectSettling);
 
@@ -67,6 +68,9 @@ export function World({
         style={{
           // 월드 안 글자 크기(calc(12px / var(--scale)))가 인트로 줌 배율도 따르게
           ['--scale' as string]: scale,
+          // 구조물 이름·이정표 글자의 "12px 바닥"은 평소 배율로 잰다(11-17). 인트로 한 바퀴의 배율(모바일 0.6)로 재면
+          // 12 ÷ 0.6 = 월드 20px이 되어 이름이 구조물보다 커진다. 그 구간은 월드와 함께 작아지는 게 맞다
+          ['--play-scale' as string]: playScale,
           width: WORLD.w,
           height: WORLD.h,
           transform: worldTransform(cam, scale),

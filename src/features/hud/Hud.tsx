@@ -31,7 +31,10 @@ export function useHideForDialog(): string {
   return useGame(selectDialogOpen) ? 'invisible' : '';
 }
 
-/** ▶ REPLAY(왼쪽 아래): 인트로가 끝난 뒤. 누르면 열린 창을 닫고 신호등부터 다시(useIntro.replay) */
+/**
+ * ▶ REPLAY(PC 왼쪽 아래): 인트로가 끝난 뒤. 누르면 열린 창을 닫고 신호등부터 다시(useIntro.replay).
+ * 모바일은 오른쪽 위 MAP 버튼 아래(11-17): 왼쪽 아래에 두면 출발 아치 위에 얹히고 ◀·메뉴와 붙어 엄지 자리가 붐볐다.
+ */
 export function ReplayButton({ onReplay }: { onReplay: () => void }) {
   const hide = useHideForDialog();
   if (!useHudVisible()) return null;
@@ -40,7 +43,7 @@ export function ReplayButton({ onReplay }: { onReplay: () => void }) {
       type="button"
       onClick={onReplay}
       aria-label={INTRO_LABELS.replayAria}
-      className={`${hide} hud-in-left nine-white font-pixel text-ink fixed bottom-4 left-4 z-20 h-11 px-1.5 text-[10px] max-[699px]:bottom-[200px] max-[699px]:text-[8px]`}
+      className={`${hide} hud-in-left nine-white font-pixel text-ink fixed bottom-4 left-4 z-20 h-11 px-1.5 text-[10px] max-[699px]:top-[60px] max-[699px]:right-2 max-[699px]:bottom-auto max-[699px]:left-auto max-[699px]:text-[8px]`}
     >
       {INTRO_LABELS.replay}
     </button>

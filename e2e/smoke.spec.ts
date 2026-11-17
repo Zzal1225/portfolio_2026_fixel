@@ -355,6 +355,46 @@ test('모바일: ▶ 를 누르면 메뉴 순서의 다음 지점(출발선 → 
   });
 });
 
+test('모바일: 월드를 끌면 그 방향으로 달리고, 떼면 멈춘다(터치 스틱, 11-17)', async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(!isMobile, '모바일 전용');
+  await skipIntro(page);
+  const world = page.locator('[data-world]');
+  const stick = page.locator('[data-touch-stick]');
+  // 진짜 터치 끌기는 Playwright에 없어 포인터 이벤트를 직접 보낸다(스틱은 pointerType이 mouse가 아니면 받는다)
+  const fire = (type: string, x: number, y: number) =>
+    world.dispatchEvent(type, {
+      pointerType: 'touch',
+      pointerId: 7,
+      isPrimary: true,
+      clientX: x,
+      clientY: y,
+      bubbles: true,
+    });
+  const transform = () => world.evaluate((el: HTMLElement) => el.style.transform);
+  const start = await transform();
+
+  // 죽은 구간 안(5px): 탭으로 본다 → 스틱이 뜨지 않는다
+  await fire('pointerdown', 200, 300);
+  await fire('pointermove', 204, 303);
+  await expect(stick).toBeHidden();
+
+  // 오른쪽으로 끌기: 스틱이 뜨고 카메라가 따라간다(월드 transform이 바뀐다)
+  await fire('pointermove', 280, 300);
+  await expect(stick).toBeVisible();
+  await expect.poll(transform, { timeout: 5000 }).not.toBe(start);
+
+  // 떼면 스틱이 사라지고 멈춘다
+  await fire('pointerup', 280, 300);
+  await expect(stick).toBeHidden();
+  await page.waitForTimeout(300);
+  const stopped = await transform();
+  await page.waitForTimeout(300);
+  expect(await transform()).toBe(stopped);
+});
+
 test('창이 떠 있으면 메뉴·지도·REPLAY가 숨고, TOP 버튼으로 맨 위로 간다', async ({ page }) => {
   await skipIntro(page);
   const menu = page.getByRole('navigation', { name: 'Menu' });

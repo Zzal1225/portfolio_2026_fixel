@@ -458,7 +458,8 @@ function Stack({ section }: { section: Extract<Section, { type: 'stack' }> }) {
         </ul>
         <SkillGroup
           group={groups.top}
-          listClass="grid grid-cols-5 gap-2 max-[699px]:grid-cols-2 max-[699px]:gap-y-4"
+          // 좁은 화면 2칸: 항목이 홀수면 마지막 하나가 왼쪽에 혼자 남는다 → 두 칸을 차지해 가운데로
+          listClass="grid grid-cols-5 gap-2 max-[699px]:grid-cols-2 max-[699px]:gap-y-4 max-[699px]:[&>li:last-child:nth-child(odd)]:col-span-2"
         >
           {(it) => (
             <div className="flex flex-col items-center gap-1.5 text-center">

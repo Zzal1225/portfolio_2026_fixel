@@ -19,6 +19,8 @@
 | 키캡 | ↑ ← → ↓ 4개가 0.45초마다 차례로 |
 | 반응 구역 말풍선 | (11-10 6차) 시안 "!" 말풍선 모양 안에 PC는 "SPACE", 모바일은 "!". 따로 뜨던 SPACE 태그는 없앰(`scripts/build-alert-bubble.mjs` 몸통 9-slice + 꼬리) |
 | 미니맵(PC) | 버튼 하나 → 큰 지도 창(모바일 MAP과 같은 창) |
+| 모바일 직접 이동 | (11-17) **화면 끌기 = 터치 스틱**: 월드를 누른 채 끌면 그 방향(8방향)으로 달리고, 닿은 자리에 스틱 그림이 뜬다(`hud/TouchStick.tsx`, `track/stick.ts`). 터치·펜만(마우스 제외), 폭과 무관. 고정 방향 패드는 여전히 범위 밖. 인트로 직후 ◀ ▶ 사이에 "화면을 끌면 달려요" 안내(첫 입력까지) |
+| 모바일 화면 배치 | (11-17) 평소 카메라는 하단 메뉴 바(112px)를 뺀 화면을 기준으로 한다(`scale.playView`, 인트로 줌아웃은 `timeline` inset 0 → 1). REPLAY는 오른쪽 위 MAP 아래. 지도 창은 세로 화면에서 90° 세워 크게(이름표는 바로). 구조물 이름의 12px 바닥은 평소 배율 기준(`--play-scale`) |
 | 모바일 ◀ ▶ | 이전·다음 지점으로 자동 이동 후 창 열기. (11-12) 순서는 트랙 순서가 아니라 메뉴 순서(창 이전·다음도 같음, `movement.stepInMenu`) |
 | 인트로 | 시안 14.3초 타임라인, 월드 전체 배율(소수) → 줌인 → 줌아웃 |
 | 큰 전광판 | 제자리에서 커지기 + 네온 깜빡임 |
@@ -98,13 +100,13 @@ src/
                          World.tsx(카메라 = 컨테이너 transform 하나), TrackScene.tsx(타일 + 트랙 고리 PNG), Runner.tsx(러너·`!`),
                          Landmark.tsx(구조물 6 버튼 + HTML 이름, 전광판 평소 "CAREER"), Decor.tsx(소품·이정표, aria-hidden),
                          layout.ts(배치 데이터만), trackPath.ts(t ↔ 좌표·방향, nearestS), movement.ts(자유 이동·충돌·반응 구역·자동 경로), useRunner.ts(stepRunner·cameraTarget + 틱 훅),
-                         store.ts(Zustand), runner-config.ts(틱·속도), scale.ts·useScale.ts(정수 배율)
+                         stick.ts(터치 끌기 → 8방향 입력), store.ts(Zustand), runner-config.ts(틱·속도), scale.ts·useScale.ts(정수 배율, playView)
     intro/               timeline.ts(경과 ms → 화면, 순수), useIntro.ts(고정 틱 진행기·SKIP·REPLAY), camera.ts(인트로 카메라·부채꼴 각도),
                          preload.ts(fonts.ready·decode), IntroOverlay.tsx(신호 띠·SKIP·큰 전광판·진행 점·흑백 부채꼴),
                          WorldIntro.tsx(신호등·심판·인사 말풍선·키캡)
     panels/              PanelDialog.tsx(Radix Dialog 하나에 6개 내용, 이전·다음), Sections.tsx(섹션 타입 렌더러), FeatureShowcase.tsx(주요 기능: 목록 + 그림), LapLog.tsx(DEV LOG: 트랙 막대 + 기록 한 장씩), LoopVideo.tsx(소리 없는 영상), Resume.tsx(이력서 한 장), TodoValue.tsx(TODO 값 → "[...]" 빈칸), ScrollTopButton.tsx(창·지도 창 공통 맨 위로)
     hud/                 Hud.tsx(로고·메뉴 PC 상단/모바일 하단 3×2·REPLAY), Minimap.tsx(TrackMap: 시안 월드 그림 + 구조물 버튼, PC 미니맵 버튼·모바일 MAP 버튼),
-                         MapDialog.tsx(큰 지도 창, PC·모바일 공통), TouchControls.tsx(모바일 ◀ ▶ = 이전·다음 지점)
+                         MapDialog.tsx(큰 지도 창, PC·모바일 공통), TouchControls.tsx(모바일 ◀ ▶ = 이전·다음 지점), TouchStick.tsx(화면 끌기 = 터치 스틱)
   content/               intro.ts, menu.ts, hud.ts, panels.ts, world.ts, site.ts(메타·사이트 주소) — 문구는 여기에만
   styles/                globals.css(16색 토큰·9-slice·창 애니메이션), sprites.css(그림 경로·시트 좌표·스프라이트 애니메이션)
 public/
@@ -112,7 +114,7 @@ public/
   icons/tech/            SKILLS 창 기술 로고 16개(build-tech-icons.mjs)
   img/                   창 사진(about-me-320·640.webp, 원본은 private/img/)
   resume.pdf             이력서 PDF(scripts/build-resume-pdf.mjs가 /resume/print를 A4로 굽는다)
-scripts/                 extract-design-layout.mjs·build-track-ring.mjs(시안 코드에서 숫자·그림 1회 추출), build-photos.mjs(창 사진 → WebP 2장), build-og.mjs(링크 미리보기·아이콘), build-cursor.mjs(커서), build-tech-icons.mjs(SKILLS 기술 로고), build-resume-pdf.mjs(이력서 PDF), lh-summary.mjs, measure-run.mjs·measure-intro.mjs·measure-intro-smooth.mjs(측정)
+scripts/                 extract-design-layout.mjs·build-track-ring.mjs(시안 코드에서 숫자·그림 1회 추출), build-photos.mjs(창 사진 → WebP 2장), build-og.mjs(링크 미리보기·아이콘), build-cursor.mjs(커서), build-tech-icons.mjs(SKILLS 기술 로고), build-resume-pdf.mjs(이력서 PDF), build-readme-gif.mjs(README 맨 위 GIF, ffmpeg 필요), lh-summary.mjs, measure-run.mjs·measure-intro.mjs·measure-intro-smooth.mjs(측정)
 e2e/                     smoke.spec.ts(Playwright: 크로미움 PC·모바일, WebKit PC + axe)
 docs/                    기획서.md, design-vs-plan.md, step1-plan.md, performance.md, milestones.md, assets/credits.md
 private/                 learning/, interview-questions.md (gitignore)

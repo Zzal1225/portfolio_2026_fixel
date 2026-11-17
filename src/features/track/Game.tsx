@@ -15,6 +15,7 @@ import { useIntro } from '@/features/intro/useIntro';
 import { Logo, Menu, ReplayButton } from '@/features/hud/Hud';
 import { MapLauncher } from '@/features/hud/Minimap';
 import { TouchControls } from '@/features/hud/TouchControls';
+import { TouchStick } from '@/features/hud/TouchStick';
 import { useRunner } from './useRunner';
 import { useGame } from './store';
 import { useScale } from './useScale';
@@ -37,7 +38,7 @@ export function Game() {
   useScale();
   const worldRef = useRef<HTMLDivElement>(null);
   const intro = useIntro(worldRef);
-  const { goTo, stepStation } = useRunner(worldRef);
+  const { goTo, stepStation, setStick } = useRunner(worldRef);
   const panelsNeeded = useGame((s) => s.panelsNeeded);
 
   return (
@@ -47,6 +48,7 @@ export function Game() {
       <World worldRef={worldRef} onSelect={goTo} />
       <MapLauncher onSelect={goTo} />
       <TouchControls stepStation={stepStation} />
+      <TouchStick worldRef={worldRef} setStick={setStick} />
       <ReplayButton onReplay={intro.replay} />
       {panelsNeeded && (
         // fallback 없음: 받는 동안 러너는 계속 달린다(가짜 대기 표시를 두지 않는다)

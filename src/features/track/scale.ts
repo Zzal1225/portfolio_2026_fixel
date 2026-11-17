@@ -22,3 +22,26 @@ export function computeScale(widthPx: number, heightPx: number): number {
 export function introScale(normal: number): number {
   return normal <= 2 ? 1 : 2;
 }
+
+/** 폭이 이보다 좁으면 모바일 배치(하단 메뉴 바·◀ ▶). CSS의 max-[699px]와 같은 경계 */
+export const MOBILE_MAX_W = 700;
+/** 모바일 하단 메뉴 바 높이(CSS px). Hud.tsx의 h-28과 같아야 한다 */
+export const MOBILE_BAR_PX = 112;
+
+/** 화면 아래에서 HUD가 가리는 높이(CSS px). PC는 0 */
+export const hudBottomPx = (viewportPx: { w: number; h: number }): number =>
+  viewportPx.w < MOBILE_MAX_W ? MOBILE_BAR_PX : 0;
+
+/**
+ * 평소 카메라가 쓰는 "보이는 월드 크기"(월드 px): 화면에서 하단 메뉴 바를 뺀 부분(11-17).
+ * 왜 빼나: 바는 불투명해서 그 뒤의 월드는 보이지 않는다. 화면 전체를 기준으로 가운데·경계를 잡으면
+ * 월드 맨 아래(접수 테이블·러너)가 바 뒤로 들어간다. 손가락으로 직접 달리게 되면서 러너가 바 밑으로 사라질 수 있었다.
+ * 인트로 한 바퀴·줌인·인사는 HUD가 없으므로 화면 전체를 쓴다(intro/timeline.ts의 inset).
+ */
+export const playView = (
+  viewportPx: { w: number; h: number },
+  scale: number,
+): { w: number; h: number } => ({
+  w: viewportPx.w / scale,
+  h: (viewportPx.h - hudBottomPx(viewportPx)) / scale,
+});
