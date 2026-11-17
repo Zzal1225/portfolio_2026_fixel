@@ -11,8 +11,14 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 
-const MENU = ['ABOUT ME', 'CAREER', 'PROJECT1', 'PROJECT2', 'SKILL', 'RESUME'];
-const OPEN_TIMEOUT = 8_000;
+const MENU = ['ABOUT ME', 'CAREER', 'PROJECT', 'DEV LOG', 'SKILLS', 'RESUME'];
+/**
+ * 메뉴를 누른 뒤 창이 열리기까지 기다리는 상한. 열리는 즉시 다음으로 넘어가므로 평소 실행 시간은 늘지 않는다.
+ * 왜 15초: 가장 긴 길(출발선 → 전광판, 반 바퀴)은 평소 약 4초인데, 러너는 고정 틱이라 밀린 틱을 몰아 따라잡지 않는다
+ * (순간이동 방지, useRunner). 세 브라우저가 병렬로 돌아 타이머가 밀리면 같은 길이 8초를 넘겼다(11-12 측정: WebKit 6.3~8.0초).
+ * 8초일 때 WebKit "키보드만으로 6개 창"이 전체 실행 3번 중 2번 실패했다. 실패 1.5초 뒤에는 창이 정상으로 열려 있었다.
+ */
+const OPEN_TIMEOUT = 15_000;
 
 /** SKIP → 인트로 끝 상태(시안: 바로 플레이 준비). HUD 등장 애니메이션까지 끝난 뒤 돌려준다 */
 async function skipIntro(page: Page) {
@@ -50,6 +56,9 @@ test('첫 방문: 인트로 → SKIP → 메뉴 → 창 → ESC', async ({ page 
 
 test('키보드만으로 6개 창을 모두 열고 닫는다', async ({ page, isMobile }) => {
   test.skip(isMobile, '키보드 시나리오는 PC');
+  // 창 6개를 차례로 달려가 연다. 혼자 돌면 13초쯤이지만 세 브라우저가 병렬로 돌 때 WebKit은 고정 틱이 밀려(OPEN_TIMEOUT 주석)
+  // 기본 30초를 넘긴 적이 있다(11-13, 전체 실행 4번 중 3번). 창 하나의 상한은 OPEN_TIMEOUT이 그대로 지킨다.
+  test.setTimeout(90_000);
   await skipIntro(page);
   for (const name of MENU) {
     const button = page
@@ -74,7 +83,7 @@ test('axe: 트랙 화면과 창에 위반이 없다', async ({ page }) => {
 
   await page
     .getByRole('navigation', { name: 'Menu' })
-    .getByRole('button', { name: 'Open PROJECT1' })
+    .getByRole('button', { name: 'Open PROJECT' })
     .click();
   await expect(page.getByRole('dialog')).toBeVisible({ timeout: OPEN_TIMEOUT });
   await settle(page);
@@ -131,8 +140,9 @@ test('ABOUT ME 창: 사진이 실제로 불러와지고, 누를 수 있는 곳�
     .getByRole('button', { name: 'Open ABOUT ME' });
   await expect(open).toHaveCSS('cursor', /cursor-hand/);
   await open.click();
-  const img = page.getByRole('dialog').locator('img');
-  await expect(img).toBeVisible({ timeout: 8000 });
+  // 창에 그림이 둘(맨 위 사진, 11-13 첫 포트폴리오 화면)이라 맨 위 사진을 주소로 짚는다
+  const img = page.getByRole('dialog').locator('img[src*="about-me"]');
+  await expect(img).toBeVisible({ timeout: OPEN_TIMEOUT });
   await expect.poll(() => img.evaluate((i: HTMLImageElement) => i.naturalWidth)).toBeGreaterThan(0);
 });
 
@@ -142,10 +152,10 @@ test('창 윗변·로고·✕의 시작 높이가 같고, 제목은 머리 띠 �
   await skipIntro(page);
   await page
     .getByRole('navigation', { name: 'Menu' })
-    .getByRole('button', { name: 'Open PROJECT1' })
+    .getByRole('button', { name: 'Open PROJECT' })
     .click();
   const dialog = page.getByRole('dialog');
-  await expect(dialog).toBeVisible({ timeout: 8000 });
+  await expect(dialog).toBeVisible({ timeout: OPEN_TIMEOUT });
   await page.waitForTimeout(300); // 열림 애니메이션(150ms)이 끝난 자리에서 잰다
   const box = await page.evaluate(() => {
     const d = document.querySelector('[role=dialog]')!;
@@ -174,16 +184,105 @@ test('창 윗변·로고·✕의 시작 높이가 같고, 제목은 머리 띠 �
   expect(next!.y).toBeLessThan(box.win + 80);
 });
 
+test('창의 다음 버튼: 메뉴 순서의 다음 창으로, 창이 닫히고 러너가 달려간 뒤 열린다(11-11·11-12)', async ({
+  page,
+}) => {
+  await skipIntro(page);
+  await page
+    .getByRole('navigation', { name: 'Menu' })
+    .getByRole('button', { name: 'Open ABOUT ME' })
+    .click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByRole('heading', { level: 2 })).toHaveText('ABOUT ME', {
+    timeout: OPEN_TIMEOUT,
+  });
+  // 메뉴 순서(11-12): ABOUT ME 다음은 CAREER(트랙 순서였다면 PROJECT)
+  await dialog.getByRole('button', { name: 'Next: CAREER' }).click();
+  await expect(dialog).toHaveCount(0); // 순간이동이면 창이 닫히지 않고 내용만 바뀐다
+  await expect(dialog.getByRole('heading', { level: 2 })).toHaveText('CAREER', {
+    timeout: OPEN_TIMEOUT,
+  });
+});
+
+test('창이 열린 직후(포커스가 ✕ 버튼) ←→ 키로 이전·다음 창으로 간다', async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(isMobile, '키보드 시나리오는 PC');
+  await skipIntro(page);
+  await page
+    .getByRole('navigation', { name: 'Menu' })
+    .getByRole('button', { name: 'Open CAREER' })
+    .click();
+  const dialog = page.getByRole('dialog');
+  const title = dialog.getByRole('heading', { level: 2 });
+  await expect(title).toHaveText('CAREER', { timeout: OPEN_TIMEOUT });
+  // 버튼 위의 ←→를 무시하던 버그: 열리면 포커스가 ✕에 가므로 키가 아예 먹지 않았다
+  await expect(dialog.getByRole('button', { name: 'Close' })).toBeFocused();
+
+  await page.keyboard.press('ArrowRight');
+  await expect(title).toHaveText('nanaki(나는 나를 키운다)', { timeout: OPEN_TIMEOUT });
+  await page.keyboard.press('ArrowLeft');
+  await expect(title).toHaveText('CAREER', { timeout: OPEN_TIMEOUT });
+});
+
 test('프로젝트 창 제목은 "이름(부제목)"', async ({ page }) => {
   await skipIntro(page);
   await page
     .getByRole('navigation', { name: 'Menu' })
-    .getByRole('button', { name: 'Open PROJECT1' })
+    .getByRole('button', { name: 'Open PROJECT' })
     .click();
   await expect(page.getByRole('dialog').getByRole('heading', { level: 2 })).toHaveText(
-    'nanaki(기록 PWA)',
+    'nanaki(나는 나를 키운다)',
     { timeout: OPEN_TIMEOUT },
   );
+});
+
+test('DEV LOG 창: 기록을 한 장씩 넘기고 러너가 그 눈금으로 간다', async ({ page }) => {
+  await skipIntro(page);
+  await page
+    .getByRole('navigation', { name: 'Menu' })
+    .getByRole('button', { name: 'Open DEV LOG' })
+    .click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByRole('heading', { level: 2 })).toHaveText('DEV LOG', {
+    timeout: OPEN_TIMEOUT,
+  });
+  await expect(dialog.getByRole('article')).toHaveCount(1);
+  await expect(dialog.getByText('LAP 1/5')).toBeVisible();
+  const runner = dialog.locator('.spr-runner');
+  await expect(runner).toHaveAttribute('data-facing', 'down');
+  await dialog.getByRole('button', { name: 'Next: LAP 2' }).click();
+  // 제목 문구는 사용자가 고치는 내용이라 검사하지 않는다(몇 번째 장인지만)
+  await expect(dialog.getByText('LAP 2/5')).toBeVisible();
+  // 걸어간 뒤에는 다시 정면으로 선다(걷는 상태가 남지 않는다)
+  await expect(runner).toHaveAttribute('data-running', 'false');
+  await expect(runner).toHaveAttribute('data-facing', 'down');
+  // 끝에서 처음으로 돈다
+  await dialog.getByRole('button', { name: 'Previous: LAP 1' }).click();
+  await dialog.getByRole('button', { name: 'Previous: LAP 5' }).click();
+  await expect(dialog.getByText('LAP 5/5')).toBeVisible();
+});
+
+test('PROJECT 주요 기능: 목록에서 고르면 설명이 펼쳐지고 그림이 바뀐다', async ({ page }) => {
+  await skipIntro(page);
+  await page
+    .getByRole('navigation', { name: 'Menu' })
+    .getByRole('button', { name: 'Open PROJECT' })
+    .click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible({ timeout: OPEN_TIMEOUT });
+  const first = dialog.getByRole('button', { name: '오프라인 기록 동기화' });
+  const second = dialog.getByRole('button', { name: /AI 챗봇 나키/ });
+  // 처음에는 1번이 펼쳐져 있고 그림도 1번
+  await expect(first).toHaveAttribute('aria-expanded', 'true');
+  await expect(dialog.locator('picture img')).toHaveAttribute('src', /offline-sync/);
+  await second.click();
+  await expect(second).toHaveAttribute('aria-expanded', 'true');
+  await expect(first).toHaveAttribute('aria-expanded', 'false');
+  await expect(dialog.locator('picture img')).toHaveAttribute('src', /naki-ai/);
+  await expect(dialog.getByText(/Zod로 검증/)).toBeVisible();
+  await expect(dialog.getByText(/대기열(outbox)/)).toBeHidden();
 });
 
 test.describe('reduced-motion', () => {
@@ -225,7 +324,7 @@ test('메뉴를 누르면 캐릭터가 달려간 뒤 창이 열린다(바로 열
   await skipIntro(page);
   await page
     .getByRole('navigation', { name: 'Menu' })
-    .getByRole('button', { name: 'Open SKILL' })
+    .getByRole('button', { name: 'Open SKILLS' })
     .click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.getByRole('dialog')).toBeVisible({ timeout: OPEN_TIMEOUT });
@@ -238,17 +337,22 @@ test('지도 창: 구조물을 누르면 달려가 그 창이 열린다(PC 미�
   await page.getByRole('button', { name: 'Open track map' }).locator('visible=true').click();
   const map = page.getByRole('dialog', { name: 'MAP' });
   await expect(map).toBeVisible();
-  await map.getByRole('button', { name: 'Open SKILL' }).click();
-  await expect(page.getByRole('dialog').getByRole('heading', { level: 2 })).toHaveText('SKILL', {
+  await map.getByRole('button', { name: 'Open SKILLS' }).click();
+  await expect(page.getByRole('dialog').getByRole('heading', { level: 2 })).toHaveText('SKILLS', {
     timeout: OPEN_TIMEOUT,
   });
 });
 
-test('모바일: ▶ 를 누르면 다음 지점으로 달려가 창이 열린다', async ({ page, isMobile }) => {
+test('모바일: ▶ 를 누르면 메뉴 순서의 다음 지점(출발선 → CAREER)으로 달려가 창이 열린다', async ({
+  page,
+  isMobile,
+}) => {
   test.skip(!isMobile, '모바일 전용');
   await skipIntro(page);
   await page.getByRole('button', { name: 'Go to next stop' }).click();
-  await expect(page.getByRole('dialog')).toBeVisible({ timeout: OPEN_TIMEOUT });
+  await expect(page.getByRole('dialog').getByRole('heading', { level: 2 })).toHaveText('CAREER', {
+    timeout: OPEN_TIMEOUT,
+  });
 });
 
 test('창이 떠 있으면 메뉴·지도·REPLAY가 숨고, TOP 버튼으로 맨 위로 간다', async ({ page }) => {

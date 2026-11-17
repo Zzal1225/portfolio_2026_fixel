@@ -12,55 +12,44 @@
  *  - 화면 전체(딤 배경)가 스크롤되고 창은 내용 길이만큼 늘어난다. 닫기 ✕는 창 밖 화면 오른쪽 위(11-10 사용자 요청).
  *  - 창이 떠 있는 동안 메뉴·미니맵·REPLAY는 숨고(Hud.useHideForDialog), 미니맵 자리에 맨 위로 버튼(ScrollTopButton).
  *  - 머리 띠는 하늘색(tee) 바탕. 제목은 가운데, 이전·다음은 좌우(11-11). 창 이름(aria-labelledby)은 제목 h2에서 나온다.
- *  - 이전·다음 순서는 트랙 순서(layout.ts LANDMARKS)로 넘기며,
- *    창이 화면을 덮고 있으니 러너는 그 구조물 앞으로 바로 옮긴다(시안 stepOpen과 같음). 창 안 ←→도 같은 동작.
+ *  - 이전·다음 순서는 메뉴 순서(content/hud.ts MENU_ORDER, 11-12). 누르면 창이 닫히고 러너가 달려가 도착 시 열린다(Game의 goTo, 메뉴와 같은 길).
  *
  * 열림·닫힘 애니메이션은 CSS(globals.css .dialog-content, Radix data-state). Framer Motion은 쓰지 않음(JS 크기).
  */
 import * as Dialog from '@radix-ui/react-dialog';
 import { useRef, type KeyboardEvent } from 'react';
+import { MENU_LABEL } from '@/content/menu';
 import { DIALOG_LABELS, PANELS } from '@/content/panels';
-import { LANDMARKS, type LandmarkId } from '@/features/track/layout';
-import { frontPoint } from '@/features/track/movement';
+import type { LandmarkId } from '@/features/track/layout';
+import { stepInMenu as neighbor } from '@/features/track/movement';
 import { useGame } from '@/features/track/store';
 import { ScrollTopButton } from './ScrollTopButton';
 import { SectionList } from './Sections';
 
-/** 트랙 순서로 delta(±1)만큼 옆 구조물 */
-export function neighbor(id: LandmarkId, delta: 1 | -1): LandmarkId {
-  const i = LANDMARKS.findIndex((l) => l.id === id);
-  const n = LANDMARKS.length;
-  return LANDMARKS[(((i + delta) % n) + n) % n]!.id;
-}
-
-/** 버튼·링크·입력에 포커스가 있으면 ←→를 가로채지 않는다(원래 동작 보장) */
-const isInteractive = (el: EventTarget | null) =>
+/**
+ * ←→를 스스로 쓰는 요소(입력칸의 커서 이동, 탭 목록의 탭 전환)에 포커스가 있으면 가로채지 않는다.
+ * 버튼·링크는 넣지 않는다: ←→를 쓰지 않는 요소이고, 창이 열리면 포커스가 ✕ 버튼에 가므로
+ * 버튼을 넣으면 창을 연 직후의 ←→가 전부 무시된다(11-12에 고친 버그).
+ */
+const ownsArrowKeys = (el: EventTarget | null) =>
   el instanceof HTMLElement &&
-  el.closest('button, a, input, textarea, select, [role="tab"]') !== null;
+  el.closest('input, textarea, select, [contenteditable], [role="tab"]') !== null;
 
-export function PanelDialog() {
+export function PanelDialog({ onNavigate }: { onNavigate: (id: LandmarkId) => void }) {
   const open = useGame((s) => s.open);
   const closePanel = useGame((s) => s.closePanel);
   const closeRef = useRef<HTMLButtonElement>(null);
-  const overlayRef = useRef<HTMLDivElement>(null);
 
+  // 이전·다음도 메뉴와 같은 길(11-11 사용자 결정): 창을 닫고 러너가 그 구조물까지 달려간 뒤 도착하면 열린다.
+  // 버린 것: 러너를 앞 지점으로 순간이동시키고 창 내용만 바꾸기(시안 stepOpen) — 트랙을 달리는 사이트인데 캐릭터가 건너뛰게 된다.
   const go = (delta: 1 | -1) => {
-    if (!open) return;
-    const next = neighbor(open, delta);
-    useGame.setState({
-      open: next,
-      pos: frontPoint(next),
-      facing: 'down',
-      zone: next,
-      route: null,
-      phase: 'idle',
-    });
-    // 다음 창은 맨 위부터(아래쪽 이전·다음 띠에서 눌러도 새 창 중간부터 보이지 않게)
-    overlayRef.current?.scrollTo({ top: 0 });
+    if (open) onNavigate(neighbor(open, delta));
   };
 
   const onKeyDown = (e: KeyboardEvent) => {
-    if (isInteractive(e.target)) return;
+    if (ownsArrowKeys(e.target)) return;
+    // Alt+← 같은 브라우저 단축키(뒤로 가기)는 건드리지 않는다
+    if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
     if (e.key === 'ArrowRight') {
       e.preventDefault();
       go(1);
@@ -71,8 +60,9 @@ export function PanelDialog() {
   };
 
   const panel = open ? PANELS[open] : null;
-  const prevTitle = open ? PANELS[neighbor(open, -1)].title : '';
-  const nextTitle = open ? PANELS[neighbor(open, 1)].title : '';
+  // 버튼에는 창 제목(nanaki)이 아니라 메뉴 이름(PROJECT)을 쓴다: 상단 메뉴와 같은 말로 어디로 가는지 알리려고(11-11)
+  const prevTitle = open ? MENU_LABEL[neighbor(open, -1)] : '';
+  const nextTitle = open ? MENU_LABEL[neighbor(open, 1)] : '';
 
   return (
     <Dialog.Root open={open !== null} onOpenChange={(o) => !o && closePanel()}>
@@ -82,10 +72,7 @@ export function PanelDialog() {
           창은 내용 길이만큼 늘어난다 → 문구가 얼마나 길어질지 몰라도 창 안에 스크롤바가 생기지 않는다(11-10 사용자 요청).
           딤 배경(창 밖)을 누르면 닫힌다(Radix onPointerDownOutside 기본 동작).
         */}
-        <Dialog.Overlay
-          ref={overlayRef}
-          className="dialog-overlay fixed inset-0 z-40 overflow-y-auto bg-(--dim)"
-        >
+        <Dialog.Overlay className="dialog-overlay fixed inset-0 z-40 overflow-y-auto bg-(--dim)">
           <Dialog.Content
             aria-describedby={undefined}
             onOpenAutoFocus={(e) => {

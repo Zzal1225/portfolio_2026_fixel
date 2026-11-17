@@ -1,16 +1,18 @@
 /**
  * 메뉴·구조물 이름(영어 고정). 화면 라벨·aria-label이 전부 여기서 나온다.
- * 11-10 시안 채택: ABOUT ME · CAREER · PROJECT1 · PROJECT2 · SKILL · RESUME(시안 표기 그대로, 공백 없음).
- * 화면 메뉴 순서는 content/hud.ts MENU_ORDER, 창 이전·다음은 트랙 순서(layout.ts).
+ * ABOUT ME · CAREER · PROJECT · DEV LOG · SKILLS · RESUME.
+ * 11-16 사용자 결정: 프로젝트가 nanaki 하나가 되어 PROJECT1 → PROJECT, PROJECT2 자리는 nanaki 개발 기록 창 DEV LOG(처음 TECH LOG로 했다가 같은 날 사용자가 바꿈).
+ * id(project1·project2)는 그대로 둔다: 구조물 배치·이동·테스트가 id로 묶여 있고, 화면에 보이는 것은 이 라벨뿐이다.
+ * 화면 메뉴 순서는 content/hud.ts MENU_ORDER. 창 이전·다음·모바일 ◀ ▶도 같은 순서(11-12).
  */
 import type { LandmarkId } from '@/features/track/layout';
 
 export const MENU_LABEL: Record<LandmarkId, string> = {
   about: 'ABOUT ME',
-  project1: 'PROJECT1',
+  project1: 'PROJECT',
   career: 'CAREER',
-  project2: 'PROJECT2',
-  skill: 'SKILL',
+  project2: 'DEV LOG',
+  skill: 'SKILLS',
   resume: 'RESUME',
 };
 

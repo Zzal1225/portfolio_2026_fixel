@@ -157,7 +157,7 @@ export function combineKeys(codes: Iterable<string>): RunnerInput {
 export interface RunnerControls {
   /** 메뉴·지도·구조물 클릭: 경로를 짜서 2배 속도로 달려가 도착하면 창을 연다 */
   goTo: (id: LandmarkId) => void;
-  /** 모바일 ◀ ▶: 트랙 순서로 이전·다음 구조물까지 자동 이동(시안) */
+  /** 모바일 ◀ ▶: 메뉴 순서로 이전·다음 구조물까지 자동 이동(11-12) */
   stepStation: (delta: 1 | -1) => void;
   /** Enter·Space: 반응 구역 안이면 그 창을 연다 */
   confirm: () => void;
@@ -203,6 +203,10 @@ export function useRunner(worldEl: RefObject<HTMLElement | null>): RunnerControl
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
+      // 다른 곳이 이미 처리한 키는 달리기 입력이 아니다. 창의 ←→(이전·다음)가 대표적:
+      // 창이 그 키로 닫히며 자동 이동을 시작하는데(open이 먼저 null이 됨), 같은 키가 여기까지 올라와
+      // "방향키 = 자동 이동 취소"로 읽히면 방금 잡은 경로가 다음 틱에 지워진다.
+      if (e.defaultPrevented) return;
       const s = useGame.getState();
       if (!s.inputEnabled || s.open) return;
       if (KEY_VECTORS[e.code] && ownsArrows(e.target)) {

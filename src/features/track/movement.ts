@@ -11,6 +11,7 @@
  * 왜 레인을 따라가나: 직선으로 가면 구조물·관중석에 걸린다. 경로 탐색(A*)을 넣는 대신 "트랙은 늘 비어 있다"를 이용한다.
  * 버린 대안: 트랙 위 t 하나로만 움직이기(11-09 B안) — 시안의 자유 이동으로 결정이 바뀌었다(design-vs-plan #7).
  */
+import { MENU_ORDER } from '@/content/hud';
 import {
   ACTORS,
   LANDMARKS,
@@ -201,10 +202,29 @@ export function stepRoute(
   };
 }
 
-/** 트랙 순서(s)로 다음·이전 구조물(모바일 ◀ ▶, 시안) */
+/**
+ * 메뉴 순서(content/hud.ts MENU_ORDER)로 delta(±1)만큼 옆 구조물. 끝에서 처음으로 감긴다.
+ * 창의 이전·다음과 모바일 ◀ ▶가 같이 쓴다(11-12 사용자 결정).
+ * 왜 트랙 순서가 아닌가: 트랙을 돌면 전광판(CAREER)이 두 급수대(PROJECT·DEV LOG) 사이에 있어
+ * 메뉴(ABOUT ME → CAREER → PROJECT → …)와 이전·다음 순서가 어긋나 보였다. 사람은 위치보다 메뉴 순서를 기억한다.
+ * 버린 대안: 전광판을 옮겨 트랙 순서를 메뉴에 맞추기 — 인필드 배치·인트로·충돌·소품을 다 다시 잡아야 한다.
+ */
+export function stepInMenu(id: LandmarkId, delta: 1 | -1): LandmarkId {
+  const i = MENU_ORDER.indexOf(id);
+  const n = MENU_ORDER.length;
+  return MENU_ORDER[(((i + delta) % n) + n) % n]!;
+}
+
+/**
+ * 모바일 ◀ ▶의 목적지. 구조물 앞이면 그 구조물 기준, 아니면 가장 가까운 구조물(앞 지점까지 직선 거리) 기준으로
+ * 메뉴 순서의 앞뒤. 예: 인트로가 끝난 출발선 근처에서 ▶ → ABOUT ME 다음인 CAREER.
+ */
 export function neighborStation(pos: Point, zone: LandmarkId | null, delta: 1 | -1): LandmarkId {
-  const order = [...LANDMARKS].sort((a, b) => a.s - b.s);
-  const cur = zone ? byId(zone).s : nearestS(pos.x, pos.y);
-  if (delta > 0) return (order.find((l) => l.s > cur + 4) ?? order[0]!).id;
-  return ([...order].reverse().find((l) => l.s < cur - 4) ?? order[order.length - 1]!).id;
+  const cur =
+    zone ??
+    LANDMARKS.reduce((best, l) => {
+      const d = (p: Point) => Math.hypot(p.x - pos.x, p.y - pos.y);
+      return d(frontPoint(l.id)) < d(frontPoint(best.id)) ? l : best;
+    }).id;
+  return stepInMenu(cur, delta);
 }

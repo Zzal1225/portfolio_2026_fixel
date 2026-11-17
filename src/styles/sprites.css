@@ -392,6 +392,81 @@
   background-image: url('/sprites/ui/speech-tail-6x3.png');
 }
 
+/* SKILLS 학습 중 "강화" 연출(11-12 사용자 시안). 1.4초 한 바퀴의 70% 지점에서 칸이 번쩍이고 2px 눌리며 불꽃 4개가 튄다.
+   steps로 끊어 픽셀 게임의 강화 이펙트처럼 보이게 한다. 움직이는 건 transform·opacity뿐(스캔 막대도 left 대신 translate).
+   장식이라 전부 aria-hidden이고, reduced-motion이면 멈춘다(번쩍·불꽃은 처음 프레임이 투명이라 멈추면 안 보인다). */
+.skill-hit {
+  animation: skill-hit 1.4s steps(1) infinite;
+}
+@keyframes skill-hit {
+  0%,
+  70%,
+  100% {
+    transform: translateY(0);
+  }
+  72% {
+    transform: translateY(2px);
+  }
+}
+.skill-flash {
+  opacity: 0;
+  animation: skill-flash 1.4s steps(1) infinite;
+}
+@keyframes skill-flash {
+  0%,
+  70%,
+  100% {
+    opacity: 0;
+  }
+  74% {
+    opacity: 0.85;
+  }
+}
+.skill-burst {
+  opacity: 0;
+  animation: skill-burst 1.4s steps(4) infinite;
+}
+@keyframes skill-burst {
+  0%,
+  70% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  74% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--dx), var(--dy));
+    opacity: 0;
+  }
+}
+.skill-blink {
+  animation: skill-blink 0.9s steps(1) infinite;
+}
+@keyframes skill-blink {
+  50% {
+    opacity: 0;
+  }
+}
+/* 막대 안쪽 폭 116px(120 - 테두리 2×2) - 블록 16px = 100px를 6칸으로 왕복 */
+.skill-scan {
+  animation: skill-scan 1.2s steps(6) infinite alternate;
+}
+@keyframes skill-scan {
+  to {
+    transform: translateX(100px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skill-hit,
+  .skill-flash,
+  .skill-burst,
+  .skill-blink,
+  .skill-scan {
+    animation: none;
+  }
+}
+
 /* ABOUT ME 출발선 점선. 칸(20px)의 세로 가운데를 지나도록 위치를 맞춘다 */
 .starts-line {
   left: 0;
@@ -413,5 +488,18 @@
       var(--color-ink) 0 6px,
       transparent 6px 10px
     );
+  }
+}
+
+/*
+ * 프로젝트 창(11-12 사용자 시안 "퀘스트 로그"): 소개 판 오른쪽 아래 ▼(게임 대화창의 "다음" 표시) 깜빡임. 장식이라 reduced-motion이면 멈춘다.
+ * (11-13: 시연 그림의 GIF 딱지·스캔 막대는 휴대폰 틀로 바꾸면서 없앴다)
+ */
+.quest-next {
+  animation: skill-blink 0.8s steps(1) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .quest-next {
+    animation: none;
   }
 }

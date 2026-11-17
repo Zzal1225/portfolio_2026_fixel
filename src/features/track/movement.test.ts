@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { MENU_ORDER } from '@/content/hud';
 import { LANDMARKS, TRACK, rectFromAnchor } from './layout';
 import {
   BOUNDS,
@@ -8,6 +9,7 @@ import {
   frontPoint,
   lanePoint,
   neighborStation,
+  stepInMenu,
   planRoute,
   stepFree,
   stepRoute,
@@ -127,14 +129,27 @@ describe('planRoute / stepRoute', () => {
   });
 });
 
+describe('stepInMenu(창 이전·다음, 11-12 메뉴 순서)', () => {
+  it('메뉴 순서로 다음·이전, 끝에서 처음으로 감김', () => {
+    expect(stepInMenu('about', 1)).toBe('career');
+    expect(stepInMenu('career', 1)).toBe('project1');
+    expect(stepInMenu('project1', 1)).toBe('project2');
+    expect(stepInMenu('resume', 1)).toBe('about');
+    expect(stepInMenu('about', -1)).toBe('resume');
+    MENU_ORDER.forEach((id) => expect(stepInMenu(stepInMenu(id, 1), -1)).toBe(id));
+  });
+});
+
 describe('neighborStation(모바일 ◀ ▶)', () => {
-  it('트랙 순서로 다음·이전, 끝에서 처음으로 감김', () => {
-    const order = [...LANDMARKS].sort((a, b) => a.s - b.s).map((l) => l.id);
-    order.forEach((id, i) => {
-      expect(neighborStation(frontPoint(id), id, 1)).toBe(order[(i + 1) % order.length]);
-      expect(neighborStation(frontPoint(id), id, -1)).toBe(
-        order[(i - 1 + order.length) % order.length],
-      );
+  it('구조물 앞이면 그 구조물 기준으로 메뉴 순서의 앞뒤', () => {
+    MENU_ORDER.forEach((id, i) => {
+      const n = MENU_ORDER.length;
+      expect(neighborStation(frontPoint(id), id, 1)).toBe(MENU_ORDER[(i + 1) % n]);
+      expect(neighborStation(frontPoint(id), id, -1)).toBe(MENU_ORDER[(i - 1 + n) % n]);
     });
+  });
+  it('구조물 앞이 아니면 가장 가까운 구조물 기준(출발선 근처 ▶ → ABOUT ME 다음 CAREER)', () => {
+    expect(neighborStation(START, null, 1)).toBe('career');
+    expect(neighborStation(START, null, -1)).toBe('resume');
   });
 });

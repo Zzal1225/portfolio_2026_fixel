@@ -48,7 +48,7 @@ export function Game() {
       <MapLauncher onSelect={goTo} />
       <TouchControls stepStation={stepStation} />
       <ReplayButton onReplay={intro.replay} />
-      {panelsNeeded && <PanelDialog />}
+      {panelsNeeded && <PanelDialog onNavigate={goTo} />}
       <LoadingCover />
       <IntroOverlay onSkip={intro.skip} />
     </>

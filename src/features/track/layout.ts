@@ -126,8 +126,9 @@ export const PROP_SIZE = 32;
 const ZONE = 24;
 
 /**
- * 구조물 6개, s 오름차순(= 반시계로 도는 순서 = 창 이전·다음 순서).
+ * 구조물 6개, s 오름차순(= 반시계로 도는 순서). 창 이전·다음은 이 순서가 아니라 메뉴 순서(11-12, movement.stepInMenu).
  *
+ * 화면 이름은 project1 = PROJECT, project2 = DEV LOG(11-16, content/menu.ts). 아래는 id 기준 설명.
  * PROJECT 1·2(11-09 D1): 반시계로 돌 때 1 → 2 순서가 되도록 오른쪽 급수대(x 416)를 project1로 했다.
  * 그 자리 그림이 노란 지붕(water-b)이라 project1의 sprite가 water-b다. 이름이 엇갈려 보이는 건 의도.
  */

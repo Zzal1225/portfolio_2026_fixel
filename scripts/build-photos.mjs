@@ -18,18 +18,27 @@ const PHOTOS = [
     name: 'about-me',
     crop: { left: 800, top: 0, width: 1476, height: 1845 },
   },
+  // RESUME 증명사진(760×1024). 사진 틀이 3:4라 아래 11px만 잘라 정확히 3:4로.
+  // 얼굴이 보이는 사진이라 크게(220px)·선명하게(품질 90) 보여 달라는 요청(11-12): 원본 폭 750까지 쓴다(Resume.tsx srcset과 짝)
+  {
+    src: 'resume_01.png',
+    name: 'resume',
+    crop: { left: 0, top: 0, width: 760, height: 1013 },
+    widths: [480, 750],
+    quality: 90,
+  },
 ];
 const WIDTHS = [320, 640];
 
 fs.mkdirSync(OUT, { recursive: true });
 for (const p of PHOTOS) {
-  for (const w of WIDTHS) {
+  for (const w of p.widths ?? WIDTHS) {
     const out = `${OUT}/${p.name}-${w}.webp`;
     const info = await sharp(`${SRC}/${p.src}`)
       .rotate()
       .extract(p.crop)
       .resize({ width: w })
-      .webp({ quality: 80 })
+      .webp({ quality: p.quality ?? 80 })
       .toFile(out);
     console.log(`${out}: ${info.width}×${info.height}, ${(info.size / 1024).toFixed(1)}KB`);
   }

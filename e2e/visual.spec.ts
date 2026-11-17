@@ -28,15 +28,19 @@ test('트랙 화면(인트로 끝)', async ({ page }) => {
   await expect(page).toHaveScreenshot('track.png', SHOT);
 });
 
-test('창: PROJECT1', async ({ page }) => {
+test('창: PROJECT', async ({ page }) => {
   await ready(page);
   await page
     .getByRole('navigation', { name: 'Menu' })
-    .getByRole('button', { name: 'Open PROJECT1' })
+    .getByRole('button', { name: 'Open PROJECT' })
     .click();
-  await expect(page.getByRole('dialog')).toBeVisible({ timeout: 8000 });
+  await expect(page.getByRole('dialog')).toBeVisible({ timeout: 15_000 });
   await page.waitForTimeout(300);
-  await expect(page).toHaveScreenshot('window-project1.png', SHOT);
+  // 시연 그림은 움직이는 WebP라 찍는 순간마다 프레임이 다르다(animations: 'disabled'는 CSS 애니메이션만 멈춘다) → 그림 칸은 가리고 배치만 비교
+  await expect(page).toHaveScreenshot('window-project1.png', {
+    ...SHOT,
+    mask: [page.getByRole('dialog').locator('picture')],
+  });
 });
 
 test('큰 지도 창', async ({ page }) => {

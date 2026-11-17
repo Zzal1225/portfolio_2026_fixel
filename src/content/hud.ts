@@ -4,7 +4,7 @@ import type { LandmarkId } from '@/features/track/layout';
 /** 왼쪽 위 로고(시안) */
 export const LOGO = { name: 'ChanRyeong', sub: 'PORTFOLIO' } as const;
 
-/** 화면 메뉴 순서(시안). 창 이전·다음은 트랙 순서라 다를 수 있다 */
+/** 화면 메뉴 순서(시안). 창 이전·다음과 모바일 ◀ ▶도 이 순서를 따른다(11-12, movement.stepInMenu) */
 export const MENU_ORDER: readonly LandmarkId[] = [
   'about',
   'career',
@@ -18,7 +18,7 @@ export const HUD_LABELS = {
   menu: 'Menu',
 } as const;
 
-/** 모바일 ◀ ▶: 트랙 순서로 이전·다음 지점까지 달려가 창을 연다(시안) */
+/** 모바일 ◀ ▶: 메뉴 순서로 이전·다음 지점까지 달려가 창을 연다(11-12) */
 export const TOUCH_LABELS = { prev: 'Go to previous stop', next: 'Go to next stop' } as const;
 
 /** 미니맵(PC)·MAP 버튼(모바일) → 큰 지도 창 */

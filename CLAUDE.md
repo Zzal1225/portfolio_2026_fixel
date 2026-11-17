@@ -14,22 +14,27 @@
 |---|---|
 | 이동 | 잔디·인필드 어디든 8방향 자유 이동 + 충돌(`movement.ts`). 트랙 위 두 방향(B안) 폐지 |
 | 왼쪽 위 HUD | 로고 "ChanRyeong / PORTFOLIO"(번호표 이름 띠 폐지) |
-| 메뉴명 | ABOUT ME · CAREER · PROJECT1 · PROJECT2 · SKILL · RESUME. EDUCATION 창 없음, ABOUT 탭 없음 |
+| 메뉴명 | ABOUT ME · CAREER · PROJECT · DEV LOG · SKILLS · RESUME. EDUCATION 창 없음, ABOUT 탭 없음. (11-16) PROJECT1 → PROJECT, PROJECT2 → DEV LOG(nanaki 개발 기록). id는 `project1`·`project2` 그대로 |
 | 하단 안내 판(PC) | (11-10 6차) **없앰**. 인트로 끝 키캡 ↑←→↓와 반응 구역 SPACE 말풍선이 같은 역할 |
 | 키캡 | ↑ ← → ↓ 4개가 0.45초마다 차례로 |
 | 반응 구역 말풍선 | (11-10 6차) 시안 "!" 말풍선 모양 안에 PC는 "SPACE", 모바일은 "!". 따로 뜨던 SPACE 태그는 없앰(`scripts/build-alert-bubble.mjs` 몸통 9-slice + 꼬리) |
 | 미니맵(PC) | 버튼 하나 → 큰 지도 창(모바일 MAP과 같은 창) |
-| 모바일 ◀ ▶ | 트랙 순서 이전·다음 지점으로 자동 이동 후 창 열기 |
+| 모바일 ◀ ▶ | 이전·다음 지점으로 자동 이동 후 창 열기. (11-12) 순서는 트랙 순서가 아니라 메뉴 순서(창 이전·다음도 같음, `movement.stepInMenu`) |
 | 인트로 | 시안 14.3초 타임라인, 월드 전체 배율(소수) → 줌인 → 줌아웃 |
 | 큰 전광판 | 제자리에서 커지기 + 네온 깜빡임 |
 | 재방문 | (11-10 6차) **매번 전체 인트로**(SKIP이 있으므로). introSeen 저장 코드는 걷어냄. (2차 "인사 없이 바로 끝 상태"를 대체) |
 | 창 모양 | (11-10 4차) 딤 배경이 스크롤되고 창은 내용 길이만큼 늘어남. 닫기 ✕는 창 밖 화면 오른쪽 위(빨강). 머리 띠는 하늘색(tee) 바탕. 지도 창도 같은 모양. (11-11) 창 윗변을 로고·✕와 같은 높이로(PC 16px, 모바일 8px), 제목은 머리 띠 가운데, 이전·다음은 머리 띠 좌우(아래쪽 띠 없앰). 화면 폭 872px 미만은 ✕가 창 모서리 안으로 들어오고 이전·다음은 화살표만 |
 | 인트로 건너뛰기 | (11-11) **SKIP 버튼으로만**. 화면 클릭·아무 키는 건너뛰지 않고, 인트로 중 구조물 클릭도 무시(`goTo`가 `inputEnabled` 검사). 조작 가능해진 뒤 첫 입력은 인사·키캡 안내만 지움 |
 | 첫 로딩 | (11-11) 서버 HTML에 덮개(`IntroOverlay.LoadingCover`, 흑백 잔디색 #9c9c9c + 0.3초 뒤 LOADING)를 넣어 컬러 월드가 먼저 보이지 않게 함. 준비 완료·8초 초과·SKIP 중 먼저 온 쪽에 걷힘. REPLAY는 덮지 않음 |
-| ABOUT ME 창 | (11-11) 사용자 시안대로: 사진 + 러너 + 소개, 출발선 3칸(가로 점선), 강조 상자, 이름·설명 표(`Sections.tsx` hero·starts·callout·traits). 수치·일하는 방식·교육·자격증 섹션은 뺌 |
+| ABOUT ME 창 | (11-11) 사용자 시안대로: 사진 + 러너 + 소개, 출발선 3칸(가로 점선), 강조 상자, 이름·설명 표(`Sections.tsx` hero·starts·callout·traits). (11-13) 강조 상자 아래에 첫 포트폴리오 칸(강조 상자는 11-13에 뺐다가 11-17에 되살림. `origin`: 레인 띠 제목 → 픽셀 모니터 속 소리 없는 영상(`panels/LoopVideo.tsx`) → 글 → 당시 사이트 링크). 수치·일하는 방식·교육·자격증 섹션은 뺌 |
+| CAREER 창 | (11-11) 사용자 시안대로: 요약 판(`summary`, 재입사로 기간 2줄), 소개 글, 강조 상자(`callout` 머리글·제목), 카드 2장(`cards`), 문제해결기록(`cases`: 문제→해결→결과) |
+| SKILLS 창 | (11-12) 사용자 시안(SkillAtlas)대로: 장비창(`stack`). 가운데 러너·이름표·AI CODING AGENT(Claude Code, PAIRING..., 시안의 강화 연출 그대로)를 위 "언어 · 마크업"·왼쪽 "라이브러리 · 프레임워크"·오른쪽 "상태관리 · 서버"·아래 "테스트 · 배포"가 둘러쌈(화살표 없음). 항목마다 설명 한 줄 상시 노출. (11-17) 맨 위 범례 + 아이콘 테두리로 "실무에서 사용"(노란 실선 + 모서리 조각)과 "프로젝트에서 사용"(파란 점선)을 나눔(`StackItem.use`). 아이콘은 실제 로고(Devicon MIT, `scripts/build-tech-icons.mjs` → `public/icons/tech/`) |
+| RESUME 창 | (11-12) 사용자 시안대로: 이력서 한 장(`resume`, `panels/Resume.tsx`). 위 남색 띠(최종 수정·PDF로 받기), 증명사진·이름·연락처, 남색 띠 머리글 블록(자기소개·경력·보유 기술·학력 · 교육(한 섹션, 11-12)·자격증·기타 경력). (11-12) 기타 경력 위 트랙 막대·러너는 뺌. 모르는 값은 TODO → "[...]" 회색 빈칸, PDF 파일이 없으면 버튼 비활성 |
+| PROJECT 창 | (11-12) 사용자 시안(NanakiQuest "퀘스트 로그")대로: 남색 소개 판(`quest`: 이름표·소개·기간·기여도·GitHub·배포. "QUEST 01" 표시는 11-16에 뺌), 주요 기능(`features`, 11-13 변경: 왼쪽 기능 목록에서 고르면 설명이 펼쳐지고 오른쪽 그림이 바뀜, `panels/FeatureShowcase.tsx`. nanaki 그림은 폰 화면 260×526), 사용 기술(`tags`), 디자인 시스템(`designSystem`: Color·Typography·Components). 기획서의 수치 3개·문제·기술 고민·품질·회고는 뺌. 모르는 값은 TODO → "[...]" 빈칸(`panels/TodoValue.tsx`) |
 | 커서 | (11-11) 누를 수 있는 곳은 러너의 손(`globals.css` @layer base, `scripts/build-cursor.mjs`). 잠긴 동안은 기본 커서 |
-| 창이 떠 있을 때 | (11-10 5차) 메뉴·미니맵(모바일 MAP)·REPLAY는 visibility로 숨김(`Hud.useHideForDialog`, 닫힐 때 포커스 복귀 위해 언마운트 안 함). 미니맵 자리에 ▲ TOP(`panels/ScrollTopButton.tsx`, 80px 내려가면 보임). 이전·다음 창은 맨 위부터 |
-| 창 제목 | 프로젝트 창은 "이름(부제목)": nanaki(기록 PWA), dahda(문자 발송 콘솔). 부제목은 `content/panels.ts` subtitle |
+| 창이 떠 있을 때 | (11-10 5차) 메뉴·미니맵(모바일 MAP)·REPLAY는 visibility로 숨김(`Hud.useHideForDialog`, 닫힐 때 포커스 복귀 위해 언마운트 안 함). 미니맵 자리에 ▲ TOP(`panels/ScrollTopButton.tsx`, 80px 내려가면 보임). (11-11) 창의 이전·다음도 메뉴와 같은 길: 창이 닫히고 러너가 달려가 도착 시 열림(순간이동 폐지) |
+| DEV LOG 창 | (11-16) 예전 PROJECT2(dahda) 자리, 사용자 시안 2차대로(`laps`, `panels/LapLog.tsx`): 소개 한 줄 → 트랙 막대(LAP 눈금, 러너가 지금 보는 LAP 눈금에 서고 넘기면 그 눈금까지 걸어감) → 기록 한 장(남색 띠 LAP n/5(날짜·PR 번호는 11-16에 뺌) → 제목·원문 보기 → PROBLEM·TRACE·FIX·RESULT(BEFORE/AFTER + 막대)·LEARNED) → 이전·다음 + 점. 모르는 값은 TODO → "[...]" 빈칸 |
+| 창 제목 | "이름(부제목)": nanaki(나는 나를 키운다, 11-13 사용자 수정), DEV LOG는 부제목 없음. 부제목은 `content/panels.ts` subtitle |
 
 사용자가 "지금 유지"로 정한 것(11-10 2차): 카메라 여유 구간 40%, 자동 이동 2배(시안 1.6배), PROJECT 1·2 급수대 배치(11-09 D1), 평소 배율 상한 4.
 
@@ -37,14 +42,14 @@
 
 - **무엇을**: 화면보다 큰 400m 트랙 월드(탑뷰, 내부 640×360) 위를 캐릭터가 달리고 카메라가 따라가는 포트폴리오 사이트. 트랙 위 구조물 6개
   (START · FINISH 아치, 전광판, 급수대 2, 천막, 접수 테이블) 앞에 서거나 메뉴 아이콘·미니맵을 누르면
-  ABOUT ME · CAREER · PROJECT1 · PROJECT2 · SKILL · RESUME 창이 열린다. 들어올 때마다 시안 인트로(약 14.3초, SKIP 가능): 출발 신호등 → 월드 전체 배율로 한 바퀴(전광판이 화면 가운데로 커져 DISCOVER → PLAN → BUILD 띠 + 자기소개 문구 4개) → 러너로 줌인 → 인사 → 줌아웃. 끝나면 ▶ REPLAY 버튼.
+  ABOUT ME · CAREER · PROJECT · DEV LOG · SKILLS · RESUME 창이 열린다. 들어올 때마다 시안 인트로(약 14.3초, SKIP 가능): 출발 신호등 → 월드 전체 배율로 한 바퀴(전광판이 화면 가운데로 커져 DISCOVER → PLAN → BUILD 띠 + 자기소개 문구 4개) → 러너로 줌인 → 인사 → 줌아웃. 끝나면 ▶ REPLAY 버튼.
   일반 모드 페이지·효과음은 없다(11-09 결정). 메뉴명은 영어 고정.
 - **왜**: 담당자 기억에 남는 첫인상 + 본인 이야기(러닝·경력 코스). 주제어는 "기록". 정보 도달은 메뉴 한 번 클릭으로 끝나야 한다.
 - **포트폴리오로 증명할 것**: 게임 엔진 없이 React·CSS로 트랙 위 이동·카메라·최단 방향·스프라이트 애니메이션을 직접 구현하면서
   접근성(키보드·스크린리더·reduced-motion)과 성능(Lighthouse 90+, 정수 배율 픽셀 렌더링, 카메라 이동 중 레이아웃 재계산 0)을 지킨 것.
 - **핵심 원칙**: 글과 버튼은 전부 DOM(캔버스에 글 그리지 않음). 인트로는 언제든 SKIP 버튼으로 건너뛸 수 있다(11-11: 화면 클릭·아무 키로는 건너뛰지 않음). 가짜 대기 금지.
   조작 4가지(키보드·터치·메뉴·지도 창)는 항상 같은 결과. 순서 강제 없음. 키보드는 ↑↓←→·WASD로 **잔디·인필드 어디든 8방향 자유 이동**(11-10 시안 채택, B안 폐지). 러닝 요소는 트랙·아치·번호표까지, 창 내용은 개발 이야기만.
-  참고한 사이트의 그림·맵·문구를 쓰지 않는다. 실제 브랜드 로고를 그리지 않는다.
+  참고한 사이트의 그림·맵·문구를 쓰지 않는다. 실제 브랜드 로고를 그리지 않는다(예외: SKILLS 창의 기술 스택 아이콘은 실제 로고, 11-12).
 - **범위**: step1~3은 기획서 "기능 범위" 표. 트랙 밖 장면·NPC·다크 모드·4방향 패드·가로 강제·랩타임은 범위 밖. 미구현 구조물은 월드에 두지 않는다.
   구조물은 6개, 메뉴도 6개. 구조물 이름은 구조물 그림의 빈 면 위 HTML 오버레이(그림에 글자 없음, 제목 판 없음). 그 밖에 인필드 장식 이정표 1개(창 없음, 판 위 HTML 글자 3줄, 11-10 결정).
 - **화면**: 월드 640×360, 정수 배율(모바일 2×·태블릿 3×·PC 4×), 카메라 추적. 세로 전용 배치 없음. 라이트만. 창 본문 한국어, 라벨 영어.
@@ -85,6 +90,7 @@
 src/
   app/
     page.tsx             서버 컴포넌트. 숨은 h1 + <Game/>
+    resume/print/        이력서 PDF용 인쇄 페이지(noindex, RESUME 창과 같은 Resume 컴포넌트)
     layout.tsx           폰트 3종(next/font/local, fonts/ + licenses/)·메타(링크 미리보기 카드)
     opengraph-image.png·icon.png·apple-icon.png  링크 미리보기·아이콘(Next 파일 규칙, build-og.mjs가 구움)
   features/
@@ -96,16 +102,17 @@ src/
     intro/               timeline.ts(경과 ms → 화면, 순수), useIntro.ts(고정 틱 진행기·SKIP·REPLAY), camera.ts(인트로 카메라·부채꼴 각도),
                          preload.ts(fonts.ready·decode), IntroOverlay.tsx(신호 띠·SKIP·큰 전광판·진행 점·흑백 부채꼴),
                          WorldIntro.tsx(신호등·심판·인사 말풍선·키캡)
-    panels/              PanelDialog.tsx(Radix Dialog 하나에 6개 내용, 이전·다음), Sections.tsx(섹션 타입 렌더러), ScrollTopButton.tsx(창·지도 창 공통 맨 위로)
+    panels/              PanelDialog.tsx(Radix Dialog 하나에 6개 내용, 이전·다음), Sections.tsx(섹션 타입 렌더러), FeatureShowcase.tsx(주요 기능: 목록 + 그림), LapLog.tsx(DEV LOG: 트랙 막대 + 기록 한 장씩), LoopVideo.tsx(소리 없는 영상), Resume.tsx(이력서 한 장), TodoValue.tsx(TODO 값 → "[...]" 빈칸), ScrollTopButton.tsx(창·지도 창 공통 맨 위로)
     hud/                 Hud.tsx(로고·메뉴 PC 상단/모바일 하단 3×2·REPLAY), Minimap.tsx(TrackMap: 시안 월드 그림 + 구조물 버튼, PC 미니맵 버튼·모바일 MAP 버튼),
                          MapDialog.tsx(큰 지도 창, PC·모바일 공통), TouchControls.tsx(모바일 ◀ ▶ = 이전·다음 지점)
   content/               intro.ts, menu.ts, hud.ts, panels.ts, world.ts, site.ts(메타·사이트 주소) — 문구는 여기에만
   styles/                globals.css(16색 토큰·9-slice·창 애니메이션), sprites.css(그림 경로·시트 좌표·스프라이트 애니메이션)
 public/
   sprites/               tiles/ structures/ props/ ui/ character/ intro/ world/(track-ring) — Design 개별 PNG(시트 합치기는 step3 검토)
+  icons/tech/            SKILLS 창 기술 로고 16개(build-tech-icons.mjs)
   img/                   창 사진(about-me-320·640.webp, 원본은 private/img/)
-  resume.pdf             (예정) 이력서
-scripts/                 extract-design-layout.mjs·build-track-ring.mjs(시안 코드에서 숫자·그림 1회 추출), build-photos.mjs(창 사진 → WebP 2장), build-og.mjs(링크 미리보기·아이콘), build-cursor.mjs(커서), lh-summary.mjs, measure-run.mjs·measure-intro.mjs·measure-intro-smooth.mjs(측정)
+  resume.pdf             이력서 PDF(scripts/build-resume-pdf.mjs가 /resume/print를 A4로 굽는다)
+scripts/                 extract-design-layout.mjs·build-track-ring.mjs(시안 코드에서 숫자·그림 1회 추출), build-photos.mjs(창 사진 → WebP 2장), build-og.mjs(링크 미리보기·아이콘), build-cursor.mjs(커서), build-tech-icons.mjs(SKILLS 기술 로고), build-resume-pdf.mjs(이력서 PDF), lh-summary.mjs, measure-run.mjs·measure-intro.mjs·measure-intro-smooth.mjs(측정)
 e2e/                     smoke.spec.ts(Playwright: 크로미움 PC·모바일, WebKit PC + axe)
 docs/                    기획서.md, design-vs-plan.md, step1-plan.md, performance.md, milestones.md, assets/credits.md
 private/                 learning/, interview-questions.md (gitignore)
@@ -118,7 +125,7 @@ private/                 learning/, interview-questions.md (gitignore)
 - 러너 위치는 월드 픽셀 발 좌표 `pos: { x, y }`(배율 적용 전, 11-10 자유 이동). 트랙 거리 `t`·`s`는 인트로 한 바퀴와 자동 이동의 "레인 따라가기"에만 쓴다(변환은 `trackPath.ts`의 `toWorld`·`nearestS`). 화면 좌표는 카메라 컨테이너가 맡으므로 컴포넌트에서 직접 계산하지 않는다.
 - 바라보는 방향(스프라이트)은 `'left' | 'right' | 'up' | 'down'`. 자유 이동은 입력 벡터로(`movement.facingOf`), 레인 위는 `trackPath.facing`.
 - 키 입력은 `{ dx: -1|0|1, dy: -1|0|1 }`(↑↓←→·WASD 합산). 이동 규칙은 `features/track/movement.ts`(시안 값): 110px/s·대각선 정규화, 발 범위 x 10–630·y 48–358, 구조물(아치 제외)·신호등·심판·이정표 사각형을 좌우 8·위 2·아래 3px 넓힌 칸 + 관중석 전체가 충돌, 축별 판정으로 미끄러짐.
-- 메뉴·구조물 id는 `'about' | 'career' | 'project1' | 'project2' | 'skill' | 'resume'`(11-10: 천막 = SKILL, EDUCATION 내용은 ABOUT ME 창으로). 화면 라벨은 `content/menu.ts`(ABOUT ME · PROJECT1 등 시안 표기). 인트로 전광판 글은 `content/intro.ts`의 `BOARD_STEPS`·`BOARD_LINES`, 이정표 3줄은 같은 파일의 `SIGN_LINES`.
+- 메뉴·구조물 id는 `'about' | 'career' | 'project1' | 'project2' | 'skill' | 'resume'`(11-10: 천막 = SKILLS, EDUCATION 내용은 ABOUT ME 창으로). 화면 라벨은 `content/menu.ts`(ABOUT ME · PROJECT · DEV LOG 등). 인트로 전광판 글은 `content/intro.ts`의 `BOARD_STEPS`·`BOARD_LINES`, 이정표 3줄은 같은 파일의 `SIGN_LINES`.
 
 ### 게임 상태와 렌더
 - 이동은 고정 틱(60ms)마다 위치를 갱신하고 CSS transition이 보간한다. 카메라 목표도 같은 틱에서 계산한다. `requestAnimationFrame` 루프 금지. 예외: 경로를 미리 아는 인트로 연출(줌 2번·큰 전광판 커지기/작아지기·흑백 부채꼴)은 틱과 같은 수식을 60Hz 키프레임으로 구워 Web Animations API로 재생한다(`timeline.zoomKeyframes`·`sweepKeyframes`, 11-11).
@@ -131,8 +138,8 @@ private/                 learning/, interview-questions.md (gitignore)
 
 ### 접근성
 - 구조물·메뉴 아이콘·미니맵 점은 `<button>`에 `aria-label`("Open CAREER"). 캐릭터·타일·소품은 `aria-hidden`.
-- 키보드 사용자는 메뉴 아이콘으로 창을 연다. 방향키 달리기는 입력칸·탭 목록·창 안에 포커스가 있을 때는 동작하지 않고(그쪽 몫), Enter·Space로 구조물 창 열기는 포커스가 바탕이나 월드일 때만. 창·지도 창이 열려 있으면 ←→는 이전·다음 구조물로 넘긴다. 모바일 ◀ ▶는 트랙 순서로 이전·다음 지점까지 달려가 창을 연다(11-10 시안 채택). 반응 구역에서는 말풍선(PC "SPACE", 모바일 "!") + 시각적 숨김 텍스트.
-- 창은 Radix Dialog 기본(포커스 트랩·ESC·`aria-labelledby`). 창 안 제목은 `h2`. 이전·다음 구조물 버튼 포함. ABOUT 창의 PROFILE|SKILLS 탭은 Radix Tabs.
+- 키보드 사용자는 메뉴 아이콘으로 창을 연다. 방향키 달리기는 입력칸·탭 목록·창 안에 포커스가 있을 때는 동작하지 않고(그쪽 몫), Enter·Space로 구조물 창 열기는 포커스가 바탕이나 월드일 때만. 창이 열려 있으면 ←→는 이전·다음 구조물로 간다(창이 닫히고 러너가 달려가 도착 시 열림, 11-11). 모바일 ◀ ▶는 이전·다음 지점까지 달려가 창을 연다(11-10 시안 채택). 이전·다음 순서는 메뉴 순서(11-12). 반응 구역에서는 말풍선(PC "SPACE", 모바일 "!") + 시각적 숨김 텍스트.
+- 창은 Radix Dialog 기본(포커스 트랩·ESC·`aria-labelledby`). 창 안 제목은 `h2`. 이전·다음 구조물 버튼 포함.
 - 색만으로 뜻을 전하지 않는다(신호등은 색 + 글자 "SET"/"GO", `!` 말풍선은 아이콘 + 시각적 숨김 텍스트).
 
 ### 성능
