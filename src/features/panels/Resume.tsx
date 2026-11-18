@@ -29,7 +29,7 @@ function Row({
 }: {
   /** 여러 줄이면 줄마다 { text, badge? }(경력: 재입사로 기간이 둘) */
   period: string | readonly { text: string; badge?: string }[];
-  /** 기간 아래 작은 글자(기타 경력의 근무 기간) */
+  /** 기간 아래 작은 글자(경력의 총 경력, 기타 경력의 근무 기간) */
   sub?: string;
   children: ReactNode;
 }) {
@@ -169,7 +169,7 @@ export function Resume({ doc }: { doc: ResumeDoc }) {
           <Bar {...career} />
           <ul>
             {career.items.map((c) => (
-              <Row key={c.title + (c.periods[0]?.text ?? '')} period={c.periods}>
+              <Row key={c.title + (c.periods[0]?.text ?? '')} period={c.periods} sub={c.duration}>
                 <p className="text-[15px]">
                   <strong>
                     <Val v={c.title} />

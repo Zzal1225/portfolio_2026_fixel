@@ -249,6 +249,8 @@ export interface ResumeDoc {
     /** periods: 재입사로 기간이 둘일 수 있다(CAREER 창 요약 판과 같은 값). badge는 그 줄 옆 작은 표시 */
     items: readonly {
       periods: readonly { text: string; badge?: string }[];
+      /** 기간 아래 작은 글자: 두 기간을 더한 총 경력(11-18). CAREER 창 요약 판의 TOTAL과 같은 값이어야 한다 */
+      duration: string;
       title: string;
       org: string;
       bullets: readonly string[];
@@ -940,6 +942,7 @@ export const PANELS: Record<LandmarkId, Panel> = {
                   { text: '2023.09 ~ 2025.09' },
                   { text: '2025.12 ~ 2026.07', badge: '재입사' },
                 ],
+                duration: '총 2년 9개월',
                 title: '프론트엔드 웹 개발자',
                 org: '파워정보통신',
                 bullets: [
