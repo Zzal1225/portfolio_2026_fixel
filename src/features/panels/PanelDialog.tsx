@@ -17,12 +17,13 @@
  * 열림·닫힘 애니메이션은 CSS(globals.css .dialog-content, Radix data-state). Framer Motion은 쓰지 않음(JS 크기).
  */
 import * as Dialog from '@radix-ui/react-dialog';
-import { useRef, type KeyboardEvent } from 'react';
+import { useEffect, useRef, type KeyboardEvent } from 'react';
 import { MENU_LABEL } from '@/content/menu';
 import { DIALOG_LABELS, PANELS } from '@/content/panels';
 import type { LandmarkId } from '@/features/track/layout';
 import { stepInMenu as neighbor } from '@/features/track/movement';
 import { useGame } from '@/features/track/store';
+import { trackPanelView } from './panel-views';
 import { ScrollTopButton } from './ScrollTopButton';
 import { SectionList } from './Sections';
 
@@ -39,6 +40,11 @@ export function PanelDialog({ onNavigate }: { onNavigate: (id: LandmarkId) => vo
   const open = useGame((s) => s.open);
   const closePanel = useGame((s) => s.closePanel);
   const closeRef = useRef<HTMLButtonElement>(null);
+
+  // 창별 조회 집계: 어느 길(메뉴·지도·구조물·이전/다음)로 열리든 open이 바뀌는 여기 한 곳만 지나간다(panel-views.ts)
+  useEffect(() => {
+    if (open) trackPanelView(open);
+  }, [open]);
 
   // 이전·다음도 메뉴와 같은 길(11-11 사용자 결정): 창을 닫고 러너가 그 구조물까지 달려간 뒤 도착하면 열린다.
   // 버린 것: 러너를 앞 지점으로 순간이동시키고 창 내용만 바꾸기(시안 stepOpen) — 트랙을 달리는 사이트인데 캐릭터가 건너뛰게 된다.

@@ -8,3 +8,11 @@
 export const SITE_URL = 'https://portfolio2026fixel.vercel.app';
 export const SITE_TITLE = '박찬령 포트폴리오';
 export const SITE_DESCRIPTION = '400m 트랙을 달리며 보는 프론트엔드 개발자 박찬령의 포트폴리오';
+
+/**
+ * 본인 제외 주소(?owner=on · ?owner=off)로 들어왔을 때만 뜨는 알림(app/analytics-snippet.ts). 주인만 보는 글이다.
+ */
+export const OWNER_NOTICE = {
+  on: '이 브라우저의 방문은 이제 집계하지 않습니다.',
+  off: '이 브라우저의 방문을 다시 집계합니다.',
+} as const;

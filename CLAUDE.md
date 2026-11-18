@@ -71,7 +71,7 @@
 | 폰트 | Press Start 2P(OFL) 영어 라벨·HUD·창 제목, Galmuri(OFL) 한국어 픽셀 글자(전광판 문구·이정표·창 섹션 제목), Pretendard 본문. 전부 `next/font/local` self-host |
 | 테스트 | Vitest, Testing Library, Playwright(+axe, 화면 비교 PC 1280·모바일 390) |
 | CI/CD | GitHub Actions, Lighthouse CI(첫 화면), Vercel |
-| 방문 집계 | (11-17) Vercel Web Analytics. 패키지 없이 `app/layout.tsx`의 스크립트 태그 두 줄, Vercel 배포에서만(`VERCEL=1`). 방문 수·시간·경로·나라·기기까지, 쿠키 없음 |
+| 방문 집계 | (11-17) Vercel Web Analytics. 패키지 없이 `app/layout.tsx`의 스크립트 태그 두 줄, Vercel 배포에서만(`VERCEL=1`). 방문 수·시간·경로·나라·기기까지, 쿠키 없음. (11-18) 주소가 `/` 하나라 창을 열면 `/career` 같은 가상 페이지 조회를 방문당 창마다 한 번 보낸다(`panels/panel-views.ts`, 실제 주소는 안 바뀜). 본인 접속 제외는 `?owner=on`(브라우저마다 한 번) |
 
 - 위 목록에 없는 라이브러리는 먼저 **이유와 대안**을 제시하고 승인을 받는다. Phaser·PixiJS·react-three 등 렌더링 엔진은 금지.
 - `<canvas>`는 step2에서 달리기·카메라 이동 중 프레임 저하가 측정으로 확인될 때만, 월드 배경(트랙·잔디·관중석·소품) 한 장에 한해 검토한다. 글·버튼·캐릭터·구조물은 DOM 유지.
@@ -81,7 +81,7 @@
 - 인트로 흐름(시안 타임라인, `features/intro/timeline.ts`)은 `0–0.6 빨강 ON YOUR MARKS → 0.6–1.2 노랑 SET → 1.2–1.8 초록 GO → 1.8–10.0 한 바퀴 + 80px(흑백 → 컬러 부채꼴, 큰 전광판 1.8–2.2 커짐 · 2.2–9.4 문구 4개 1.8초씩 네온 깜빡임 · 9.4–10.0 제자리로) → 10.0–10.8 줌인 → 10.8–13.6 손 흔들기 + "WELCOME TO MY PORTFOLIO!" → 13.6–14.3 줌아웃·HUD 등장 → 키캡 ↑←→↓ 4개(첫 입력까지)`. SKIP 버튼은 인트로 끝 상태로 바로. 끝나면 왼쪽 아래 `▶ REPLAY`. 재방문도 같은 인트로(11-10 6차).
 - 카메라는 월드 컨테이너의 `transform`만 바꾼다. `left/top`·`scroll` 사용 금지(레이아웃 재계산 0이 측정 목표).
 - 인트로 프리로드는 `<link rel="preload">` + `document.fonts.ready` + 이미지 `decode()`로 실제 완료를 기다린다. `setTimeout`으로 꾸민 대기 금지.
-- 방문 기록(localStorage)은 쓰지 않는다. 인트로는 매번 재생(11-10 6차).
+- 방문자의 기록(localStorage)은 쓰지 않는다. 인트로는 매번 재생(11-10 6차). 예외 하나(11-18 사용자 결정): 주인이 `?owner=on`으로 스스로 켜는 "이 브라우저는 집계하지 않음" 표시(`va-owner`, `app/analytics-snippet.ts`). `?owner=off`로 끈다.
 - `prefers-reduced-motion: reduce`면 신호등·한 바퀴·줌·손 흔들기 생략, 인사 말풍선은 고정 표시, 이동·카메라는 즉시 이동(transition 없음), 창 애니메이션 끔.
 - 소리는 없다. 오디오 파일·오디오 API를 넣지 않는다.
 
@@ -94,7 +94,8 @@ src/
   app/
     page.tsx             서버 컴포넌트. 숨은 h1 + <Game/>
     resume/print/        이력서 PDF용 인쇄 페이지(noindex, RESUME 창과 같은 Resume 컴포넌트)
-    layout.tsx           폰트 3종(next/font/local, fonts/ + licenses/)·메타(링크 미리보기 카드)
+    layout.tsx           폰트 3종(next/font/local, fonts/ + licenses/)·메타(링크 미리보기 카드)·방문 집계 태그
+    analytics-snippet.ts 방문 집계 머리말(va 대기열 + 본인 제외 ?owner=on)
     opengraph-image.png·icon.png·apple-icon.png  링크 미리보기·아이콘(Next 파일 규칙, build-og.mjs가 구움)
   features/
     track/               Game.tsx(최상위: useScale·useIntro·useRunner를 한 번씩 부르고 goTo를 메뉴·지도·구조물에 나눔, 창 지연 로딩)
@@ -105,7 +106,7 @@ src/
     intro/               timeline.ts(경과 ms → 화면, 순수), useIntro.ts(고정 틱 진행기·SKIP·REPLAY), camera.ts(인트로 카메라·부채꼴 각도),
                          preload.ts(fonts.ready·decode), IntroOverlay.tsx(신호 띠·SKIP·큰 전광판·진행 점·흑백 부채꼴),
                          WorldIntro.tsx(신호등·심판·인사 말풍선·키캡)
-    panels/              PanelDialog.tsx(Radix Dialog 하나에 6개 내용, 이전·다음), Sections.tsx(섹션 타입 렌더러), FeatureShowcase.tsx(주요 기능: 목록 + 그림), LapLog.tsx(DEV LOG: 트랙 막대 + 기록 한 장씩), LoopVideo.tsx(소리 없는 영상), Resume.tsx(이력서 한 장), TodoValue.tsx(TODO 값 → "[...]" 빈칸), ScrollTopButton.tsx(창·지도 창 공통 맨 위로)
+    panels/              PanelDialog.tsx(Radix Dialog 하나에 6개 내용, 이전·다음), Sections.tsx(섹션 타입 렌더러), FeatureShowcase.tsx(주요 기능: 목록 + 그림), LapLog.tsx(DEV LOG: 트랙 막대 + 기록 한 장씩), LoopVideo.tsx(소리 없는 영상), Resume.tsx(이력서 한 장), TodoValue.tsx(TODO 값 → "[...]" 빈칸), panel-views.ts(창별 조회 집계), ScrollTopButton.tsx(창·지도 창 공통 맨 위로)
     hud/                 Hud.tsx(로고·메뉴 PC 상단/모바일 하단 3×2·REPLAY), Minimap.tsx(TrackMap: 시안 월드 그림 + 구조물 버튼, PC 미니맵 버튼·모바일 MAP 버튼),
                          MapDialog.tsx(큰 지도 창, PC·모바일 공통), TouchControls.tsx(모바일 ◀ ▶ = 이전·다음 지점), TouchStick.tsx(화면 끌기 = 터치 스틱)
   content/               intro.ts, menu.ts, hud.ts, panels.ts, world.ts, site.ts(메타·사이트 주소) — 문구는 여기에만

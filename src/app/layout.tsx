@@ -8,7 +8,8 @@
 //   버린 대안: Pretendard 가변 폰트 한 파일(2MB), Galmuri11 Regular(500KB) — 시안이 쓰지 않는 굵기라 제외.
 import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
-import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from '@/content/site';
+import { OWNER_NOTICE, SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from '@/content/site';
+import { analyticsSnippet } from './analytics-snippet';
 import '@/styles/globals.css';
 import '@/styles/sprites.css';
 
@@ -66,12 +67,12 @@ export const viewport: Viewport = {
  *   같은 집계 스크립트(/_vercel/insights/script.js)를 defer로 받을 뿐이라 번들에 더해지는 것이 없다.
  *   패키지가 하는 일 중 여기 없는 것은 "화면 전환마다 다시 세기"인데, 이 사이트는 화면이 하나라 필요 없다.
  * 왜 VERCEL 환경 변수로 가르나: 그 주소는 Vercel 배포에만 있다. 로컬·CI에서는 404가 콘솔 오류로 찍혀 테스트·Lighthouse를 흐린다.
- * 첫 줄(va 대기열): 집계 스크립트가 오기 전에 생긴 호출을 쌓아 두는 Vercel의 정해진 머리말.
+ * 첫 줄(머리말): va 대기열 + 본인 제외(?owner=on, 11-18). 내용과 이유는 analytics-snippet.ts.
  * 버린 대안: Google Analytics(쿠키 동의가 필요하고 스크립트가 무겁다).
  * 대시보드(Project → Analytics)에서 켜야 집계된다. 꺼져 있으면 스크립트 주소가 404다.
  */
 const ANALYTICS_ON = process.env.VERCEL === '1';
-const VA_QUEUE = 'window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};';
+const VA_HEAD = analyticsSnippet(OWNER_NOTICE);
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
@@ -80,7 +81,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         {children}
         {ANALYTICS_ON && (
           <>
-            <script dangerouslySetInnerHTML={{ __html: VA_QUEUE }} />
+            <script dangerouslySetInnerHTML={{ __html: VA_HEAD }} />
             <script defer src="/_vercel/insights/script.js" />
           </>
         )}
